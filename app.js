@@ -54,6 +54,13 @@ let trascender = function(){
 		
 		//definir funciones internas propias de trascender
 		if(true){
+						
+			this.extract = function(content,from,to){
+				var index1 = content.indexOf(from) + from.length;
+				content = content.substring(index1);
+				var index2 = content.indexOf(to);
+				return content.substring(0,index2);
+			}
 			
 			//primera funcion a ejecutar para peticion http - decodifica usuario
 			const auth	= this.auth;
@@ -175,6 +182,38 @@ let trascender = function(){
 				}
 			}
 				
+			//publicar backend
+			if(this.config.backend){
+				for(let i=0;i<this.config.backend.length;i++){
+					let b = this.config.backend[i];
+					let n;
+					let p;
+					if(typeof b=="string"){
+						n = b;
+					}else{
+						n = b.name;
+						p = b.params;
+					}
+					console.log(new Date() + " == publicando backend " + n);
+					let c = fs.readFileSync("./app/backend/" + n + ".js","utf-8");
+					let a = new (require("./app/backend/" + n))(this,p);
+					let r = c.split("//@route");
+					for(let x=1;x<r.length;x++){
+						let data = r[x];
+						let uri = eval(this.extract(data,"(",")"));
+						let method = eval(this.extract(data,"@method(",")"));
+						let action = this.extract(data,"self.prototype.","=").trim();
+						let roles = [];
+						if(data.indexOf("@roles(")>-1){
+							roles = this.extract(data,"@roles(",")");
+						}
+						for(let y=0;y<method.length;y++){
+							this.app[method[y]](uri,this.decodeUser(), this.newRequest("API"), this.hasRole(roles), this.getAPI(a,action));
+						}
+					}
+				}
+			}
+			
 			//publicar api
 			if(this.config.api){
 				for(let i=0;i<this.config.api.length;i++){

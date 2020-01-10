@@ -1,13 +1,13 @@
 {
 	"properties": {
-		"port": 1000,
+		"port": 80,
 		"admin": "jcalderon.aprog@gmail.com",
 		"secret": "trascender-con-sso",
 		"views": "/app/frontend/html/",
 		"mailing": "/app/frontend/html/mailing/templates_back/"
 	},
 	"public": {
-		"host": "http://localhost:1000",
+		"host": "http://localhost:80",
 		"phone": "+11111111",
 		"mailto": "jcalderon.aprog@gmail.com",
 		"directories": [{
@@ -61,22 +61,8 @@
 		"src": "/app/frontend",
 		"roles": []
 	}],
+	"backend": ["demo"],
 	"api": [{
-		"description": "backend of demo module",
-		"name": "demo",
-		"params": [],
-		"services": [{
-			"method": "get",
-			"uri": "/demo",
-			"action": "demo",
-			"roles": []
-		}, {
-			"method": "get",
-			"uri": "/json",
-			"action": "json",
-			"roles": []
-		}]
-	}, {
 		"description": "backend of user module",
 		"name": "user",
 		"params": ["trascender", "user"],
