@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+	<head>
+		<!--Metas-->
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<!--Title-->
+		<title>Configuración</title>
+		<!--Base-->
+		<base href="/" />
+		<!--Favicon-->
+		<link rel="shortcut icon" href="/media/img/favicon.ico" type="image/x-icon">
+		<link rel="icon" href="/media/img/favicon.ico" type="image/x-icon">
+		<!--Styles-->
+		<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css" />
+	</head>
+	<body>
+		<br>
+		<div class="container" data-ng-app="myApp" data-ng-controller="configCtrl as ctrl">
+			<div class="col-md-8 col-md-offset-2">
+				<div class="panel panel-default">
+					<div class="panel-heading">Configuración del sistema</div>
+					<div class="panel-body">
+						<textarea class="form-control" rows="20" data-ng-model="ctrl.config.doc.content"></textarea>
+					</div>
+					<div class="panel-footer text-right">
+						<div class="btn-group" role="group" aria-label="...">
+							<button type="button" class="btn btn-primary" data-ng-click="ctrl.config.update()">
+								<i class="fa fa-check"></i>
+							</button>
+							<button type="button" class="btn btn-danger" data-ng-click="ctrl.config.delete()">
+								<i class="fa fa-trash"></i>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--<js>-->
+		<script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+		<script type="text/javascript" src="bower_components/angular/angular.min.js"></script>
+		<script type="text/javascript" src="js/lib/trascender.js"></script>
+		<script type="text/javascript">
+			var app = angular.module('myApp',[]);
+			app.factory("trascender", function(){
+				return trascender;
+			});
+			var config = {{data:JSON.stringify(doc.config)}};
+		</script>
+		<script type="text/javascript" src="js/config.js"></script>
+		<!--</js>-->
+	</body>
+</html>
