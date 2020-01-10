@@ -1,0 +1,165 @@
+<!--use:_views/m.main-->
+
+<!--define:title-->
+	Mapas
+<!--/define:title-->
+
+<!--define:css-->
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
+	<style>
+		article{
+			text-align: center;
+			padding:5px;
+		}
+		article img{
+			max-height: 200px;
+		}
+		#imap{
+			width: 100%;
+			border: 0px;
+			min-height: 400px;
+		}
+		#map{
+			width: 100%;
+			min-height: 400px;
+		}
+	</style>
+	
+<!--/define:css-->
+
+<!--define:head-->
+	<script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Leaflet.draw.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Leaflet.Draw.Event.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Toolbar.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Tooltip.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/GeometryUtil.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/LatLngUtil.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/LineUtil.Intersect.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/Polygon.Intersect.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/Polyline.Intersect.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/TouchEvents.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/DrawToolbar.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Feature.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.SimpleShape.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Polyline.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Marker.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Circle.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.CircleMarker.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Polygon.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Rectangle.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/EditToolbar.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/EditToolbar.Edit.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/EditToolbar.Delete.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Control.Draw.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.Poly.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.SimpleShape.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.Rectangle.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.Marker.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.CircleMarker.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.Circle.js"></script>
+	
+	<script src="https://unpkg.com/topojson@3.0.2/dist/topojson.min.js"></script>
+	
+<!--/define:head-->
+
+<!--define:main-->
+	<div data-ng-controller="storyCtrl as ctrl">
+		
+		<div class="page-header">
+			<h1>
+				<a href="/map">Mapas</a>
+			</h1>
+		</div>
+		
+		<div class="row" id="storyMain">
+			<div class="col-md-4">
+				<article>
+					<div class="btn-group btn-group-xs btn-group-justified" role="group">
+						<a class="btn btn-primary" data-ng-click="ctrl.collection.prev()" title="Anterior">
+							<i class="fa fa-chevron-left" aria-hidden="true"></i>
+						</a>
+						<a class="btn btn-warning to-speech" title="Pause" data-ng-show="ctrl.collection.inprocess" data-ng-click="ctrl.collection.stop()">
+							<i class="fa fa-pause" aria-hidden="true"></i>
+						</a>
+						<a class="btn btn-success to-speech" title="Play" data-ng-show="!ctrl.collection.inprocess" data-ng-click="ctrl.collection.play()">
+							<i class="fa fa-play" aria-hidden="true"></i>
+						</a>
+						<a class="btn btn-primary" data-ng-click="ctrl.collection.next()" title="Siguiente">
+							<i class="fa fa-chevron-right" aria-hidden="true"></i>
+						</a>
+					</div>
+					<h4>{{ctrl.collection.doc.title}}</h4>
+					<small>{{ctrl.collection.doc.fechat}}</small>
+					<br>
+					<img data-ng-src="{{ctrl.collection.doc.img}}"/>
+					<br>
+					<small>{{ctrl.collection.doc.resume}}.</small>
+					<ul class="list-unstyled list-inline">
+						<li data-ng-repeat="tag in ctrl.collection.doc.tag">
+							<a class="label label-success" href="/story/map?tag={{tag}}" >{{tag}}</a>
+						</li>
+						<li data-ng-repeat="font in ctrl.collection.doc.font">
+							<a class="label label-primary" href="{{font}}" target="_blank">ver {{$index+1}}° referencia</a>
+						</li>
+						<li data-ng-show="ctrl.user.isAdmin()">
+							<a class="label label-warning" data-toggle="modal" data-target="#mdDoc">
+								<i class="fa fa-pencil"></i>
+							</a>
+						</li>
+					</ul>
+					<audio id="audio"></audio>
+					<audio id="speech"></audio>
+				</article>
+			</div>
+			<div class="col-md-8">
+				<div id="map"></div>
+			</div>
+		</div>
+		
+		<div class="modal fade" id="mdDoc" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title" id="myModalLabel">Información de mapa</h4>
+					</div>
+					<div class="modal-body">
+						<label>Latitud</label>
+						<input type="text" class="form-control" data-ng-model="ctrl.document.getDoc().LAT" disabled>
+						<label>Longitud</label>
+						<input type="text" class="form-control" data-ng-model="ctrl.document.getDoc().LNG" disabled>
+						<br>
+						<br>
+						<button class="btn btn-warning" data-ng-click="ctrl.document.setLoc()">Setear en mapa</button>
+						<br>
+						<br>
+						<label>Zoom</label>
+						<input type="text" class="form-control" data-ng-model="ctrl.document.getDoc().ZOOM">
+						<label>AUDIO</label>
+						<input type="text" class="form-control" data-ng-model="ctrl.document.getDoc().AUDIO">
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" title="Crear" data-ng-show="ctrl.document.isCreateMode()" data-ng-click="ctrl.document.create()">
+							<i class="fa fa-check" data-ng-show="!ctrl.document.createLog.spinner"></i>
+							<i class="fa fa-spinner fa-spin" data-ng-show="ctrl.document.createLog.spinner"></i>
+						</button>
+						<button type="button" class="btn btn-primary" title="Actualizar" data-ng-show="ctrl.document.isEditMode()" data-ng-click="ctrl.document.update()">
+							<i class="fa fa-check" data-ng-show="!ctrl.document.updateLog.spinner"></i>
+							<i class="fa fa-spinner fa-spin" data-ng-show="ctrl.document.updateLog.spinner"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+<!--/define:main-->
+
+<!--define:script-->
+	<script type="text/javascript">
+		var map_instances = ["collection","document"];
+	</script>
+	<script type="text/javascript" src="js/map.js"></script>
+<!--/define:script-->

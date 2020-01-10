@@ -1,0 +1,78 @@
+<!--use:_views/m.main-->
+
+<!--define:title-->
+{{data:doc.title}}
+<!--/define:title-->
+
+<!--define:css-->
+<link rel="stylesheet" href="css/product.css" />
+<!--/define:css-->
+
+<!--define:main-->
+<div data-ng-controller="productCtrl as ctrl">
+	<div class="page-header">
+		<a class="pull-right" data-toggle="modal" data-target="#mdAdmin" data-ng-click="ctrl.document.new()" data-ng-show="ctrl.user.isAdmin()">
+			<i class="fa fa-plus"></i>
+		</a>
+		<div class="pull-right btn-group">
+			<button type="button" class="btn btn-default btn-xs">Tags</button>
+			<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<span class="caret"></span>
+				<span class="sr-only">Toggle Dropdown</span>
+			</button>
+			<ul class="dropdown-menu">
+				<li data-ng-repeat="row in ctrl.collection.tag">
+					<a data-ng-href="/product/categoria/{{row}}">{{row}}</a>
+				</li>
+			</ul>
+		</div>
+		<h1>
+			<a href="/product">Productos</a>
+			<!--if:doc.title!='Product'-->
+				<small>{{data:doc.title}}</small>
+			<!--/if-->
+		</h1>
+	</div>
+	<div id="dv-product" class="row" >
+		
+		<article data-ng-repeat="row in ctrl.collection.coll" class="col-md-6">
+			<img data-ng-src="{{row.thumb}}" alt="{{row.resume}}" title="{{row.resume}}" />
+			<div class="detail">
+				<h2>{{row.title}}</h2>
+				<span class="btn btn-xs label-primary">${{row.price|number}}</span>
+				<button class="btn btn-xs btn-success" data-ng-click="ctrl.collection.updateCart(row)" >
+					<span class="fa fa-shopping-cart"></span>
+				</button>
+				<a class="btn btn-xs btn-info" data-ng-href="/product/{{row.uri}}" >
+					<span class="fa fa-info"></span>
+				</a>
+				<br>
+				<br>
+			</div>
+			<div class="admin" data-ng-show="ctrl.user.isAdmin()" >
+				<button class="btn btn-xs btn-warning" data-ng-click="ctrl.document.read(row._id)">
+					<i class="fa fa-pencil"></i>
+				</button>
+			</div>
+		</article>
+		
+		<button class="btn btn-default" data-ng-click="ctrl.collection.getCollection()" data-ng-show="ctrl.collection.obtained < ctrl.collection.total">cargar más</button>
+				
+	</div>
+	
+	<!--include:product/admin-->
+</div>
+<a href="/ecommerce/carro-de-solicitud" class="link-bottom" title="Carrito de cotización">
+	<i class="fa fa-shopping-cart"></i>
+</a>
+<!--/define:main-->
+
+<!--define:script-->
+	<script type="text/javascript" src="bower_components/ckeditor/ckeditor.js"></script>
+	<script type="text/javascript">
+		var _collection = {{data: JSON.stringify(doc.rows)}};
+		var product_instances = ["collection","document"];
+	</script>
+	<script type="text/javascript" src="js/wall.js"></script>
+	<script type="text/javascript" src="js/product.js"></script>
+<!--/define:script-->

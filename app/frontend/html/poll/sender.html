@@ -1,0 +1,41 @@
+<div class="modal fade" id="modalSender" tabindex="-1">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Encuesta 
+					<small data-ng-show="ctrl.document.isReadMode() || ctrl.document.isEditMode()">{{ctrl.document.doc._id}}</small>
+				</h4>
+            </div>
+            <div class="modal-body">
+                <ul class="list-unstyled">
+                    <li data-ng-repeat="row in ctrl.document.doc.sending">
+                        <button class="btn btn-xs btn-primary" data-ng-show="ctrl.document.getSendingStatus($index)==0" data-ng-click="ctrl.document.notify(ctrl.document.doc._id,row,$index)">
+                            <i class="fa fa-send"></i>
+                        </button>
+                        <button class="btn btn-xs btn-info" data-ng-show="ctrl.document.getSendingStatus($index)==1">
+                            <i class="fa fa-spinner fa-spin"></i>
+                        </button>
+                        <button class="btn btn-xs btn-success" data-ng-show="ctrl.document.getSendingStatus($index)==2">
+                            <i class="fa fa-check"></i>
+                        </button>
+                        <button class="btn btn-xs btn-danger" data-ng-show="ctrl.document.getSendingStatus($index)==3" data-ng-click="ctrl.document.notify(ctrl.document.doc._id,row,$index)">
+                            <i class="fa fa-close"></i>
+                        </button>
+                        {{row}}
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <!-- ACTION CLOSE -->
+                <button type="button" class="btn btn-default btn-xs" data-dismiss="modal" title="Cerrar">
+                    <i class="fa fa-remove"></i>
+                </button>
+                <!-- ACTION EDIT -->
+                <button type="button" class="btn btn-primary btn-xs" data-ng-click="ctrl.document.notifyAll()" title="Enviar a todos">
+                    <i class="fa fa-send"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

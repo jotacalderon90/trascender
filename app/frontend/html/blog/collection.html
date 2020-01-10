@@ -1,0 +1,81 @@
+<!--use:_views/m.main-->
+
+<!--define:title-->
+{{data:doc.title}}
+<!--/define:title-->
+
+<!--define:css-->
+<link rel="stylesheet" href="css/blog.css" media="all"/> 
+<!--/define:css-->
+
+<!--define:main-->
+<div data-ng-controller="blogCtrl as ctrl">
+	<div class="page-header">
+		<a class="pull-right" href="/blog/new" data-ng-show="ctrl.user.isAdmin()">
+			<i class="fa fa-plus"></i>
+		</a>
+		<div class="pull-right btn-group">
+			<button type="button" class="btn btn-default btn-xs">Tags</button>
+			<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<span class="caret"></span>
+				<span class="sr-only">Toggle Dropdown</span>
+			</button>
+			<ul class="dropdown-menu">
+				<li data-ng-repeat="row in ctrl.collection.tag">
+					<a data-ng-href="/blog/categoria/{{row}}">{{row}}</a>
+				</li>
+			</ul>
+		</div>
+		<h1>
+			<a href="/blog">Blog</a>
+			<!--if:doc.title!='Blog'-->
+				<small>{{data:doc.title}}</small>
+			<!--/if-->
+		</h1>
+	</div>
+	<div id="dv-blog" class="row" >
+		
+		<article data-ng-repeat="row in ctrl.collection.coll" class="col-md-6">
+			<a data-ng-href="/blog/{{row.uri}}">
+				<img data-ng-src="{{row.thumb}}" alt="{{row.resume}}" title="{{row.resume}}" />
+				<div class="detail">
+					<h2>{{row.title}}</h2>
+				</div>
+			</a>
+			<div data-ng-show="ctrl.user.isAdmin()" class="admin">
+				<button class="btn btn-xs btn-warning" data-ng-click="ctrl.document.read(row._id)">
+					<i class="fa fa-pencil"></i>
+				</button>
+			</div>
+		</article>
+		
+		<button class="btn btn-default" data-ng-click="ctrl.collection.getCollection()" data-ng-show="ctrl.collection.obtained < ctrl.collection.cant">cargar más</button>
+		
+	</div>
+	
+	<div class="modal fade" id="mdAdmin" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">Administración del Blog</h4>
+				</div>
+				<div class="modal-body">
+					<!--include:blog/form-->
+				</div>
+			</div>
+		</div>
+	</div>
+	
+</div>
+<!--/define:main-->
+
+<!--define:script-->
+	<script type="text/javascript" src="bower_components/ckeditor/ckeditor.js"></script>
+	<script type="text/javascript">
+		var _collection = {{data: JSON.stringify(doc.rows)}};
+		var blog_instances = ["collection","document"];
+	</script>
+	<script type="text/javascript" src="js/wall.js"></script>
+	<script type="text/javascript" src="js/blog.js"></script>
+<!--/define:script-->

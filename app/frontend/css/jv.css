@@ -1,0 +1,55 @@
+html,body{
+	height: 100%;
+}
+#app,#map{
+	height: 100%;
+}
+#map{
+	position: absolute;
+	width: 100%;
+	z-index: 1;
+}
+#background{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background: black;
+	z-index: 3;
+	opacity: 0.5;
+	display: block;
+}
+#loading{
+	position: absolute;
+	z-index: 4;
+	top: 50%;
+	width: 100%;
+	text-align: center;
+	display: block;
+}
+#loading i{
+	font-size: 100px;
+	color: green;
+}
+#botonera {
+	position: absolute;
+	z-index: 2;
+	bottom: 0;
+	margin: 10px;
+	display: none;
+}
+#mdALL .table th,
+#mdALL .table td{
+	font-size: 12px;
+	text-align: center;
+}
+
+.leaflet-draw-draw-polygon::after {
+  content: "P";
+  color: red;
+  font-weight: bold;
+}
+.leaflet-draw-draw-marker::after {
+  content: "M";
+  color: red;
+  font-weight: bold;
+}

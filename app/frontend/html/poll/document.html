@@ -1,0 +1,102 @@
+<div class="modal fade" id="modalDocument" tabindex="-1">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Encuesta  
+					<small data-ng-show="ctrl.document.isCreateMode()">Nueva</small>
+					<small data-ng-show="ctrl.document.isReadMode() || ctrl.document.isEditMode()">{{ctrl.getDoc()._id}}</small>
+				</h4>
+            </div>
+            <div class="modal-body">
+				<div class="form-group">
+					<label>Título</label>
+					<input type="text" class="form-control" placeholder="Título" data-ng-model="ctrl.document.getDoc().title" data-ng-disabled="ctrl.document.isReadMode()">
+				</div>
+				<div class="form-group">
+					<label>Resultados privados</label>
+                    <br/>
+					<input type="checkbox" data-ng-model="ctrl.document.getDoc().private" data-ng-disabled="ctrl.document.isReadMode()">
+				</div>
+				<div class="form-group">
+					<label>Permitir respuestas anonimas</label>
+                    <br/>
+					<input type="checkbox" data-ng-model="ctrl.document.getDoc().anon" data-ng-disabled="ctrl.document.isReadMode()">
+				</div>
+				<div class="form-group">
+					<label>Contenido del email</label>
+					<input type="text" class="form-control" id="input_content" placeholder="Contenido" data-ng-disabled="ctrl.document.isReadMode()">
+				</div>
+                <div class="form-group">
+                    <label>Cuentas a notificar</label>
+					<div class="input-group-btn">
+						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-ng-disabled="ctrl.document.isReadMode()">
+							Cargar 
+							<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu dropdown-menu-right">
+							<li><a data-ng-click="ctrl.document.loadUsers('*')">todos</a></li>
+							<li role="separator" class="divider"></li>
+							<li><a data-ng-repeat="rol in ctrl.user.roles" data-ng-click="ctrl.document.loadUsers(rol)">{{rol}}</a></li>
+						</ul>
+					</div>
+                    <textarea class="form-control" placeholder="Lista de Correos separadas por línea" data-ng-model="ctrl.document.getDoc().accounts" data-ng-disabled="ctrl.document.isReadMode()"></textarea>
+                </div>
+                <div class="form-group">
+                    <table class="table">
+                        <tr>
+                            <th colspan="2">Lista de Opciones</th>
+                        </tr>
+                        <tr data-ng-repeat="option in ctrl.document.getDoc().options">
+                            <td>
+                                <input type="text" class="form-control" data-ng-model="option.text" placeholder="Opcion $index" data-ng-disabled="ctrl.document.isReadMode()"/>
+                            </td>
+                            <td>
+                                <button class="btn btn-danger" data-ng-click="ctrl.document.getDoc().options.splice($index,1)" data-ng-disabled="ctrl.document.isReadMode()">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
+                    <button class="btn btn-primary" data-ng-click="ctrl.document.getDoc().options.push({text:'Nueva opcion'})" data-ng-disabled="ctrl.document.isReadMode()">Agregar opcion</button>
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select class="form-control" data-ng-model="ctrl.document.getDoc().status" data-ng-disabled="ctrl.document.isReadMode()">
+                        <option value="Inicial">Inicial</option>
+                        <option value="Enviada">Enviada</option>
+                        <option value="Finalizada">Finalizada</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+				<div class="btn-group" role="group">
+					 <button type="button" class="btn btn-default" data-dismiss="modal">
+						<i class="fa fa-close"></i>
+					</button>
+					<button type="button" class="btn btn-primary" data-ng-click="ctrl.document.create()" data-ng-show="ctrl.document.isCreateMode()" title="ctrl.document.createLog.msg">
+						<i class="fa fa-check" data-ng-show="!ctrl.document.createLog.spinner"></i>
+						<i class="fa fa-spinner fa-spin" data-ng-show="ctrl.document.createLog.spinner"></i>
+					</button>
+					<button type="button" class="btn btn-danger" data-ng-click="ctrl.document.delete()" data-ng-show="ctrl.document.isEditMode()" title="ctrl.document.deleteLog.msg">
+						<i class="fa fa-trash" data-ng-show="!ctrl.document.deleteLog.spinner"></i>
+						<i class="fa fa-spinner fa-spin" data-ng-show="ctrl.document.deleteLog.spinner"></i>
+					</button>
+					<button type="button" class="btn btn-primary" data-ng-click="ctrl.document.edit()" data-ng-show="ctrl.document.isReadMode()">
+						<i class="fa fa-pencil"></i>
+					</button>
+					<button type="button" class="btn btn-success" data-ng-click="ctrl.document.update()" data-ng-show="ctrl.document.isEditMode()" title="ctrl.document.updateLog.msg">
+						<i class="fa fa-check" data-ng-show="!ctrl.document.updateLog.spinner"></i>
+						<i class="fa fa-spinner fa-spin" data-ng-show="ctrl.document.updateLog.spinner"></i>
+					</button>
+					<a class="btn btn-success" title="Ver resultados" href="/api/poll/{{ctrl.document.doc._id}}/result" data-ng-show="ctrl.document.getDoc().status=='Enviada'">
+						VER RESULTADOS
+					</a>
+					<button class="btn btn-info" data-dismiss="modal" data-toggle="modal" data-target="#modalSender">
+						<span class="fa fa-send"></span>
+					</button>
+				</div>
+            </div>
+        </div>
+    </div>
+</div>

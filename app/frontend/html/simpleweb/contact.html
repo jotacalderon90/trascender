@@ -1,0 +1,48 @@
+<section id="contact">
+    <div class="row">
+        <div class="col-md-6">
+            <p>
+                <strong>CONTACTAME
+		          </strong>
+            </p>
+            <p>El tiempo es algo que aprecio mucho, no pretendo hacerte perder el tuyo así que intentare responderte a la brevedad.
+            </p>
+        </div>
+        <div class="col-md-6">
+            <form id="contacto" data-ng-controller="messageCtrl as ctrl">
+                <div class="form-group">
+                    <input class="form-control" placeholder="Email" data-ng-model="ctrl.message.newdoc.email" type="text" />
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" placeholder="Mensaje" rows="5" data-ng-model="ctrl.message.newdoc.mensaje">
+                    </textarea>
+                </div>
+                <!--if:doc.config.recaptcha.enabled-->
+                <div class="g-recaptcha" data-sitekey="{{data:doc.config.recaptcha.public}}">
+                </div>
+                <br />
+                <!--/if-->
+                <button class="btn btn-primary" data-ng-click="ctrl.message.newdoc.subject='Mensaje desde una SIMPLEWEB';ctrl.message.create()">ENVIAR
+                </button>
+                <br />
+                <br />
+                <div class="alert" data-ng-repeat="doc in ctrl.message.log" data-ng-show="doc.show" data-ng-class="doc.class">
+                    <p>
+                        <span data-ng-click="doc.show=!doc.show" class="glyphicon glyphicon-remove pull-right">
+		              </span>
+                        <i class="fa fa-spinner fa-spin" aria-hidden="true" data-ng-show="doc.spinner">
+		              </i>
+                        <span data-ng-click="doc.showError=!doc.showError">{{doc.msg}}</span>
+                        <br />
+                        <small data-ng-show="doc.showError">
+						<span data-ng-repeat="(key, value) in doc.xhttp.json.error">
+							{{key}}: {{value}}
+							<br />
+						</span>
+					  </small>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>

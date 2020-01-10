@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+	<head>
+		<!--Metas-->
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<!--Title-->
+		<title>{{data:doc.poll.title}}</title>
+		<!--Base-->
+		<base href="/" />
+		<!--Favicon-->
+		<link rel="shortcut icon" href="/media/img/favicon/favicon.ico" type="image/x-icon">
+		<link rel="icon" href="/media/img/favicon/favicon.ico" type="image/x-icon">
+		<!--Styles-->
+		<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="css/main.css" />
+	</head>
+	<body>
+		<form method="POST" action="{{data:doc.action}}" onSubmit="return confirm('Confirme respuesta seleccionada');">
+			<div class="container font-normal">
+				<div class="col-md-8 col-md-offset-2  full-content" style="padding: 20px;">
+					<div class="page-header">
+						<h1 class="text-{{data:doc.class}}">{{data:doc.poll.title}}</h1>
+					</div>
+					<div>
+						{{data:doc.poll.content}}
+					</div>
+					<div class="text-center">
+						<!--repeat:doc.poll.options-->
+						<button class="btn btn-lg btn-primary" name="option" value="{{data:doc.poll.options[index]}}">{{data:doc.poll.options[index]}}</button>
+						<!--/repeat:doc.poll.options-->
+					</div>
+				</div>
+			</div>
+		</form>
+	</body>
+</html>

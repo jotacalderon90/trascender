@@ -1,0 +1,84 @@
+<!--use:_views/m.main-->
+
+<!--define:title-->
+Resultados {{data:doc.title}}
+<!--/define:title-->
+
+<!--define:css-->
+	<style>
+	main p{
+		font-size: 12px;
+	}
+	</style>
+<!--/define:css-->
+
+<!--define:main-->
+	<div class="page-header">
+		<h1>{{data:doc.title}}</h1>
+	</div>
+	<div class="row">
+		<div class="col-md-6 in-main">
+			{{data:doc.content}}
+		</div>
+		<div class="col-md-6 in-main">
+			<div id="chartContainer" style="height: 370px; width: 100%;"></div>
+		</div>
+	</div>
+<!--/define:main-->
+
+<!--define:script-->
+	<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+	<script>
+		var row = {{data: JSON.stringify(doc)}};
+		
+		let counter = function(option){
+			return row.answer.filter(function(r){
+				return r == option;
+			}).length;
+		}
+		
+		//set counters
+		counters = {};
+		if(row.answer){
+			for(let i=0;i<row.answer.length;i++){
+				if(!counters[row.answer[i]]){
+					counters[row.answer[i]] = counter(row.answer[i]);
+				}
+			}
+		}
+		
+		
+		//set counters from anon
+		if(row.anon){
+			for(let i=0;i<row.anons.length;i++){
+				if(counters[row.anons[i]]){
+					counters[row.anons[i]]++;
+				}else{
+					counters[row.anons[i]] = 1;
+				}
+			}
+		}
+		
+		var dataPoints = [];
+		for(op in counters){
+			dataPoints.push({
+				label: (op=="null")?"No respondida":op,
+				y: counters[op]
+			});
+		}
+		
+		window.onload = function() {
+			var chart = new CanvasJS.Chart("chartContainer", {
+				animationEnabled: true,
+				title: {
+					text: "Resultados"
+				},
+				data: [{
+					type: "pie",
+					dataPoints: dataPoints
+				}]
+			});
+			chart.render();
+		}
+	</script>
+<!--/define:script-->

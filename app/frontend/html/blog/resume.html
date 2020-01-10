@@ -1,0 +1,15 @@
+<section id="blog" data-ng-controller="blogCtrl as ctrl">
+	<p>Últimas publicaciones</p>
+	<div class="row">
+		<div class="col-md-4" data-ng-repeat="row in ctrl.resume.coll">
+			<article>
+				<a data-ng-href="/blog/{{row.uri}}">
+					<img data-ng-src="{{row.thumb}}" height="200" alt="{{row.title}}"/>
+					<h2>{{row.title}}</h2>
+					<p title="{{row.datetitle}}"><strong>{{row.datefromnow}}</strong></p>
+				</a>
+			</article>
+		</div>
+	</div>
+	<p><a href="/blog">ver más</a></p>
+</section>

@@ -1,0 +1,322 @@
+<!--use:_views/m.full-->
+
+<!--define:title-->
+Vecinos
+<!--/define:title-->
+
+<!--define:css-->
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />	
+	<link rel="stylesheet" href="css/jv.css" />	
+	
+<!--/define:css-->
+
+<!--define:head-->
+	<script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Leaflet.draw.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Leaflet.Draw.Event.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Toolbar.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Tooltip.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/GeometryUtil.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/LatLngUtil.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/LineUtil.Intersect.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/Polygon.Intersect.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/Polyline.Intersect.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/TouchEvents.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/DrawToolbar.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Feature.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.SimpleShape.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Polyline.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Marker.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Circle.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.CircleMarker.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Polygon.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Rectangle.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/EditToolbar.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/EditToolbar.Edit.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/EditToolbar.Delete.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Control.Draw.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.Poly.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.SimpleShape.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.Rectangle.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.Marker.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.CircleMarker.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.Circle.js"></script>
+	
+	<script src="https://unpkg.com/topojson@3.0.2/dist/topojson.min.js"></script>
+	
+<!--/define:head-->
+
+<!--define:main-->
+	<div id="app" data-ng-app="myApp" data-ng-controller="jvCtrl as ctrl">
+		<div id="map"></div>
+		<div id="background"></div>
+		<div id="loading">
+			<i class="fa fa-spin fa-spinner"></i>
+		</div>
+		<div id="botonera">
+			<div class="btn-group" role="group">
+				<button type="button" class="btn btn-default" data-toggle="modal" data-target="#mdProfile" title="Editar mi perfil">
+					<i class="fa fa-cog"></i>
+				</button>
+				<!--<button type="button" class="btn btn-default" data-ng-repeat="row in ctrl.user_jv.tag" data-ng-click="ctrl.user_jv.getByTag(row,true)">
+					{{row}} 
+					<i class="fa fa-check" data-ng-show="!ctrl.user_jv['collection_' + row + '_showing']"></i>
+					<i class="fa fa-close" data-ng-show="ctrl.user_jv['collection_' + row + '_showing']"></i>
+				</button>-->
+				<button type="button" class="btn btn-default"data-toggle="modal" data-target="#mdALL" >
+					<i class="fa fa-reorder"></i>
+				</button>
+				<button type="button" class="btn btn-default" data-ng-click="ctrl.user.updateEXT()" title="guardar posición del mapa">
+					<i class="fa fa-map"></i>
+				</button>
+			</div>
+		</div>
+		
+		<div class="modal fade" id="mdProfile" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<div class="btn-group btn-group-xs pull-right">
+							<button type="button" class="btn btn-default" data-dismiss="modal">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<h4 class="modal-title">Mi información pública</h4>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label>Nombre</label>
+							<input type="text" class="form-control" placeholder="Nombre" data-ng-model="ctrl.user.getDoc().public.name" >
+						</div>
+						<div class="form-group">
+							<label>Email</label>
+							<input type="text" class="form-control" placeholder="Email" data-ng-model="ctrl.user.getDoc().public.email" >
+						</div>
+						<div class="form-group">
+							<label>Fono</label>
+							<input type="text" class="form-control" placeholder="Fono" data-ng-model="ctrl.user.getDoc().public.phone" >
+						</div>
+						<div class="form-group">
+							<label>Dirección</label>
+							<input type="text" class="form-control" placeholder="Dirección" data-ng-model="ctrl.user.getDoc().public.address" >
+						</div>
+						<div class="form-group">
+							<label>Web</label>
+							<input type="text" class="form-control" placeholder="Web" data-ng-model="ctrl.user.getDoc().public.web" >
+						</div>
+						<div class="form-group">
+							<label>Tweeter</label>
+							<input type="text" class="form-control" placeholder="Twitter" data-ng-model="ctrl.user.getDoc().public.twitter" >
+						</div>
+						<div class="form-group">
+							<label>Facebook</label>
+							<input type="text" class="form-control" placeholder="Facebook" data-ng-model="ctrl.user.getDoc().public.facebook">
+						</div>
+						<div class="form-group">
+							<label>Instagram</label>
+							<input type="text" class="form-control" placeholder="Instagram" data-ng-model="ctrl.user.getDoc().public.instagram">
+						</div>
+						<div class="form-group">
+							<label>Servicios</label>
+							<br>
+							<small data-ng-repeat="row in ctrl.user_jv.services">
+								<label>
+									<input type="checkbox" value="{{row}}" data-ng-model="ctrl.user.doc.services[row]"/> {{row}}
+								</label>
+								<br>
+							</small>
+							<!--<input type="text" class="form-control" placeholder="Tags" data-ng-model="ctrl.user.getDoc().public.tag">-->
+						</div>
+						<!--<div class="form-group">
+							<label>Junta de vecinos</label>
+							<select class="form-control" data-ng-model="ctrl.user.getDoc().jv" >
+								<option value=""></option>
+								<option data-ng-repeat="row in ctrl.jv.coll" value="{{row._id}}">{{row.name}}</option>
+							</select>
+						</div>-->
+						<div class="form-group">
+							<label>Ubicacion</label>
+							<br>
+							<small>Para editar pinche <a data-ng-click="ctrl.user.setGeoJson()">aquí</a> y luego presione el boton M en rojo para definir la ubicación.</small>
+							<br>
+							<small>Para eliminar su ubicación pinche <a data-ng-click="ctrl.user.deleteGeoJson()">aquí</a>.</small>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-ng-click="ctrl.user.updateEXT()" title="guardar datos públicos">
+							<i class="fa fa-check"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="modal fade" id="mdPublic" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label>Nombre</label>
+							<p>{{ctrl.user_jv.getDoc().public.name}}</p>
+						</div>
+						<div class="form-group">
+							<label>Email</label>
+							<p><a href="mailto: {{ctrl.user_jv.getDoc().public.name}}">{{ctrl.user_jv.getDoc().public.email}}</a></p>
+						</div>
+						<div class="form-group">
+							<label>Fono</label>
+							<p><a href="tel: {{ctrl.user_jv.getDoc().public.phone}}">{{ctrl.user_jv.getDoc().public.phone}}</a></p>
+						</div>
+						<div class="form-group">
+							<label>Dirección</label>
+							<p>{{ctrl.user_jv.getDoc().public.address}}</p>
+						</div>
+						<div class="form-group">
+							<label>Web</label>
+							<p>
+								<a href="{{ctrl.user_jv.getDoc().public.web}}" target="_blank">
+									{{ctrl.user_jv.getDoc().public.web}}
+								</a>
+							</p>
+						</div>
+						<div class="form-group">
+							<label>Tweeter</label>
+							<p>
+								<a href="{{ctrl.user_jv.getDoc().public.twitter}}" target="_blank">
+									{{ctrl.user_jv.getDoc().public.twitter}}
+								</a>
+							</p>
+						</div>
+						<div class="form-group">
+							<label>Facebook</label>
+							<p>
+								<a href="{{ctrl.user_jv.getDoc().public.facebook}}" target="_blank">
+									{{ctrl.user_jv.getDoc().public.facebook}}
+								</a>
+							</p>
+						</div>
+						<div class="form-group">
+							<label>Instagram</label>
+							<p>
+								<a href="{{ctrl.user_jv.getDoc().public.instagram}}" target="_blank">
+									{{ctrl.user_jv.getDoc().public.instagram}}
+								</a>
+							</p>
+						</div>
+						<div class="form-group">
+							<label>Servicios</label>
+							<p>{{ctrl.user_jv.getDoc().public.tag}}</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="modal fade" id="mdALL" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog modal-lg" role="document">
+				<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+					<div class="panel panel-default" data-ng-repeat="row in ctrl.user_jv.tag">
+						<div class="panel-heading" role="tab" id="headingMDALL_{{$index}}">
+							<h4 class="panel-title">
+								<a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseMDALL_{{$index}}" aria-expanded="false" aria-controls="collapseMDALL_{{$index}}">
+									{{row}}
+								</a>
+							</h4>
+						</div>
+						<div id="collapseMDALL_{{$index}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingMDALL_{{$index}}">
+							<div class="panel-body table-responsive">
+								<table class="table">
+									<thead>
+										<tr>
+											<th>Nombre</th>
+											<th>Email</th>
+											<th>Fono</th>
+											<th>Dirección</th>
+											<th>Web</th>
+											<th>Twitter</th>
+											<th>Facebook</th>
+											<th>Instagram</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr data-ng-repeat="r in ctrl.user_jv['collection_' + row]">
+											<td>{{r.public.name}}</td>
+											<td>
+												<a data-ng-show="r.public.email.length>0" href="mailto: {{r.public.email}}">
+													<i class="fa fa-envelope"></i>
+												</a>
+											</td>
+											<td>
+												<a data-ng-show="r.public.phono.length>0" href="tel: {{r.public.phono}}">
+													<i class="fa fa-phone"></i>
+												</a>
+											</td>
+											<td>{{r.public.address}}</td>
+											<td>
+												<a data-ng-show="r.public.web.length>0" href="{{r.public.web}}" target="_blank">
+													Sitio Web
+												</a>
+											</td>
+											<td>
+												<a data-ng-show="r.public.twitter.length>0" href="{{r.public.twitter}}" target="_blank">
+													<i class="fa fa-twitter"></i>
+												</a>
+											</td>
+											<td>
+												<a data-ng-show="r.public.facebook.length>0" href="{{r.public.facebook}}" target="_blank">
+													<i class="fa fa-facebook"></i>
+												</a>
+											</td>
+											<td>
+												<a data-ng-show="r.public.instagram.length>0" href="{{r.public.instagram}}" target="_blank">
+													<i class="fa fa-instagram"></i>
+												</a>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="modal fade" id="mdJV" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<div class="btn-group btn-group-xs pull-right">
+							<button type="button" class="btn btn-default" data-dismiss="modal">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<h4 class="modal-title">Seleccione su Junta de Vecinos</h4>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label>Junta de vecinos</label>
+							<select class="form-control" data-ng-model="ctrl.user.getDoc().jv" >
+								<option data-ng-repeat="row in ctrl.jv.coll" value="{{row._id}}">{{row.name}}</option>
+							</select>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-ng-click="ctrl.user.updateEXT()" title="guardar información">
+							<i class="fa fa-check"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+<!--/define:main-->
+
+<!--define:script-->
+	<script type="text/javascript" src="js/jv.js"></script>
+<!--/define:script-->

@@ -1,0 +1,231 @@
+<!--use:_views/m.full-->
+
+<!--define:title-->
+Mapa
+<!--/define:title-->
+
+<!--define:css-->
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />	
+	<link rel="stylesheet" href="css/twitter.css" />	
+	
+<!--/define:css-->
+
+<!--define:head-->
+	<script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Leaflet.draw.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Leaflet.Draw.Event.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Toolbar.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Tooltip.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/GeometryUtil.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/LatLngUtil.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/LineUtil.Intersect.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/Polygon.Intersect.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/Polyline.Intersect.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/ext/TouchEvents.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/DrawToolbar.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Feature.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.SimpleShape.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Polyline.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Marker.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Circle.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.CircleMarker.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Polygon.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/draw/handler/Draw.Rectangle.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/EditToolbar.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/EditToolbar.Edit.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/EditToolbar.Delete.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/Control.Draw.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.Poly.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.SimpleShape.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.Rectangle.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.Marker.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.CircleMarker.js"></script>
+	<script src="https://leaflet.github.io/Leaflet.draw/src/edit/handler/Edit.Circle.js"></script>
+	
+	<script src="https://unpkg.com/topojson@3.0.2/dist/topojson.min.js"></script>
+	
+<!--/define:head-->
+
+<!--define:main-->
+	<div id="app" data-ng-app="myApp" data-ng-controller="twitterCtrl as ctrl">
+		<div id="map"></div>
+		<div id="background"></div>
+		<div id="loading">
+			<i class="fa fa-spin fa-spinner"></i>
+		</div>
+		<div id="botonera">
+			<div class="btn-group" role="group">
+				<button type="button" class="btn btn-default" data-toggle="modal" data-target="#mdMap" data-ng-show="ctrl.user.isAdmin()" data-ng-click="ctrl.map.new()">
+					<i class="fa fa-plus"></i>
+				</button>
+				<button type="button" class="btn btn-default" data-toggle="modal" data-target="#mdConfig">
+					<i class="fa fa-cog"></i>
+				</button>
+				
+				<!--<button type="button" class="btn btn-default" data-ng-click="ctrl.map.region()" data-ng-show="!ctrl.map.showRegion">
+					Marcar Regiones
+				</button>
+				<button type="button" class="btn btn-default" data-ng-repeat="row in ctrl.map.tag" data-ng-click="ctrl.map.getByTag(row)">
+					{{row}} 
+					<i class="fa fa-check" data-ng-show="!ctrl.map['collection_' + row + '_showing']"></i>
+					<i class="fa fa-close" data-ng-show="ctrl.map['collection_' + row + '_showing']"></i>
+				</button>
+				<button type="button" class="btn btn-default" data-ng-click="ctrl.user.updateEXT()" title="guardar posición del mapa">
+					<i class="fa fa-map"></i>
+				</button>
+				<button type="button" class="btn btn-default" data-ng-show="ctrl.user.isAdmin()" data-ng-click="ctrl.map.updateStatus()">
+					<i class="fa fa-refresh"></i>
+				</button>
+				
+				
+				<button type="button" class="btn btn-">
+					<img src="/media/img/twitter/red.png" style="max-height: 18px;"/> = DESINFORMACIÓN
+				</button>-->
+			</div>
+		</div>
+		
+		<div class="modal fade" id="mdConfig" tabindex="-1" role="dialog">
+			<div class="modal-dialog modal-lg" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Configuración</h4>
+					</div>
+					<div class="modal-body">
+						<p>Intereses</p>
+						<div class="btn-group btn-group-xs" role="group">
+							<button type="button" class="btn btn-default" data-ng-repeat="row in ctrl.map.tag" data-ng-click="ctrl.map.getByTag(row)">
+								{{row}} 
+								<i class="fa fa-check" data-ng-show="ctrl.map['collection_' + row + '_showing']"></i>
+								<i class="fa fa-close" data-ng-show="!ctrl.map['collection_' + row + '_showing']"></i>
+							</button>
+						</div>
+						<br>
+						<br>
+						<p>Mapa</p>
+						<button class="btn btn-primary btn-xs" data-ng-click="ctrl.user.updateLMAP()">Guardar posición</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="modal fade" id="mdTweets" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog modal-lg" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<div class="btn-group btn-group-xs pull-right">
+							<button type="button" class="btn btn-default" title="ver comentarios" data-ng-click="ctrl.map.openComment()">
+								<i class="fa fa-comment"></i>
+							</button>
+							<button type="button" class="btn btn-default" data-ng-click="ctrl.map.openInfo()">
+								<i class="fa fa-info"></i>
+							</button>
+							<button type="button" class="btn btn-default" data-dismiss="modal">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<h4 class="modal-title" id="myModalLabel">{{ctrl.map.doc.name}}</h4>
+					</div>
+					<div class="modal-body">
+						<div class="alert alert-warning" data-ng-show="ctrl.twitter.coll.length==0">
+							<strong>No Twitter</strong>
+						</div>
+						<article data-ng-repeat="row in ctrl.twitter.coll">
+							<img data-ng-show="row.images.length > 0" class="media" src="{{row.images[row.image]}}" data-ng-click="ctrl.twitter.changeImage(row)"/>
+							<div data-ng-class="(row.images.length > 0)?'content':'content-full'">
+								<small title="{{row.datetitle}}" class="text-left">{{row.datefromnow}}</small>
+								<div data-html="{{row.content}}"></div>
+							</div>
+							<div style="clear:both;"></div>
+						</article>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="modal fade" id="mdMap" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<div class="btn-group btn-group-xs pull-right">
+							<button type="button" class="btn btn-default" title="ver comentarios" data-ng-click="ctrl.map.openComment()" data-ng-show="!ctrl.map.isCreateMode()">
+								<i class="fa fa-comment"></i>
+							</button>
+							<button type="button" class="btn btn-default" data-ng-click="ctrl.map.openTweet()" data-ng-show="!ctrl.map.isCreateMode()">
+								<i class="fa fa-twitter"></i>
+							</button>
+							<button type="button" class="btn btn-default" data-dismiss="modal">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label>Nombre</label>
+							<input type="text" class="form-control" placeholder="Nombre" data-ng-model="ctrl.map.getDoc().name" data-ng-disabled="ctrl.map.isReadMode()">
+						</div>
+						<div class="form-group">
+							<label>Tweeter</label>
+							<input type="text" class="form-control" placeholder="Nombre" data-ng-model="ctrl.map.getDoc().twitter" data-ng-disabled="ctrl.map.isReadMode()">
+						</div>
+						<div class="form-group">
+							<label>Tag</label>
+							<input type="text" class="form-control" placeholder="Tags" data-ng-model="ctrl.map.getDoc().tag" data-ng-disabled="ctrl.map.isReadMode()">
+						</div>
+						<div class="form-group">
+							<label>Ubicacion</label>
+							<p>{{ctrl.map.getDoc().geojson}}</p>
+						</div>
+					</div>
+					<div class="modal-footer" data-ng-show="ctrl.user.isAdmin()">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+						<button type="button" class="btn btn-primary" data-ng-click="ctrl.map.create()" data-ng-show="ctrl.map.isCreateMode()" title="ctrl.map.createLog.msg">
+							<i class="fa fa-check" data-ng-show="!ctrl.map.createLog.spinner"></i>
+							<i class="fa fa-spinner fa-spin" data-ng-show="ctrl.map.createLog.spinner"></i>
+						</button>
+						<button type="button" class="btn btn-danger" data-ng-click="ctrl.map.delete()" data-ng-show="ctrl.map.isEditMode()" title="ctrl.map.deleteLog.msg">
+							<i class="fa fa-trash" data-ng-show="!ctrl.map.deleteLog.spinner"></i>
+							<i class="fa fa-spinner fa-spin" data-ng-show="ctrl.map.deleteLog.spinner"></i>
+						</button>
+						<button type="button" class="btn btn-primary" data-ng-click="ctrl.map.edit()" data-ng-show="ctrl.map.isReadMode()">
+							<i class="fa fa-pencil"></i>
+						</button>
+						<button type="button" class="btn btn-success" data-ng-click="ctrl.map.update()" data-ng-show="ctrl.map.isEditMode()" title="ctrl.map.updateLog.msg">
+							<i class="fa fa-check" data-ng-show="!ctrl.map.updateLog.spinner"></i>
+							<i class="fa fa-spinner fa-spin" data-ng-show="ctrl.map.updateLog.spinner"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="modal fade" id="mdComment" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog modal-lg" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<div class="btn-group btn-group-xs pull-right">
+							<button type="button" class="btn btn-default" data-ng-click="ctrl.map.openInfo()">
+								<i class="fa fa-info"></i>
+							</button>
+							<button type="button" class="btn btn-default" data-ng-click="ctrl.map.openTweet()">
+								<i class="fa fa-twitter"></i>
+							</button>
+							<button type="button" class="btn btn-default" data-dismiss="modal">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<h4 class="modal-title" id="myModalLabel">Comentarios {{ctrl.map.doc.name}}</h4>
+					</div>
+					<div class="modal-body">
+						proximamente!
+					</div>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+<!--/define:main-->
+
+<!--define:script-->
+	<script type="text/javascript" src="js/twitter.js"></script>
+<!--/define:script-->

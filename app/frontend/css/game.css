@@ -1,0 +1,154 @@
+/*****ALWAYS*********/
+/********************/
+* {
+	margin: 0;
+	padding: 0;
+}
+html,body{
+	height: 100%;
+	overflow: hidden;
+	font-family: monospace;
+}
+#app{
+	position: absolute; 
+	top: 0; 
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+}
+
+video{
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  min-width: 100%;
+  min-height: 100%;
+  z-index: 2;
+}
+
+/*******************/
+/******WAITING******/
+/*******************/
+	#background{
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		background: black;
+		z-index: 3;
+		opacity: 0.5;
+		display: block;
+	}
+	#loading{
+		position: absolute;
+		z-index: 4;
+		top: 40%;
+		width: 100%;
+		text-align: center;
+		display: block;
+	}
+	#loading i{
+		font-size: 100px;
+		color: green;
+	}
+	#message{
+		position: absolute;
+		z-index: 4;
+		top: 40%;
+		text-align: center;
+		display: none;
+		width: 100%;
+		
+		color: green;
+		background: black;
+	}
+	.danger{
+		position: absolute;
+		z-index: 4;
+		top: 40%;
+		text-align: center;
+		display: none;
+		width: auto;
+		max-width: 400px;
+		margin: auto;
+		border: 2px solid red;
+		padding: 25px;
+		color: red;
+		background: black;
+		
+		left: 0;
+		right: 0;
+		
+	}
+	.parpadeo{
+		
+		animation-name: parpadeo;
+		animation-duration: 0.68s;
+		animation-timing-function: linear;
+		animation-iteration-count: infinite;
+		
+		-webkit-animation-name:parpadeo;
+		-webkit-animation-duration: 0.68s;
+		-webkit-animation-timing-function: linear;
+		-webkit-animation-iteration-count: infinite;
+	}
+	@-moz-keyframes parpadeo{  
+	  0% { opacity: 1.0; }
+	  50% { opacity: 0.0; }
+	  100% { opacity: 1.0; }
+	}
+
+	@-webkit-keyframes parpadeo {  
+	  0% { opacity: 1.0; }
+	  50% { opacity: 0.0; }
+	   100% { opacity: 1.0; }
+	}
+
+	@keyframes parpadeo {  
+	  0% { opacity: 1.0; }
+	   50% { opacity: 0.0; }
+	  100% { opacity: 1.0; }
+	}
+/***********************/
+/*SKELETON OF GAME AREA*/
+/***********************/
+	.sk1{
+		width: 100%;
+		height: 0.5%;
+	}
+	.sk2{
+		width: 100%;
+		height: 99%;
+	}
+	.sk2-1{
+		width: 0.1%;
+		height: 100%;
+		float:left;
+	}
+	.sk2-2{
+		width: 99.8%;
+		height: 100%;
+		float:left;
+	}
+	.sk2-3{
+		width: 0.1%;
+		height: 100%;
+		float:left;
+	}
+	.sk3{
+		width: 100%;
+		height: 0.5%;
+	}
+
+/*******************/
+/********MAP********/
+/*******************/
+.map-container{
+	width: 100%;
+	height: 100%;
+}
+#map{
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}

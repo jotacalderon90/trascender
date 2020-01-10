@@ -1,0 +1,21 @@
+###########################
+#archivo de configuracion##
+#para no subir al servidor#
+###########################
+
+#dependencias del lado servidor
+###############################
+node_modules/*
+
+#dependencias de lado cliente
+#################
+app/frontend/bower_components/*
+
+#logs
+#################
+app/media/doc/log/*
+
+#package-lock
+#################
+package-lock.json
+log.csv

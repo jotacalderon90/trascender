@@ -1,0 +1,55 @@
+<!--use:_views/m.full-->
+
+<!--define:title-->
+GAME
+<!--/define:title-->
+
+<!--define:css-->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+	<link rel="stylesheet" href="css/game.css" media="all"/> 
+<!--/define:css-->
+
+<!--define:main-->
+
+	<video autoplay muted loop>
+		<source src="/media/mp4/background.mp4" type="video/mp4">
+	</video>
+	<canvas id="background"></canvas>
+	<div id="loading">
+		<i class="fa fa-spin fa-spinner"></i>
+	</div>
+	<div id="message">
+		<h1></h1>
+	</div>
+	<div class="danger">
+		<h1 class="parpadeo">SYSTEM FAILURE</h1>
+	</div>
+	
+	<div id="app" data-ng-app="myApp" data-ng-controller="gameCtrl as ctrl">
+		<div class="sk1">
+		</div>
+		<div class="sk2">
+			<div class="sk2-1">
+			</div>
+			<div class="sk2-2">
+				<div class="map-container">
+					<div id="map"></div>
+				</div>
+			</div>
+			<div class="sk2-3">
+			</div>
+		</div>
+		<div class="sk3">
+		</div>
+	</div>
+<!--/define:main-->
+
+<!--define:script-->
+	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+	<script type="text/javascript" src="js/lib/background.js"></script>
+	<script type="text/javascript">
+		//var _collection = {{data: JSON.stringify(doc.rows)}};
+		//var blog_instances = ["collection","document"];
+	</script>
+	<script type="text/javascript" src="js/game.js"></script>
+<!--/define:script-->

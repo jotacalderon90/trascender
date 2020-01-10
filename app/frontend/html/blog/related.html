@@ -1,0 +1,11 @@
+<div>
+	<h3 data-ng-show="ctrl.relation.coll.length>0">Notas relacionadas</h3>
+	<div class="row">
+		<article class="col-md-4" data-ng-repeat="row in ctrl.relation.coll">
+			<a data-ng-href="/blog/{{row.uri}}">
+				<img data-ng-src="{{row.thumb}}" alt="{{row.resume}}" title="{{row.resume}}" />
+				<h2>{{row.title}}</h2>
+			</a>
+		</article>
+	</div>
+</div>

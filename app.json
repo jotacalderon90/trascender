@@ -1,0 +1,1207 @@
+{
+	"properties": {
+		"port": 1000,
+		"admin": "jcalderon.aprog@gmail.com",
+		"secret": "trascender-con-sso",
+		"views": "/app/frontend/html/",
+		"mailing": "/app/frontend/html/mailing/templates_back/"
+	},
+	"public": {
+		"host": "http://localhost:1000",
+		"phone": "+11111111",
+		"mailto": "jcalderon.aprog@gmail.com",
+		"directories": [{
+			"name": "Directorio público",
+			"file": "/api/file/public/",
+			"folder": "/api/folder/public/",
+			"path": "/"
+		},{
+			"name": "Directorio privado",
+			"file": "/api/file/private/",
+			"folder": "/api/folder/private/",
+			"path": "/"
+		}]
+	},
+	"database": {
+		"trascender": {
+			"url": "mongodb://127.0.0.1:27017/trascender",
+			"main": true
+		}
+	},
+	"google": {
+		"auth": {
+			"clientId": "",
+			"clientSecret": "",
+			"redirect": ""
+		}
+	},
+	"smtp": {
+		"host": "smtp.gmail.com",
+		"secureConnection": true,
+		"port": 587,
+		"user": "",
+		"pass": ""
+	},
+	"recaptcha": {
+		"enabled": false,
+		"public": "x",
+		"private": "x"
+	},
+	"files": [{
+		"uri": "/favicon.ico",
+		"src": "/app/frontend/media/img/favicon.ico",
+		"roles": []
+	}, {
+		"uri": "/robots.txt",
+		"src": "/app/frontend/media/doc/robots.txt",
+		"roles": []
+	}],
+	"folders": [{
+		"uri": "/",
+		"src": "/app/frontend",
+		"roles": []
+	}],
+	"api": [{
+		"description": "backend of demo module",
+		"name": "demo",
+		"params": [],
+		"services": [{
+			"method": "get",
+			"uri": "/demo",
+			"action": "demo",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/json",
+			"action": "json",
+			"roles": []
+		}]
+	}, {
+		"description": "backend of user module",
+		"name": "user",
+		"params": ["trascender", "user"],
+		"services": [{
+			"method": "post",
+			"uri": "/user",
+			"action": "create",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/user/activate/:hash",
+			"action": "activate",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/user/desactivate/:hash",
+			"action": "desactivate",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/user/forget",
+			"action": "forget",
+			"roles": []
+		}, {
+			"method": "post",
+			"uri": "/user/forget",
+			"action": "forget",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/user/recovery/:hash",
+			"action": "recovery",
+			"roles": []
+		}, {
+			"method": "post",
+			"uri": "/user/recovery",
+			"action": "recovery",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/user/login",
+			"action": "login",
+			"roles": []
+		}, {
+			"method": "post",
+			"uri": "/user/login",
+			"action": "login",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/user/logout",
+			"action": "logout",
+			"roles": ["user"]
+		}, {
+			"method": "get",
+			"uri": "/user/info",
+			"action": "info",
+			"roles": ["user"]
+		}, {
+			"method": "post",
+			"uri": "/user/update",
+			"action": "update",
+			"roles": ["user"]
+		}, {
+			"method": "put",
+			"uri": "/user/update/ext",
+			"action": "update_ext",
+			"roles": ["user"]
+		}, {
+			"method": "get",
+			"uri": "/api/user",
+			"action": "read",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/user/:id",
+			"action": "public",
+			"roles": ["user"]
+		}, {
+			"method": "get",
+			"uri": "/user/auth/google/callback",
+			"action": "login_google",
+			"roles": []
+		}, {
+			"method": "post",
+			"uri": "/user/subscriber",
+			"action": "subscriber",
+			"roles": []
+		}]
+	}, {
+		"description": "frontend of user module",
+		"name": "generic",
+		"params": ["user"],
+		"services": [{
+			"method": "get",
+			"uri": "/user",
+			"action": "render",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/user/:id",
+			"action": "render",
+			"roles": []
+		}]
+	}, {
+		"description": "backend of mailing module to get html templates",
+		"name": "filemanager",
+		"params": ["/app/frontend/html/mailing/templates_front/"],
+		"services": [ {
+			"method": "get",
+			"uri": "/api/mailing/file/:id/total",
+			"action": "getTotalFile",
+			"roles": ["admin"]
+		}, {
+			"method": "get",
+			"uri": "/api/mailing/file/:id/collection",
+			"action": "getCollectionFile",
+			"roles": ["admin"]
+		}, {
+			"method": "get",
+			"uri": "/api/mailing/file/:id",
+			"action": "readFile",
+			"roles": ["admin"]
+		}]
+	}, {
+		"description": "backend of mailing module to get user",
+		"name": "mongodb",
+		"params": ["trascender","user"],
+		"services": [{
+			"method": "get",
+			"uri": "/api/document/user/total",
+			"action": "total",
+			"roles": ["admin"]
+		}, {
+			"method": "get",
+			"uri": "/api/document/user/collection",
+			"action": "collection",
+			"roles": ["admin"]
+		}]
+	}, {
+		"description": "backend of mailing module to send message",
+		"name": "mailing",
+		"params": [],
+		"services": [{
+			"method": "post",
+			"uri": "/api/mailing/message",
+			"action": "send",
+			"roles": ["admin"]
+		}]
+	}, {
+		"description": "frontend of mailing module",
+		"name": "generic",
+		"params": ["mailing"],
+		"services": [{
+			"method": "get",
+			"uri": "/mailing",
+			"action": "render",
+			"roles": ["admin"]
+		}, {
+			"method": "get",
+			"uri": "/mailing/:id",
+			"action": "render",
+			"roles": ["admin"]
+		}]
+	}, {
+		"description": "frontend of chat module",
+		"name": "generic",
+		"params": ["chat"],
+		"services": [{
+			"method": "get",
+			"uri": "/chat",
+			"action": "render",
+			"roles": ["user"],
+			"activated": true
+		}, {
+			"method": "get",
+			"uri": "/chat/:id",
+			"action": "render",
+			"roles": ["user"],
+			"activated": true
+		}]
+	}, {
+		"description": "backend of filemanager module to private folder",
+		"name": "filemanager",
+		"params": ["/app/media/"],
+		"services": [{
+			"method": "get",
+			"uri": "/api/folder/private/:id/total",
+			"action": "getTotalFolder",
+			"roles": ["admin"]
+		}, {
+			"method": "get",
+			"uri": "/api/folder/private/:id/collection",
+			"action": "getCollectionFolder",
+			"roles": ["admin"]
+		}, {
+			"method": "post",
+			"uri": "/api/folder/private/:id",
+			"action": "createFolder",
+			"roles": ["admin"]
+		}, {
+			"method": "put",
+			"uri": "/api/folder/private/:id",
+			"action": "updateFolder",
+			"roles": ["admin"]
+		}, {
+			"method": "delete",
+			"uri": "/api/folder/private/:id",
+			"action": "deleteFolder",
+			"roles": ["admin"]
+		}, {
+			"method": "get",
+			"uri": "/api/file/private/:id/total",
+			"action": "getTotalFile",
+			"roles": ["admin"]
+		}, {
+			"method": "get",
+			"uri": "/api/file/private/:id/collection",
+			"action": "getCollectionFile",
+			"roles": ["admin"]
+		}, {
+			"method": "post",
+			"uri": "/api/file/private/:id",
+			"action": "createFile",
+			"roles": ["admin"]
+		}, {
+			"method": "get",
+			"uri": "/api/file/private/:id",
+			"action": "readFile",
+			"roles": ["admin"]
+		}, {
+			"method": "put",
+			"uri": "/api/file/private/:id",
+			"action": "updateFile",
+			"roles": ["admin"]
+		}, {
+			"method": "delete",
+			"uri": "/api/file/private/:id",
+			"action": "deleteFile",
+			"roles": ["admin"]
+		}, {
+			"method": "put",
+			"uri": "/api/file/private/:id/rename",
+			"action": "renameFile",
+			"roles": ["admin"]
+		}, {
+			"method": "get",
+			"uri": "/api/file/private/:id/download",
+			"action": "downloadFile",
+			"roles": ["admin"]
+		}, {
+			"method": "get",
+			"uri": "/api/file/private/:id/getfile",
+			"action": "getFile",
+			"roles": ["admin"]
+		}, {
+			"method": "post",
+			"uri": "/api/file/private/:id/uploader",
+			"action": "upload",
+			"roles": ["admin"]
+		}]
+	}, {
+		"description": "backend of filemanager module to frontend folder",
+		"name": "filemanager",
+		"params": ["/app/frontend/"],
+		"services": [{
+			"method": "get",
+			"uri": "/api/folder/public/:id/total",
+			"action": "getTotalFolder",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/folder/public/:id/collection",
+			"action": "getCollectionFolder",
+			"roles": []
+		}, {
+			"method": "post",
+			"uri": "/api/folder/public/:id",
+			"action": "createFolder",
+			"roles": ["admin","ADM_FileDirectory"]
+		}, {
+			"method": "put",
+			"uri": "/api/folder/public/:id",
+			"action": "updateFolder",
+			"roles": ["admin","ADM_FileDirectory"]
+		}, {
+			"method": "delete",
+			"uri": "/api/folder/public/:id",
+			"action": "deleteFolder",
+			"roles": ["admin","ADM_FileDirectory"]
+		}, {
+			"method": "get",
+			"uri": "/api/file/public/:id/total",
+			"action": "getTotalFile",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/file/public/:id/collection",
+			"action": "getCollectionFile",
+			"roles": []
+		}, {
+			"method": "post",
+			"uri": "/api/file/public/:id",
+			"action": "createFile",
+			"roles": ["admin","ADM_FileDirectory"]
+		}, {
+			"method": "get",
+			"uri": "/api/file/public/:id",
+			"action": "readFile",
+			"roles": []
+		}, {
+			"method": "put",
+			"uri": "/api/file/public/:id",
+			"action": "updateFile",
+			"roles": ["admin","ADM_FileDirectory"]
+		}, {
+			"method": "delete",
+			"uri": "/api/file/public/:id",
+			"action": "deleteFile",
+			"roles": ["admin","ADM_FileDirectory"]
+		}, {
+			"method": "put",
+			"uri": "/api/file/public/:id/rename",
+			"action": "renameFile",
+			"roles": ["admin","ADM_FileDirectory"]
+		}, {
+			"method": "get",
+			"uri": "/api/file/public/:id/download",
+			"action": "downloadFile",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/file/public/:id/getfile",
+			"action": "getFile",
+			"roles": []
+		}, {
+			"method": "post",
+			"uri": "/api/file/public/:id/uploader",
+			"action": "upload",
+			"roles": ["admin", "ADM_FileDirectory"]
+		}]
+	}, {
+		"description": "frontend of filemanager module",
+		"name": "generic",
+		"params": ["filemanager"],
+		"services": [{
+			"method": "get",
+			"uri": "/filemanager",
+			"action": "render",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/filemanager/:id",
+			"action": "render",
+			"roles": []
+		}]
+	}, {
+		"description": "backend of database module",
+		"name": "mongodb",
+		"params": ["trascender","object"],
+		"services": [{
+			"method": "get",
+			"uri": "/api/object/total",
+			"action": "total",
+			"roles": ["user"]
+		}, {
+			"method": "get",
+			"uri": "/api/object/collection",
+			"action": "collection",
+			"roles": ["user"]
+		}, {
+			"method": "post",
+			"uri": "/api/object",
+			"action": "create",
+			"roles": ["admin","ADM_Data"]
+		}, {
+			"method": "get",
+			"uri": "/api/object/:id",
+			"action": "read",
+			"roles": ["user"]
+		}, {
+			"method": "put",
+			"uri": "/api/object/:id",
+			"action": "update",
+			"roles": ["admin","ADM_Data"]
+		}, {
+			"method": "delete",
+			"uri": "/api/object/:id",
+			"action": "delete",
+			"roles": ["admin","ADM_Data"]
+		}]
+	}, {
+		"description": "backend of database module",
+		"name": "mongodb",
+		"params": ["trascender"],
+		"services": [{
+			"method": "get",
+			"uri": "/api/document/:name/export",
+			"action": "export",
+			"roles": []
+		}, {
+			"method": "post",
+			"uri": "/api/document/:name/import",
+			"action": "import",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/document/:name/total",
+			"action": "total",
+			"roles": ["user"]
+		}, {
+			"method": "get",
+			"uri": "/api/document/:name/collection",
+			"action": "collection",
+			"roles": ["user"]
+		}, {
+			"method": "get",
+			"uri": "/api/document/:name/:id",
+			"action": "read",
+			"roles": ["user"]
+		}, {
+			"method": "post",
+			"uri": "/api/document/:name",
+			"action": "create",
+			"roles": ["admin","ADM_Data"]
+		}, {
+			"method": "put",
+			"uri": "/api/document/:name/:id",
+			"action": "update",
+			"roles": ["admin","ADM_Data"]
+		}, {
+			"method": "delete",
+			"uri": "/api/document/:name/:id",
+			"action": "delete",
+			"roles": ["admin","ADM_Data"]
+		}]
+	}, {
+		"description": "frontend of database module",
+		"name": "generic",
+		"params": ["database"],
+		"services": [{
+			"method": "get",
+			"uri": "/database",
+			"action": "render",
+			"roles": ["user"]
+		}, {
+			"method": "get",
+			"uri": "/database/:id",
+			"action": "render",
+			"roles": ["user"]
+		}]
+	}, {
+		"description": "backend of wysiwyg module",
+		"name": "filemanager",
+		"params": ["/app/frontend/html/simpleweb"],
+		"services": [{
+			"method": "get",
+			"uri": "/api/simpleweb/directory",
+			"action": "fullDirectory",
+			"roles": ["admin","ADM_Constructor"]
+		}, {
+			"method": "post",
+			"uri": "/api/simpleweb/file/:id",
+			"action": "createFile",
+			"roles": ["admin","ADM_Constructor"]
+		}, {
+			"method": "get",
+			"uri": "/api/simpleweb/file/:id",
+			"action": "readFile",
+			"roles": ["admin","ADM_Constructor"]
+		}, {
+			"method": "put",
+			"uri": "/api/simpleweb/file/:id",
+			"action": "updateFile",
+			"roles": ["admin","ADM_Constructor"]
+		}, {
+			"method": "delete",
+			"uri": "/api/simpleweb/file/:id",
+			"action": "deleteFile",
+			"roles": ["admin","ADM_Constructor"]
+		}]
+	}, {
+		"description": "frontend of wysiwyg module",
+		"name": "generic",
+		"params": ["wysiwyg"],
+		"services": [{
+			"method": "get",
+			"uri": "/wysiwyg",
+			"action": "render",
+			"roles": ["admin","ADM_Constructor"]
+		}, {
+			"method": "get",
+			"uri": "/wysiwyg/:id",
+			"action": "render",
+			"roles": ["admin","ADM_Constructor"]
+		}]
+	}, {
+		"description": "backend/frontend of blog module",
+		"name": "blog",
+		"params": ["trascender"],
+		"services": [{
+			"method": "get",
+			"uri": "/blog",
+			"action": "renderCollection",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/blog/new",
+			"action": "renderNew",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/blog/:id",
+			"action": "renderDocument",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/blog/categoria/:id",
+			"action": "renderCollection",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/blog/total",
+			"action": "total",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/blog/collection",
+			"action": "collection",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/blog/tag/collection",
+			"action": "tags",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/blog/:id",
+			"action": "read",
+			"roles": []
+		}, {
+			"method": "post",
+			"uri": "/api/blog",
+			"action": "create",
+			"roles": ["admin","BLOGUER"]
+		}, {
+			"method": "put",
+			"uri": "/api/blog/:id",
+			"action": "update",
+			"roles": ["admin","BLOGUER"]
+		}, {
+			"method": "delete",
+			"uri": "/api/blog/:id",
+			"action": "delete",
+			"roles": ["admin","BLOGUER"]
+		}]
+	}, {
+		"description": "backend/frontend of comment module",
+		"name": "mongodb",
+		"params": ["trascender","comment"],
+		"services": [{
+			"method": "get",
+			"uri": "/api/comment/total",
+			"action": "total",
+			"roles": []
+		},{
+			"method": "get",
+			"uri": "/api/comment/collection",
+			"action": "collection",
+			"roles": []
+		},{
+			"method": "post",
+			"uri": "/api/comment",
+			"action": "create",
+			"roles": ["user"]
+		}]
+	}, {
+		"description": "backend/frontend of product module",
+		"name": "mongodb",
+		"params": ["trascender","product","product/document","product/collection","uri",{"title":1}],
+		"services": [{
+			"method": "get",
+			"uri": "/product",
+			"action": "renderCollection",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/product/:id",
+			"action": "renderDocument",
+			"roles": []
+		},{
+			"method": "get",
+			"uri": "/product/categoria/:id",
+			"action": "renderCollection",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/product/total",
+			"action": "total",
+			"roles": []
+		},{
+			"method": "get",
+			"uri": "/api/product/collection",
+			"action": "collection",
+			"roles": []
+		},{
+			"method": "get",
+			"uri": "/api/product/:id",
+			"action": "read",
+			"roles": []
+		},{
+			"method": "get",
+			"uri": "/api/product/tag/collection",
+			"action": "tags",
+			"roles": []
+		},{
+			"method": "post",
+			"uri": "/api/product",
+			"action": "create",
+			"roles": ["admin","SELLER"]
+		}, {
+			"method": "put",
+			"uri": "/api/product/:id",
+			"action": "update",
+			"roles": ["admin","SELLER"]
+		}, {
+			"method": "delete",
+			"uri": "/api/product/:id",
+			"action": "delete",
+			"roles": ["admin","SELLER"]
+		}]
+	}, {
+		"description": "backend of ecommerce module",
+		"name": "workflow",
+		"params": ["trascender", "ecommerce"],
+		"services": [{
+			"method": "post",
+			"uri": "/ecommerce/transaction",
+			"action": "create",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/ecommerce/transaction/:id",
+			"action": "read",
+			"roles": []
+		}, {
+			"method": "post",
+			"uri": "/ecommerce/transaction/:id",
+			"action": "update",
+			"roles": []
+		}]
+	}, {
+		"description": "frontend of ecommerce module",
+		"name": "generic",
+		"params": ["ecommerce"],
+		"services": [{
+			"method": "get",
+			"uri": "/ecommerce/:id",
+			"action": "render",
+			"roles": []
+		}]
+	}, {
+		"description": "backend of twitter module",
+		"name": "twitter",
+		"params": [],
+		"services": [{
+			"method": "get",
+			"uri": "/api/tweet/:name",
+			"action": "read",
+			"roles": []
+		}]
+	}, {
+		"description": "backend/frontend of twitter module",
+		"name": "mongodb",
+		"params": ["trascender","twitter"],
+		"services": [{
+			"method": "get",
+			"uri": "/api/twitter/total",
+			"action": "total",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/twitter/collection",
+			"action": "collection",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/twitter/tag/collection",
+			"action": "tags",
+			"roles": []
+		}, {
+			"method": "post",
+			"uri": "/api/twitter",
+			"action": "create",
+			"roles": ["admin"]
+		}, {
+			"method": "put",
+			"uri": "/api/twitter/:id",
+			"action": "update",
+			"roles": ["admin"]
+		}, {
+			"method": "delete",
+			"uri": "/api/twitter/:id",
+			"action": "delete",
+			"roles": ["admin"]
+		}]
+	}, {
+		"description": "frontend of twitter module",
+		"name": "generic",
+		"params": ["twitter"],
+		"services": [{
+			"method": "get",
+			"uri": "/twitter",
+			"action": "render",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/twitter/:id",
+			"action": "render",
+			"roles": []
+		}]
+	}, {
+		"description": "backend of junta vecino module to get users",
+		"name": "user.jv",
+		"params": ["trascender"],
+		"services": [{
+			"method": "get",
+			"uri": "/api/user.jv/total",
+			"action": "total",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/user.jv/collection",
+			"action": "collection",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/user.jv/tag/collection",
+			"action": "tags",
+			"roles": []
+		}]
+	}, {
+		"description": "backend of junta vecino module to get jv",
+		"name": "mongodb",
+		"params": ["trascender", "jv"],
+		"services": [{
+			"method": "get",
+			"uri": "/api/jv/total",
+			"action": "total",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/jv/collection",
+			"action": "collection",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/jv/:id",
+			"action": "read",
+			"roles": []
+		}]
+	}, {
+		"description": "frontend of jv module",
+		"name": "generic",
+		"params": ["jv"],
+		"services": [{
+			"method": "get",
+			"uri": "/jv",
+			"action": "render",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/jv/:id",
+			"action": "render",
+			"roles": []
+		}]
+	}, {
+		"description": "backend/frontend of story module",
+		"name": "mongodb",
+		"params": ["trascender","story","story/document","story/collection","title",{"year":-1,"month": -1, "day": -1, "title": -1}],
+		"services": [{
+			"method": "get",
+			"uri": "/story",
+			"action": "renderCollection",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/story/categoria/:id",
+			"action": "renderCollection",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/story/total",
+			"action": "total",
+			"roles": []
+		},{
+			"method": "get",
+			"uri": "/api/story/collection",
+			"action": "collection",
+			"roles": []
+		},{
+			"method": "get",
+			"uri": "/api/story/:id",
+			"action": "read",
+			"roles": []
+		},{
+			"method": "get",
+			"uri": "/api/story/tag/collection",
+			"action": "tags",
+			"roles": []
+		},{
+			"method": "post",
+			"uri": "/api/story",
+			"action": "create",
+			"roles": ["admin"]
+		}, {
+			"method": "put",
+			"uri": "/api/story/:id",
+			"action": "update",
+			"roles": ["admin"]
+		}, {
+			"method": "delete",
+			"uri": "/api/story/:id",
+			"action": "delete",
+			"roles": ["admin"]
+		}]
+	}, {
+		"description": "frontend of story module",
+		"name": "generic",
+		"params": ["story"],
+		"services": [{
+			"method": "get",
+			"uri": "/story/config/json",
+			"action": "config_public",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/story/audio/:text",
+			"action": "texttomp3",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/story/:id",
+			"action": "render",
+			"roles": []
+		}]
+	}, {
+		"description": "backend of map module",
+		"name": "mongodb",
+		"params": ["trascender","map"],
+		"services": [{
+			"method": "get",
+			"uri": "/api/map/collection",
+			"action": "collection",
+			"roles": []
+		}, {
+			"method": "post",
+			"uri": "/api/map",
+			"action": "create",
+			"roles": ["admin"]
+		}, {
+			"method": "put",
+			"uri": "/api/map/:id",
+			"action": "update",
+			"roles": ["admin"]
+		}]
+	}, {
+		"description": "frontend of map module",
+		"name": "generic",
+		"params": ["map"],
+		"services": [{
+			"method": "get",
+			"uri": "/map",
+			"action": "render",
+			"roles": []
+		}]
+	}, {
+		"description": "backend of poll module",
+		"name": "mongodb",
+		"params": ["trascender","poll"],
+		"services": [{
+			"method": "get",
+			"uri": "/api/poll/total",
+			"action": "total",
+			"roles": ["admin"]
+		},{
+			"method": "get",
+			"uri": "/api/poll/collection",
+			"action": "collection",
+			"roles": ["admin"]
+		},{
+			"method": "get",
+			"uri": "/api/poll/:id",
+			"action": "read",
+			"roles": ["admin"]
+		},{
+			"method": "post",
+			"uri": "/api/poll",
+			"action": "create",
+			"roles": ["admin"]
+		}, {
+			"method": "put",
+			"uri": "/api/poll/:id",
+			"action": "update",
+			"roles": ["admin"]
+		}, {
+			"method": "delete",
+			"uri": "/api/poll/:id",
+			"action": "delete",
+			"roles": ["admin"]
+		}]
+	}, {
+		"description": "backend of poll module",
+		"name": "poll",
+		"params": ["trascender", "poll"],
+		"services": [{
+			"method": "put",
+			"uri": "/api/poll/start/:id",
+			"action": "start",
+			"roles": ["admin"]
+		}, {
+			"method": "put",
+			"uri": "/api/poll/notify/:id/:to",
+			"action": "notify",
+			"roles": ["admin"]
+		}, {
+			"method": "get",
+			"uri": "/api/poll/:id/answer/:encode",
+			"action": "answer",
+			"roles": []
+		}, {
+			"method": "post",
+			"uri": "/api/poll/:id/answer/:encode",
+			"action": "answer",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/poll/:id/answer",
+			"action": "answer_anon",
+			"roles": []
+		}, {
+			"method": "post",
+			"uri": "/api/poll/:id/answer",
+			"action": "answer_anon",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/poll/:id/result",
+			"action": "result",
+			"roles": []
+		}]
+	}, {
+		"description": "frontend of poll module",
+		"name": "generic",
+		"params": ["poll"],
+		"services": [{
+			"method": "get",
+			"uri": "/poll",
+			"action": "render",
+			"roles": ["admin"]
+		}]
+	}, {
+		"description": "backend/frontend of wall module",
+		"name": "mongodb",
+		"params": ["trascender","wall","","wall/collection","",{"created": -1}],
+		"services": [{
+			"method": "get",
+			"uri": "/wall",
+			"action": "renderCollection",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/wall/categoria/:id",
+			"action": "renderCollection",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/wall/total",
+			"action": "total",
+			"roles": []
+		},{
+			"method": "get",
+			"uri": "/api/wall/collection",
+			"action": "collection",
+			"roles": []
+		},{
+			"method": "get",
+			"uri": "/api/wall/tag/collection",
+			"action": "tags",
+			"roles": []
+		},{
+			"method": "post",
+			"uri": "/api/wall",
+			"action": "create",
+			"roles": ["user"]
+		}, {
+			"method": "delete",
+			"uri": "/api/wall/:id",
+			"action": "delete",
+			"roles": ["admin"]
+		}]
+	}, {
+		"description": "backend/frontend of game module",
+		"name": "game",
+		"params": ["trascender"],
+		"services": [{
+			"method": "get",
+			"uri": "/game",
+			"action": "renderIndex",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/game/:id",
+			"action": "renderDocument",
+			"roles": []
+		},{
+			"method": "get",
+			"uri": "/game/categoria/:id",
+			"action": "renderCollection",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/game/total",
+			"action": "total",
+			"roles": []
+		},{
+			"method": "get",
+			"uri": "/api/game/collection",
+			"action": "collection",
+			"roles": []
+		},{
+			"method": "get",
+			"uri": "/api/game/:id",
+			"action": "read",
+			"roles": []
+		},{
+			"method": "get",
+			"uri": "/api/game/tag/collection",
+			"action": "tags",
+			"roles": []
+		},{
+			"method": "post",
+			"uri": "/api/game",
+			"action": "create",
+			"roles": ["admin"]
+		}, {
+			"method": "put",
+			"uri": "/api/game/:id",
+			"action": "update",
+			"roles": ["admin"]
+		}, {
+			"method": "delete",
+			"uri": "/api/game/:id",
+			"action": "delete",
+			"roles": ["admin"]
+		}]
+	}, {
+		"description": "PWA module",
+		"name": "pwa",
+		"params": ["trascender"],
+		"services": [{
+			"method": "get",
+			"uri": "/manifest.json",
+			"action": "manifest",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/loader.js",
+			"action": "loader",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/sw.js",
+			"action": "sw",
+			"roles": []
+		}] 
+	},{
+		"description": "backend of simpleweb module",
+		"name": "mailing",
+		"params": [],
+		"services": [{
+			"method": "post",
+			"uri": "/api/message",
+			"action": "create",
+			"roles": []
+		}]
+	},{
+		"description": "segundo backend of simpleweb module",
+		"name": "mongodb",
+		"params": ["trascender","message"],
+		"services": [{
+			"method": "post",
+			"uri": "/api/message/document",
+			"action": "create",
+			"roles": []
+		}]
+	},{
+		"description": "frontend of simpleweb module",
+		"name": "generic",
+		"params": ["simpleweb"],
+		"services": [{
+			"method": "get",
+			"uri": "/",
+			"action": "render",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/client/ip",
+			"action": "ip",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/client/geoip",
+			"action": "geoip",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/api/client/geoip/:ip",
+			"action": "geoipFromIP",
+			"roles": []
+		}, {
+			"method": "get",
+			"uri": "/:id",
+			"action": "render",
+			"roles": []
+		}]
+	}]
+}
