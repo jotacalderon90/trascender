@@ -4,8 +4,7 @@ const fs = require("fs");
 
 let self = function(a,p){
 	this.dir = a.dir;
-	this.path = a.dir + "/app.json";
-	this.json = a.config;
+	this.config = a.config;
 }
 
 //@route('/config')
@@ -15,14 +14,14 @@ self.prototype.plain = function(req,res){
 }
 
 self.prototype.get = function(req,res){
-	res.render("config",{config: this.json});
+	res.render("config",{config: this.config});
 }
 
 self.prototype.put = function(req,res){
 	try{
-		let json = JSON.parse(req.body.content);
-		fs.writeFileSync(this.path, JSON.stringify(json,undefined,"\t"));
-		this.json = json;
+		let config = JSON.parse(req.body.content);
+		fs.writeFileSync(this.dir + "/app.json", JSON.stringify(config,undefined,"\t"));
+		this.config = config;
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null, error: e});
@@ -32,7 +31,7 @@ self.prototype.put = function(req,res){
 self.prototype.delete = function(req,res){
 	try{
 		fs.unlinkSync(this.dir + "/app/backend/001.config.js");
-		fs.writeFileSync(this.path, JSON.stringify(this.json,undefined,"\t"));
+		fs.writeFileSync(this.dir + "/app.json", JSON.stringify(this.config,undefined,"\t"));
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null, error: e});

@@ -5,15 +5,16 @@ const fs = require("fs");
 let self = function(application,params){
 	this.dir				= application.dir;
 	this.config				= application.config;
-	this.url				= application.config.database.url;
 	this.helper				= application.helper;
-	this.collection_name	= "story";
-	this.view_doc			= "story/document";
-	this.view_coll			= "story/collection";
-	this.match				= "title";
-	this.sort				= {year: -1, month: -1, day: -1, title: -1};
 	this.mongodb			= application.mongodb;
-	this.view = "story/";
+	
+	this.collection_name = "story";
+	this.view_doc = "story/document";
+	this.view_coll = "story/collection";
+	this.match = "title";
+	this.sort = {year: -1, month: -1, day: -1, title: -1};
+	
+	this.path = "story";
 }
 
 
@@ -28,7 +29,7 @@ self.prototype.renderCollection = async function(req,res){
 		let options = {};
 		options.limit = 10;
 		options.sort = this.sort;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let data = await this.mongodb.find(db,collection,query,options,true);
 		res.render(this.view_coll,{
 			title: title.charAt(0).toUpperCase() + title.slice(1),
@@ -53,7 +54,7 @@ self.prototype.renderCollectionTag = async function(req,res){
 		let options = {};
 		options.limit = 10;
 		options.sort = this.sort;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let data = await this.mongodb.find(db,collection,query,options,true);
 		res.render(this.view_coll,{
 			title: title.charAt(0).toUpperCase() + title.slice(1),
@@ -73,7 +74,7 @@ self.prototype.renderCollectionTag = async function(req,res){
 self.prototype.total = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let total = await this.mongodb.count(db,collection,query,{},true);
 		res.send({data: total});
@@ -89,7 +90,7 @@ self.prototype.total = async function(req,res){
 self.prototype.collection = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
 		let data = await this.mongodb.find(db,collection,query,options,true);
@@ -106,7 +107,7 @@ self.prototype.collection = async function(req,res){
 self.prototype.tags = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let data = await this.mongodb.distinct(db,collection,"tag",true);
 		res.send({data: data});
 	}catch(e){
@@ -121,7 +122,7 @@ self.prototype.tags = async function(req,res){
 self.prototype.read = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let row = await this.mongodb.findOne(db,collection,req.params.id,true);
 		res.send({data: row});
 	}catch(e){
@@ -137,7 +138,7 @@ self.prototype.read = async function(req,res){
 self.prototype.create = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		await this.mongodb.insertOne(db,collection,req.body,true);
 		res.send({data: true});
 	}catch(e){
@@ -153,7 +154,7 @@ self.prototype.create = async function(req,res){
 self.prototype.update = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		await this.mongodb.updateOne(db,collection,req.params.id,req.body,true);
 		res.send({data: true});
 	}catch(e){
@@ -169,7 +170,7 @@ self.prototype.update = async function(req,res){
 self.prototype.delete = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		await this.mongodb.deleteOne(db,collection,req.params.id,true);
 		res.send({data: true});
 	}catch(e){
@@ -181,15 +182,12 @@ self.prototype.delete = async function(req,res){
 
 //@route('/story/:id')
 //@method(['get'])
-self.prototype.render_other = async function(req,res){
-	try{
-		var v = this.view + req.params.id;
-		if(!fs.existsSync(this.dir + this.config.properties.views + "/" + v + ".html")){
-			throw("URL no encontrada");
-		}
-		res.render(v,{config: this.config});
-	}catch(e){
-		res.status(404).render("message",{title: "Error 404", message: e.toString(), error: 404, class: "danger"});
+self.prototype.render_other = async function(req,res,next){
+	let view = this.path + "/" + req.params.id;
+	if(this.helper.exist(view)){
+		res.render(view,{config: this.config});
+	}else{
+		return next();
 	}
 }
 

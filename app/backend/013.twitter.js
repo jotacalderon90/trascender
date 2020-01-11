@@ -2,16 +2,15 @@
 
 const fs = require("fs");
 
-var self = function(application,params){
-	this.helper = application.helper;
+var self = function(a,p){
+	this.dir = a.dir;
+	this.config = a.config;
+	this.helper = a.helper;
+	this.mongodb = a.mongodb;
+	
 	this.url = "https://cdn.syndication.twimg.com/timeline/profile?screen_name=";
 	this.tweets = {};
-	this.dir				= application.dir;
-	this.config				= application.config;
-	this.url				= application.config.database.url;
-	this.helper				= application.helper;
-	this.collection_name	= "twitter";
-	this.view = "twitter/";
+	this.name = "twitter";
 }
 
 
@@ -46,10 +45,9 @@ self.prototype.read = async function(req,res){
 //@method(['get'])
 self.prototype.total = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
-		let total = await this.mongodb.count(db,collection,query,{},true);
+		let total = await this.mongodb.count(db,this.name,query,{},true);
 		res.send({data: total});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -62,11 +60,10 @@ self.prototype.total = async function(req,res){
 //@method(['get'])
 self.prototype.collection = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
-		let data = await this.mongodb.find(db,collection,query,options,true);
+		let data = await this.mongodb.find(db,this.name,query,options,true);
 		res.send({data: data});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -79,9 +76,8 @@ self.prototype.collection = async function(req,res){
 //@method(['get'])
 self.prototype.tags = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
-		let data = await this.mongodb.distinct(db,collection,"tag",true);
+		let db = await this.mongodb.connect(this.config.database.url);
+		let data = await this.mongodb.distinct(db,this.name,"tag",true);
 		res.send({data: data});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -95,9 +91,8 @@ self.prototype.tags = async function(req,res){
 //@roles(['admin'])
 self.prototype.create = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
-		await this.mongodb.insertOne(db,collection,req.body,true);
+		let db = await this.mongodb.connect(this.config.database.url);
+		await this.mongodb.insertOne(db,this.name,req.body,true);
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -111,9 +106,8 @@ self.prototype.create = async function(req,res){
 //@roles(['admin'])
 self.prototype.update = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
-		await this.mongodb.updateOne(db,collection,req.params.id,req.body,true);
+		let db = await this.mongodb.connect(this.config.database.url);
+		await this.mongodb.updateOne(db,this.name,req.params.id,req.body,true);
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -127,9 +121,8 @@ self.prototype.update = async function(req,res){
 //@roles(['admin'])
 self.prototype.delete = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
-		await this.mongodb.deleteOne(db,collection,req.params.id,true);
+		let db = await this.mongodb.connect(this.config.database.url);
+		await this.mongodb.deleteOne(db,this.name,req.params.id,true);
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -140,15 +133,12 @@ self.prototype.delete = async function(req,res){
 
 //@route('/twitter')
 //@method(['get'])
-self.prototype.render_index = async function(req,res){
-	try{
-		var v = this.view + "index";
-		if(!fs.existsSync(this.dir + this.config.properties.views + "/" + v + ".html")){
-			throw("URL no encontrada");
-		}
-		res.render(v,{config: this.config});
-	}catch(e){
-		res.status(404).render("message",{title: "Error 404", message: e.toString(), error: 404, class: "danger"});
+self.prototype.render_index = async function(req,res,next){
+	let view = this.name + "/" + "index";
+	if(this.helper.exist(view)){
+		res.render(view,{config: this.config});
+	}else{
+		return next();
 	}
 }
 
@@ -156,15 +146,12 @@ self.prototype.render_index = async function(req,res){
 
 //@route('/twitter/:id')
 //@method(['get'])
-self.prototype.render_other = async function(req,res){
-	try{
-		var v = this.view + req.params.id;
-		if(!fs.existsSync(this.dir + this.config.properties.views + "/" + v + ".html")){
-			throw("URL no encontrada");
-		}
-		res.render(v,{config: this.config});
-	}catch(e){
-		res.status(404).render("message",{title: "Error 404", message: e.toString(), error: 404, class: "danger"});
+self.prototype.render_other = async function(req,res,next){
+	let view = this.name + "/" + req.params.id;
+	if(this.helper.exist(view)){
+		res.render(view,{config: this.config});
+	}else{
+		return next();
 	}
 }
 

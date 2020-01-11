@@ -2,20 +2,20 @@
 
 var fs = require("fs");
 
-var self = function(application,params){
+var self = function(a,p){
+	this.dir = a.dir;
+	this.config = a.config;
+	this.helper = a.helper;
+	this.mailing = a.mailing;
+	this.mongodb = a.mongodb;
+	this.render = a.render;
+	this.path = "mailing";
 	
-	this.dir		= application.dir;
-	this.config		= application.config;
-	this.render 	= application.render;
-	this.helper 	= application.helper;
-	this.mailing	= application.mailing;
-	
-	if(application.config.recaptcha.enabled===true){
+	if(a.config.recaptcha.enabled===true){
 		this.recaptcha = require("express-recaptcha");
-		this.recaptcha.init(application.config.recaptcha.public,application.config.recaptcha.private);
+		this.recaptcha.init(a.config.recaptcha.public,a.config.recaptcha.private);
 		this.recaptcha.render();
 	}
-	this.view = "mailing/";
 }
 
 
@@ -36,22 +36,17 @@ self.prototype.send = async function(req,res){
 
 //@route('/api/message')
 //@method(['post'])
+//@description('segunda accion en que usuario/cliente envia informacion al servidor')
 self.prototype.create = async function(req,res){
 	try{
-		
-		if(this.recaptcha!=undefined){
-			await this.helper.recaptcha(this.recaptcha,req);
-		}
-		
-		req.body.to = req.body.email;
-		req.body.bcc = this.config.properties.admin;
-		req.body.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "message.html",req.body);
 		await this.mailing.send(req.body);
-		
-		//finish
 		res.send({data: true});
 	}catch(e){
-		res.send({data: null, error: e});
+		console.error("ERROR-ERROR-ERROR-ERROR");
+		console.error("ERROR-ERROR-ERROR-ERROR");
+		console.error("ERROR-ERROR-ERROR-ERROR");
+		console.error(e);
+		res.send({data: true});
 	}
 }
 
@@ -61,15 +56,12 @@ self.prototype.create = async function(req,res){
 //@route('/mailing')
 //@method(['get'])
 //@roles(['admin'])
-self.prototype.render_index = async function(req,res){
-	try{
-		var v = this.view + "index";
-		if(!fs.existsSync(this.dir + this.config.properties.views + "/" + v + ".html")){
-			throw("URL no encontrada");
-		}
-		res.render(v,{config: this.config});
-	}catch(e){
-		res.status(404).render("message",{title: "Error 404", message: e.toString(), error: 404, class: "danger"});
+self.prototype.render_index = function(req,res,next){
+	let view = this.path + "/" + "index";
+	if(this.helper.exist(view)){
+		res.render(view,{config: this.config});
+	}else{
+		return next();
 	}
 }
 
@@ -78,16 +70,15 @@ self.prototype.render_index = async function(req,res){
 //@route('/mailing/:id')
 //@method(['get'])
 //@roles(['admin'])
-self.prototype.render_other = async function(req,res){
-	try{
-		var v = this.view + req.params.id;
-		if(!fs.existsSync(this.dir + this.config.properties.views + "/" + v + ".html")){
-			throw("URL no encontrada");
-		}
-		res.render(v,{config: this.config});
-	}catch(e){
-		res.status(404).render("message",{title: "Error 404", message: e.toString(), error: 404, class: "danger"});
+self.prototype.render_other = function(req,res,next){
+	let view = this.path + "/" + req.params.id;
+	if(this.helper.exist(view)){
+		res.render(view,{config: this.config});
+	}else{
+		return next();
 	}
 }
+
+
 
 module.exports = self;

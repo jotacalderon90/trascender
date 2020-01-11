@@ -5,8 +5,9 @@ const fs	 = require("fs");
 const http 	 = require("http");
 const https  = require("https");
 
-var self = function(){
-	
+var self = function(a){
+	this.dir = a.dir;
+	this.config = a.config;
 }
 
 self.prototype.random = function(length){
@@ -30,8 +31,16 @@ self.prototype.getUser = function(req){
 	}
 }
 
-self.prototype.validEMAIL = function(email){
+self.prototype.isEmail = function(email){
 	if(email!=undefined && email.trim()!="" && /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)){
+		return true;
+	}else{
+		return false;
+	}
+}
+
+self.prototype.exist = function(path){
+	if(fs.existsSync(this.dir + this.config.properties.views + "/" + path + ".html")){
 		return true;
 	}else{
 		return false;

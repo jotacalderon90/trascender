@@ -6,7 +6,6 @@ const transport = require("nodemailer-smtp-transport");
 var self = function(application){
 	
 	this.config = application.config;
-	this.helper = application.helper;
 	
 	this.createTransport = function(){
 		//attachments : [{filename: 'text3.txt',path: 'Your File path'}]
@@ -25,18 +24,14 @@ var self = function(application){
 self.prototype.send = function(body){
 	let me = this;
 	return new Promise(function(resolve,reject){
-		if(me.helper.validEMAIL(body.to)){
-			body.from = (me.config.smtp.from!=undefined && me.config.smtp.from.trim()!="")?me.config.smtp.from:me.config.smtp.user;
-			me.createTransport().sendMail(body, function(e, response){
-				if(e){
-					return reject(e);
-				}else{
-					resolve(response);
-				}
-			});
-		}else{
-			return reject("Parametros invalidos");
-		}
+		body.from = (me.config.smtp.from!=undefined && me.config.smtp.from.trim()!="")?me.config.smtp.from:me.config.smtp.user;
+		me.createTransport().sendMail(body, function(e, response){
+			if(e){
+				return reject(e);
+			}else{
+				resolve(response);
+			}
+		});
 	});
 }
 

@@ -3,15 +3,17 @@
 const fs = require("fs");
 const io = require("socket.io");
 
-let self = function(application){
-	this.dir = application.dir;
-	this.config = application.config;
-	this.server = io(application.server);
+let self = function(a){
+	this.dir = a.dir;
+	this.config = a.config;
+	this.helper = a.helper;
+	
+	this.server = io(a.server);
 	this.sockets = {};
 	this.users_info = {};
 	this.last_msg = [];
 	this.server.on("connection", (socket)=>{this.connection(socket)});
-	this.view = "chat/";
+	this.path = "chat";
 }
 
 self.prototype.connection = function(socket){
@@ -61,16 +63,12 @@ self.prototype.first_load = function(ip){
 
 //@route('/chat')
 //@method(['get'])
-//@roles(['user'])
-self.prototype.render_chat_index = async function(req,res){
-	try{
-		var v = this.view + "index";
-		if(!fs.existsSync(this.dir + this.config.properties.views + "/" + v + ".html")){
-			throw("URL no encontrada");
-		}
-		res.render(v,{config: this.config});
-	}catch(e){
-		res.status(404).render("message",{title: "Error 404", message: e.toString(), error: 404, class: "danger"});
+self.prototype.render_index = function(req,res,next){
+	let view = this.path + "/" + "index";
+	if(this.helper.exist(view)){
+		res.render(view,{config: this.config});
+	}else{
+		return next();
 	}
 }
 
@@ -78,16 +76,12 @@ self.prototype.render_chat_index = async function(req,res){
 
 //@route('/chat/:id')
 //@method(['get'])
-//@roles(['user'])
-self.prototype.render_chat_other = async function(req,res){
-	try{
-		var v = this.view + req.params.id;
-		if(!fs.existsSync(this.dir + this.config.properties.views + "/" + v + ".html")){
-			throw("URL no encontrada");
-		}
-		res.render(v,{config: this.config});
-	}catch(e){
-		res.status(404).render("message",{title: "Error 404", message: e.toString(), error: 404, class: "danger"});
+self.prototype.render_other = function(req,res,next){
+	let view = this.path + "/" + req.params.id;
+	if(this.helper.exist(view)){
+		res.render(view,{config: this.config});
+	}else{
+		return next();
 	}
 }
 

@@ -2,17 +2,15 @@
 
 const fs = require("fs");
 
-var self = function(application,params){
-	
-	this.dir		= application.dir;
-	this.config		= application.config;
-	this.url		= application.config.database.url;
-	this.mongodb	= application.mongodb;
-	this.render 	= application.render;
-	this.helper		= application.helper;
-	this.mailing	= application.mailing;
-	this.auth		= application.auth;
-	this.view		= "user/";
+var self = function(a,p){
+	this.dir = a.dir;
+	this.config = a.config;
+	this.auth = a.auth;
+	this.helper = a.helper;
+	this.mailing = a.mailing;
+	this.mongodb = a.mongodb;
+	this.render = a.render;
+	this.path = "user";
 	
 	if(this.config.recaptcha && this.config.recaptcha.enabled===true){
 		this.recaptcha = require("express-recaptcha");
@@ -20,9 +18,9 @@ var self = function(application,params){
 		this.recaptcha.render();
 	}
 	
-	if(application.config.google && application.config.google.auth && application.config.google.auth.clientId && application.config.google.auth.clientId!=""){
-		this.google = application.google;
-		this.config.public.google_url = this.google.getURL();
+	if(a.config.google && a.config.google.auth && a.config.google.auth.clientId && a.config.google.auth.clientId!=""){
+		this.google = a.google;
+		this.config.properties.google_url = this.google.getURL();
 	}
 }
 
@@ -31,7 +29,7 @@ var self = function(application,params){
 //@route('/user/new')
 //@method(['get'])
 self.prototype.render_new = async function(req,res){
-	res.render(this.view + "new", {config: this.config});
+	res.render(this.path + "/" + "new", {config: this.config});
 }
 
 
@@ -39,7 +37,7 @@ self.prototype.render_new = async function(req,res){
 //@route('/user/login')
 //@method(['get'])
 self.prototype.render_login = async function(req,res){
-	res.render(this.view + "login", {config: this.config});
+	res.render(this.path + "/" + "login", {config: this.config});
 }
 
 
@@ -47,7 +45,7 @@ self.prototype.render_login = async function(req,res){
 //@route('/user/forget')
 //@method(['get'])
 self.prototype.render_forget = async function(req,res){
-	res.render(this.view + "forget", {config: this.config});
+	res.render(this.path + "/" + "forget", {config: this.config});
 }
 
 
@@ -55,7 +53,7 @@ self.prototype.render_forget = async function(req,res){
 //@route('/user/recovery')
 //@method(['get'])
 self.prototype.render_recovery = async function(req,res){
-	res.render(this.view + "recovery", {config: this.config, hash: req.query.id});
+	res.render(this.path + "/" + "recovery", {config: this.config, hash: req.query.id});
 }
 
 
@@ -67,13 +65,13 @@ self.prototype.render_info = async function(req,res){
 	try{
 		
 		//connect to mongo
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		
 		//get user
 		let user = await this.mongodb.findOne(db,"user",req.user.sub,true);
 		
 		//finish
-		res.render(this.view + "info",{user: user, config: this.config});
+		res.render(this.path + "/" + "info",{user: user, config: this.config});
 	}catch(e){
 		console.log(e);
 		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger", config: this.config});
@@ -86,7 +84,7 @@ self.prototype.render_info = async function(req,res){
 //@method(['get'])
 //@roles(['user'])
 self.prototype.render_subcription = async function(req,res){
-	res.render(this.view + "subscription", {config: this.config});
+	res.render(this.path + "/" + "subscription", {config: this.config});
 }
 
 
@@ -101,7 +99,7 @@ self.prototype.login = async function(req,res){
 		}
 		
 		//connect to mongo
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		
 		req.body.email = req.body.email.toLowerCase();
 		
@@ -131,7 +129,7 @@ self.prototype.login = async function(req,res){
 		if(req.session.redirectTo){
 			res.redirect(req.session.redirectTo);
 		}else{
-			res.redirect("/" + this.view + "info");
+			res.redirect("/" + this.path + "/" + "info");
 		}
 	}catch(e){
 		console.log(e);
@@ -154,7 +152,7 @@ self.prototype.login_google = async function(req,res){
 		}
 		
 		//connect to mongo
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		
 		console.log("usuario google:");
 		console.log(user);
@@ -211,7 +209,7 @@ self.prototype.login_google = async function(req,res){
 		if(req.session.redirectTo){
 			res.redirect(req.session.redirectTo);
 		}else{
-			res.redirect("/" + this.view + "info");
+			res.redirect("/" + this.path + "/" + "info");
 		}
 		
 	}catch(e){
@@ -235,7 +233,7 @@ self.prototype.logout = async function(req,res){
 		}
 		
 		//connect to mongo
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		
 		//get user
 		let user = await this.mongodb.find(db,"user_active",{user_id: req.user.sub},{});
@@ -250,7 +248,7 @@ self.prototype.logout = async function(req,res){
 		req.session.destroy();
 		
 		//finish
-		res.render(this.view + "login", {config: this.config});
+		res.render(this.path + "/" + "login", {config: this.config});
 	}catch(e){
 		console.log(e);
 		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger", config: this.config});
@@ -272,7 +270,7 @@ self.prototype.read = async function(req,res){
 		}
 		
 		//connect to mongo
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		
 		//get user
 		let user = await this.mongodb.findOne(db,"user",req.user.sub);
@@ -304,13 +302,13 @@ self.prototype.create = async function(req,res){
 		req.body.email = req.body.email.toLowerCase();
 		
 		//valid email
-		if(!this.helper.validEMAIL(req.body.email)){ throw("El email ingresado no es válido");}
+		if(!this.helper.isEmail(req.body.email)){ throw("El email ingresado no es válido");}
 		
 		//valid password
 		if(req.body.password==undefined || req.body.password==null || req.body.password.length < 5){ throw("La contraseña ingresada debe tener al menos 5 caracteres");}
 		
 		//connect to mongo
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		
 		//valid unique user email
 		let ce = await this.mongodb.count(db,"user",{email: req.body.email},{});
@@ -340,7 +338,7 @@ self.prototype.create = async function(req,res){
 			memo.bcc = this.config.properties.admin;
 			memo.subject = "Activación de cuenta"
 			memo.nickname = doc.nickname;
-			memo.hash = this.config.properties.host + "/api/" + this.view + "activate/" + new Buffer(doc.password).toString("base64");
+			memo.hash = this.config.properties.host + "/api/user/activate/" + new Buffer(doc.password).toString("base64");
 			memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "activate_account.html", memo);
 			memo.config = this.config;
 			
@@ -369,7 +367,7 @@ self.prototype.forget = async function(req,res){
 		}
 		
 		//connect to mongo
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		
 		req.body.email = req.body.email.toLowerCase();
 		
@@ -385,7 +383,7 @@ self.prototype.forget = async function(req,res){
 		memo.to = req.body.email;
 		memo.bcc = this.config.properties.admin;
 		memo.subject = "Reestablecer contraseña";
-		memo.hash = this.config.properties.host + "/api/" + this.view + "recovery?hash=" + new Buffer(user[0].password).toString("base64");
+		memo.hash = this.config.properties.host + "/api/user/recovery?hash=" + new Buffer(user[0].password).toString("base64");
 		memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "recovery_account.html", memo);
 		memo.config = this.config;
 		
@@ -412,7 +410,7 @@ self.prototype.recovery = async function(req,res){
 		}
 		
 		//connect to mongo
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		
 		//get registred user
 		let user = await this.mongodb.find(db,"user",{password:  new Buffer(req.body.hash,"base64").toString("ascii")},{});
@@ -449,10 +447,10 @@ self.prototype.subscriber = async function(req,res){
 		req.body.email = req.body.email.toLowerCase();
 		
 		//valid email
-		if(!this.helper.validEMAIL(req.body.email)){ throw("El email ingresado no es válido");}
+		if(!this.helper.isEmail(req.body.email)){ throw("El email ingresado no es válido");}
 		
 		//connect to mongo
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		
 		//valid unique user email
 		let ce = await this.mongodb.count(db,"user",{email: req.body.email},{});
@@ -480,7 +478,7 @@ self.prototype.subscriber = async function(req,res){
 		memo.bcc = this.config.properties.admin;
 		memo.subject = "Activación de cuenta"
 		memo.nickname = doc.nickname;
-		memo.hash = this.config.properties.host + "/" + this.view + "activate/" + new Buffer(doc.password).toString("base64");
+		memo.hash = this.config.properties.host + "/api/user/activate/" + new Buffer(doc.password).toString("base64");
 		memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "activate_account.html", memo);
 		memo.config = this.config;
 		
@@ -506,7 +504,7 @@ self.prototype.activate = async function(req,res){
 		let hash = new Buffer(req.params.hash, "base64").toString("ascii");
 		
 		//connect to mongo
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		
 		//get document whit hash password
 		let row = await this.mongodb.find(db,"user",{password: hash},{});
@@ -537,7 +535,7 @@ self.prototype.desactivate = async function(req,res){
 		let hash = new Buffer(req.params.hash, "base64").toString("ascii");
 		
 		//connect to mongo
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		
 		//get document whit hash password
 		let row = await this.mongodb.find(db,"user",{password: hash},{});
@@ -566,7 +564,7 @@ self.prototype.update = async function(req,res){
 	try{
 		
 		//connect to mongo
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		
 		//get user
 		let user = await this.mongodb.findOne(db,"user",req.user.sub);
@@ -580,7 +578,7 @@ self.prototype.update = async function(req,res){
 			}
 		};
 		
-		let redirect = "/" + this.view + "info";
+		let redirect = "/" + this.path + "/" + "info";
 		
 		//password update
 		if(!user.google && req.body.password!=user.password){
@@ -588,7 +586,7 @@ self.prototype.update = async function(req,res){
 				throw("La contraseña ingresada debe tener al menos 5 caracteres");
 			}
 			updated["$set"]["password"] = this.helper.toHash(req.body.password + user.email,user.hash);
-			redirect = "/" + this.view + "logout";
+			redirect = "/" + this.path + "/" + "logout";
 		}
 		
 		//update mongo user
@@ -609,7 +607,7 @@ self.prototype.update = async function(req,res){
 //@roles(['user'])
 self.prototype.update_ext = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let user = await this.mongodb.findOne(db,"user",req.user.sub);
 		let enabled = ["lmap","public","jv","interest","location","twitter"];
 		let fields = {};
@@ -636,7 +634,7 @@ self.prototype.public = async function(req,res){
 	try{
 		
 		//connect to mongo
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		
 		//get user
 		let user = await this.mongodb.findOne(db,"user",req.params.id,true);

@@ -8,9 +8,7 @@ let self = function(application,params){
 	this.config				= application.config;
 	this.helper				= application.helper;
 	this.mongodb			= application.mongodb;
-	this.url				= application.config.database.url;
 	this.collection_name	= "map";
-	
 }
 
 
@@ -20,7 +18,7 @@ let self = function(application,params){
 self.prototype.collection = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
 		let data = await this.mongodb.find(db,collection,query,options,true);
@@ -38,7 +36,7 @@ self.prototype.collection = async function(req,res){
 self.prototype.create = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		await this.mongodb.insertOne(db,collection,req.body,true);
 		res.send({data: true});
 	}catch(e){
@@ -54,7 +52,7 @@ self.prototype.create = async function(req,res){
 self.prototype.update = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		await this.mongodb.updateOne(db,collection,req.params.id,req.body,true);
 		res.send({data: true});
 	}catch(e){

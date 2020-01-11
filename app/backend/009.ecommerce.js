@@ -2,28 +2,27 @@
 
 const fs = require("fs");
 
-let self = function(application,params){
-	this.url				= application.config.database.url;
-	this.config				= application.config;
-	this.dir				= application.dir;
-	this.render				= application.render;
-	this.helper				= application.helper;
-	this.mongodb			= application.mongodb;
-	this.mailing			= application.mailing;
-	this.collection_name	= "product";
-	this.view_doc			= "product/document";
-	this.view_coll			= "product/collection";
-	this.match				= "uri";
-	this.sort				= {title: 1};
+let self = function(a,p){
+	this.dir = a.dir;
+	this.config = a.config;
+	this.helper = a.helper;
+	this.mailing = a.mailing;
+	this.mongodb = a.mongodb;
+	this.render = a.render;
 	
-	//ECOMMERCE
-	this.name				= "ecommerce";
-	this.view				= this.name + "/transaction";
+	this.collection_name = "product";
+	this.view_doc = "product/document";
+	this.view_coll = "product/collection";
+	this.match = "uri";
+	this.sort = {created: -1};
+	
+	this.name = "ecommerce";
+	this.view = this.name + "/transaction";
 	this.setWorkflow(this.name);
 	
-	if(application.config.recaptcha && application.config.recaptcha.enabled===true){
+	if(a.config.recaptcha && a.config.recaptcha.enabled===true){
 		this.recaptcha = require("express-recaptcha");
-		this.recaptcha.init(application.config.recaptcha.public,application.config.recaptcha.private);
+		this.recaptcha.init(a.config.recaptcha.public,a.config.recaptcha.private);
 		this.recaptcha.render();
 	}
 	
@@ -41,7 +40,7 @@ self.prototype.renderCollection = async function(req,res){
 		let options = {};
 		options.limit = 10;
 		options.sort = this.sort;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let data = await this.mongodb.find(db,collection,query,options,true);
 		res.render(this.view_coll,{
 			title: title.charAt(0).toUpperCase() + title.slice(1),
@@ -66,7 +65,7 @@ self.prototype.renderCollectionTag = async function(req,res){
 		let options = {};
 		options.limit = 10;
 		options.sort = this.sort;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let data = await this.mongodb.find(db,collection,query,options,true);
 		res.render(this.view_coll,{
 			title: title.charAt(0).toUpperCase() + title.slice(1),
@@ -88,7 +87,7 @@ self.prototype.renderDocument = async function(req,res){
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
 		let query = {};
 		query[this.match] = req.params.id;		
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let data = await this.mongodb.find(db,collection,query,{},true);
 		if(data.length!=1){
 			throw("No se encontró el documento solicitado");
@@ -110,7 +109,7 @@ self.prototype.renderDocument = async function(req,res){
 self.prototype.total = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let total = await this.mongodb.count(db,collection,query,{},true);
 		res.send({data: total});
@@ -126,7 +125,7 @@ self.prototype.total = async function(req,res){
 self.prototype.collection = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
 		let data = await this.mongodb.find(db,collection,query,options,true);
@@ -143,7 +142,7 @@ self.prototype.collection = async function(req,res){
 self.prototype.tags = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let data = await this.mongodb.distinct(db,collection,"tag",true);
 		res.send({data: data});
 	}catch(e){
@@ -158,7 +157,7 @@ self.prototype.tags = async function(req,res){
 self.prototype.read = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let row = await this.mongodb.findOne(db,collection,req.params.id,true);
 		res.send({data: row});
 	}catch(e){
@@ -174,7 +173,7 @@ self.prototype.read = async function(req,res){
 self.prototype.create = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		await this.mongodb.insertOne(db,collection,req.body,true);
 		res.send({data: true});
 	}catch(e){
@@ -190,7 +189,7 @@ self.prototype.create = async function(req,res){
 self.prototype.update = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		await this.mongodb.updateOne(db,collection,req.params.id,req.body,true);
 		res.send({data: true});
 	}catch(e){
@@ -206,7 +205,7 @@ self.prototype.update = async function(req,res){
 self.prototype.delete = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		await this.mongodb.deleteOne(db,collection,req.params.id,true);
 		res.send({data: true});
 	}catch(e){
@@ -255,7 +254,7 @@ self.prototype.setWorkflow = async function(name){
 	try{
 		
 		//get document
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		this.workflow = await this.mongodb.find(db,"workflow",{name: name},{},true);
 		this.workflow = this.workflow[0];
 		
@@ -272,7 +271,7 @@ self.prototype.ecommerce_create = async function(req,res){
 	try{
 
 		//valid email
-		if(!this.helper.validEMAIL(req.body.email)){ throw("El email ingresado no es válido");}
+		if(!this.helper.isEmail(req.body.email)){ throw("El email ingresado no es válido");}
 		
 		//recaptcha valid
 		if(this.recaptcha!=undefined){
@@ -301,7 +300,7 @@ self.prototype.ecommerce_create = async function(req,res){
 		doc.created = new Date();
 		
 		//insert document
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let row = await this.mongodb.insertOne(db,this.name,doc,true);
 		
 		//config notification
@@ -340,7 +339,7 @@ self.prototype.ecommerce_read = async function(req,res){
 		}
 		
 		//get document
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let row = await this.mongodb.findOne(db,this.name,params[0],true);
 		
 		//finish
@@ -388,7 +387,7 @@ self.prototype.ecommerce_update = async function(req,res){
 		}
 		
 		//get document
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let row = await this.mongodb.findOne(db,this.name,params[0]);
 		
 		//set document
@@ -432,15 +431,12 @@ self.prototype.ecommerce_update = async function(req,res){
 
 //@route('/ecommerce/:id')
 //@method(['get'])
-self.prototype.render_ = async function(req,res){
-	try{
-		var v = this.name + "/" + req.params.id;
-		if(!fs.existsSync(this.dir + this.config.properties.views + v + ".html")){
-			throw("URL no encontrada");
-		}
-		res.render(v,{config: this.config});
-	}catch(e){
-		res.status(404).render("message",{title: "Error 404", message: e.toString(), error: 404, class: "danger"});
+self.prototype.render_other = async function(req,res,next){
+	let view = this.name + "/" + req.params.id;
+	if(this.helper.exist(view)){
+		res.render(view,{config: this.config});
+	}else{
+		return next();
 	}
 }
 

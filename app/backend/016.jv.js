@@ -5,10 +5,8 @@ const fs = require("fs");
 let self = function(application,params){
 	this.dir				= application.dir;
 	this.config				= application.config;
-	this.url				= application.config.database.url;
 	this.helper				= application.helper;
 	this.mongodb			= application.mongodb;
-	
 }
 
 
@@ -17,7 +15,7 @@ let self = function(application,params){
 //@method(['get'])
 self.prototype.user_total = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		query.roles = {$in: ["JV"]};
 		let total = await this.mongodb.count(db,"user",query,{},true);
@@ -33,7 +31,7 @@ self.prototype.user_total = async function(req,res){
 //@method(['get'])
 self.prototype.user_collection = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		query.roles = {$in: ["JV"]};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
@@ -51,7 +49,7 @@ self.prototype.user_collection = async function(req,res){
 //@method(['get'])
 self.prototype.user_tags = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let data = await this.mongodb.distinct(db,"user","public.tag",true);
 		res.send({data: data});
 	}catch(e){
@@ -65,7 +63,7 @@ self.prototype.user_tags = async function(req,res){
 //@method(['get'])
 self.prototype.jv_total = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let total = await this.mongodb.count(db,"jv",query,{},true);
 		res.send({data: total});
@@ -80,7 +78,7 @@ self.prototype.jv_total = async function(req,res){
 //@method(['get'])
 self.prototype.jv_collection = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
 		let data = await this.mongodb.find(db,"jv",query,options,true);
@@ -95,7 +93,7 @@ self.prototype.jv_collection = async function(req,res){
 //@method(['get'])
 self.prototype.jv_read = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let row = await this.mongodb.findOne(db,"jv",req.params.id,true);
 		res.send({data: row});
 	}catch(e){

@@ -3,19 +3,20 @@
 var fs = require("fs");
 var path = require("path");
 
-let self = function(application,params){
-	
-	this.decode = function(value){
-		return decodeURIComponent(new Buffer(value,"base64"));
-	};
-	
-	this.base = application.dir + "/app/frontend/";
+let self = function(a,params){
+	this.dir = a.dir + "/app/frontend/";
 	this.client = {
 		name: "Directorio público",
 		file: "/api/file/public/",
 		folder: "/api/folder/public/",
 		path: "/"
 	};
+}
+
+
+
+self.prototype.decode = function(value){
+	return decodeURIComponent(new Buffer(value,"base64"));
 }
 
 
@@ -46,7 +47,7 @@ self.prototype.fullDirectory = function(req,res){
 			}
 			return directory;
 		};
-		res.send({data: getDirectory(this.base,"/")});
+		res.send({data: getDirectory(this.dir,"/")});
 	}catch(e){
 		res.send({data: null, error: e.toString()});
 	}
@@ -58,7 +59,7 @@ self.prototype.fullDirectory = function(req,res){
 //@method(['get'])
 self.prototype.getTotalFolder = function(req,res){
 	try{
-		let dir = this.base + this.decode(req.params.id);
+		let dir = this.dir + this.decode(req.params.id);
 		let response = fs.readdirSync(dir,"utf8").filter(function(row){
 			return !fs.statSync(path.join(dir,row)).isFile();
 		}).length;
@@ -74,7 +75,7 @@ self.prototype.getTotalFolder = function(req,res){
 //@method(['get'])
 self.prototype.getCollectionFolder = function(req,res){
 	try{
-		let dir = this.base + this.decode(req.params.id);
+		let dir = this.dir + this.decode(req.params.id);
 		let response = fs.readdirSync(dir,"utf8").filter(function(row){
 			return !fs.statSync(path.join(dir,row)).isFile();
 		});
@@ -91,7 +92,7 @@ self.prototype.getCollectionFolder = function(req,res){
 //@roles(['admin','ADM_FileDirectory'])
 self.prototype.createFolder = function(req,res){
 	try{
-		fs.mkdirSync(this.base + this.decode(req.params.id) + req.body.name);
+		fs.mkdirSync(this.dir + this.decode(req.params.id) + req.body.name);
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null, error: e.toString()});
@@ -105,7 +106,7 @@ self.prototype.createFolder = function(req,res){
 //@roles(['admin','ADM_FileDirectory'])
 self.prototype.updateFolder = function(req,res){
 	try{
-		fs.renameSync(this.base + this.decode(req.params.id), this.base + "/" + req.body.name);
+		fs.renameSync(this.dir + this.decode(req.params.id), this.dir + "/" + req.body.name);
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null, error: e.toString()});
@@ -119,7 +120,7 @@ self.prototype.updateFolder = function(req,res){
 //@roles(['admin','ADM_FileDirectory'])
 self.prototype.deleteFolder = function(req,res){
 	try{
-		fs.rmdirSync(this.base + this.decode(req.params.id));
+		fs.rmdirSync(this.dir + this.decode(req.params.id));
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null, error: e.toString()});
@@ -132,7 +133,7 @@ self.prototype.deleteFolder = function(req,res){
 //@method(['get'])
 self.prototype.getTotalFile = function(req,res){
 	try{
-		let dir = this.base + this.decode(req.params.id);
+		let dir = this.dir + this.decode(req.params.id);
 		let response = fs.readdirSync(dir,"utf8").filter(function(row){
 			return fs.statSync(path.join(dir,row)).isFile();
 		}).length;
@@ -148,7 +149,7 @@ self.prototype.getTotalFile = function(req,res){
 //@method(['get'])
 self.prototype.getCollectionFile = function(req,res){
 	try{
-		let dir = this.base + this.decode(req.params.id);
+		let dir = this.dir + this.decode(req.params.id);
 		let response = fs.readdirSync(dir,"utf8").filter(function(row){
 			return fs.statSync(path.join(dir,row)).isFile();
 		});
@@ -165,7 +166,7 @@ self.prototype.getCollectionFile = function(req,res){
 //@roles(['admin','ADM_FileDirectory'])
 self.prototype.createFile = function(req,res){
 	try{
-		fs.writeFileSync(this.base + this.decode(req.params.id) + req.body.name, (req.body.content)?req.body.content:"");
+		fs.writeFileSync(this.dir + this.decode(req.params.id) + req.body.name, (req.body.content)?req.body.content:"");
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null, error: e.toString()});
@@ -178,7 +179,7 @@ self.prototype.createFile = function(req,res){
 //@method(['get'])
 self.prototype.readFile = function(req,res){
 	try{
-		res.send({data: fs.readFileSync(this.base + this.decode(req.params.id),"utf8")});
+		res.send({data: fs.readFileSync(this.dir + this.decode(req.params.id),"utf8")});
 	}catch(e){
 		res.send({data: null, error: e.toString()});
 	}
@@ -191,7 +192,7 @@ self.prototype.readFile = function(req,res){
 //@roles(['admin','ADM_FileDirectory'])
 self.prototype.updateFile = function(req,res){
 	try{
-		fs.writeFileSync(this.base + this.decode(req.params.id), req.body.content);
+		fs.writeFileSync(this.dir + this.decode(req.params.id), req.body.content);
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null, error: e.toString()});
@@ -205,7 +206,7 @@ self.prototype.updateFile = function(req,res){
 //@roles(['admin','ADM_FileDirectory'])
 self.prototype.deleteFile = function(req,res){
 	try{
-		fs.unlinkSync(this.base + this.decode(req.params.id));
+		fs.unlinkSync(this.dir + this.decode(req.params.id));
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null, error: e.toString()});
@@ -219,7 +220,7 @@ self.prototype.deleteFile = function(req,res){
 //@roles(['admin','ADM_FileDirectory'])
 self.prototype.renameFile = function(req,res){
 	try{
-		fs.renameSync(this.base + this.decode(req.params.id),this.base + "/" + req.body.name);
+		fs.renameSync(this.dir + this.decode(req.params.id),this.dir + "/" + req.body.name);
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null, error: e.toString()});
@@ -232,7 +233,7 @@ self.prototype.renameFile = function(req,res){
 //@method(['get'])
 self.prototype.downloadFile = function(req,res){
 	try{
-		res.download(this.base + this.decode(req.params.id));
+		res.download(this.dir + this.decode(req.params.id));
 	}catch(e){
 		res.send({data: null, error: e});
 	}
@@ -244,7 +245,7 @@ self.prototype.downloadFile = function(req,res){
 //@method(['get'])
 self.prototype.getFile = function(req,res){
 	try{
-		res.sendFile(this.base + this.decode(req.params.id));
+		res.sendFile(this.dir + this.decode(req.params.id));
 	}catch(e){
 		res.send({data: null, error: e});
 	}
@@ -261,7 +262,7 @@ self.prototype.upload = async function(req,res){
 			throw("no file");
 		}
 		
-		let dir = this.base + (this.decode(req.params.id)).substr(1);
+		let dir = this.dir + (this.decode(req.params.id)).substr(1);
 		
 		if(Array.isArray(req.files.file)){
 			for(let i=0;i<req.files.file.length;i++){

@@ -2,17 +2,14 @@
 
 const fs = require("fs");
 
-var self = function(application,params){
-	this.url		= application.config.database.url;
-	this.config		= application.config;
-	this.dir		= application.dir;
-	this.render 	= application.render;
-	this.helper		= application.helper;
-	this.mongodb	= application.mongodb;
-	this.mailing	= application.mailing;
+var self = function(a,p){
+	this.dir		= a.dir;
+	this.config		= a.config;
+	this.helper		= a.helper;
+	this.mailing	= a.mailing;
+	this.mongodb	= a.mongodb;
+	this.render 	= a.render;
 	this.name		= "poll";
-	this.view		= this.name + "/";
-	
 }
 
 
@@ -21,7 +18,7 @@ var self = function(application,params){
 //@roles(['admin'])
 self.prototype.total = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let total = await this.mongodb.count(db,this.name,query,{},true);
 		res.send({data: total});
@@ -37,7 +34,7 @@ self.prototype.total = async function(req,res){
 //@roles(['admin'])
 self.prototype.collection = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
 		let data = await this.mongodb.find(db,this.name,query,options,true);
@@ -54,7 +51,7 @@ self.prototype.collection = async function(req,res){
 //@roles(['admin'])
 self.prototype.create = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		await this.mongodb.insertOne(db,this.name,req.body,true);
 		res.send({data: true});
 	}catch(e){
@@ -69,7 +66,7 @@ self.prototype.create = async function(req,res){
 //@roles(['admin'])
 self.prototype.read = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let row = await this.mongodb.findOne(db,this.name,req.params.id,true);
 		res.send({data: row});
 	}catch(e){
@@ -84,7 +81,7 @@ self.prototype.read = async function(req,res){
 //@roles(['admin'])
 self.prototype.update = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		await this.mongodb.updateOne(db,this.name,req.params.id,req.body,true);
 		res.send({data: true});
 	}catch(e){
@@ -99,7 +96,7 @@ self.prototype.update = async function(req,res){
 //@roles(['admin'])
 self.prototype.delete = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		await this.mongodb.deleteOne(db,this.name,req.params.id,true);
 		res.send({data: true});
 	}catch(e){
@@ -116,7 +113,7 @@ self.prototype.start = async function(req,res){
 	try{
 		
 		//get document
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let row = await this.mongodb.findOne(db,"poll",req.params.id);
 		
 		row.sent = [];
@@ -153,7 +150,7 @@ self.prototype.notify = async function(req,res){
 	try{
 		
 		//get document
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let row = await this.mongodb.findOne(db,"poll",req.params.id);
 		let to = req.params.to;
 		let hash = this.helper.toHash(to, row._id.toString());
@@ -189,7 +186,7 @@ self.prototype.answer = async function(req,res){
 	try{
 		
 		//get document
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let row = await this.mongodb.findOne(db,"poll",req.params.id);
 		
 		if(row.status!="Enviada"){
@@ -207,7 +204,7 @@ self.prototype.answer = async function(req,res){
 				if(row.answer[indexof]!=null){
 					throw("Su solicitud ya ha sido procesada");
 				}
-				res.render(this.view + "poll",{poll: row, action: this.config.properties.host +"/api/poll/" + row._id + "/answer/" + req.params.encode});
+				res.render(this.name + "/" + "poll",{poll: row, action: this.config.properties.host +"/api/poll/" + row._id + "/answer/" + req.params.encode});
 			break;
 			case "POST":
 				row.answer[indexof] = req.body.option;
@@ -230,7 +227,7 @@ self.prototype.answer_anon = async function(req,res){
 	try{
 		
 		//get document
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let row = await this.mongodb.findOne(db,"poll",req.params.id);
 		
 		if(row.status!="Enviada"){
@@ -243,7 +240,7 @@ self.prototype.answer_anon = async function(req,res){
 		
 		switch(req.method){
 			case "GET":
-				res.render(this.view + "poll",{poll: row, action: this.config.properties.host +"/api/poll/" + row._id + "/answer"});
+				res.render(this.name + "/" + "poll",{poll: row, action: this.config.properties.host +"/api/poll/" + row._id + "/answer"});
 			break;
 			case "POST":
 				row.anons.push(req.body.option);
@@ -266,7 +263,7 @@ self.prototype.result = async function(req,res){
 	try{
 		
 		//get document
-		let db = await this.mongodb.connect(this.url);
+		let db = await this.mongodb.connect(this.config.database.url);
 		let row = await this.mongodb.findOne(db,"poll",req.params.id);
 		
 		if(row.private && (req.user==undefined || req.user.roles.indexOf("admin")==-1)){
@@ -275,7 +272,7 @@ self.prototype.result = async function(req,res){
 		
 		row.config = this.config;
 		
-		res.render(this.view + "result",row);
+		res.render(this.name + "/" + "result",row);
 	}catch(e){
 		console.log(e);
 		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger", config: this.config});
@@ -287,15 +284,12 @@ self.prototype.result = async function(req,res){
 //@route('/poll')
 //@method(['get'])
 //@roles(['admin'])
-self.prototype.render_ = async function(req,res){
-	try{
-		var v = this.view + "index";
-		if(!fs.existsSync(this.dir + this.config.properties.views + "/" + v + ".html")){
-			throw("URL no encontrada");
-		}
-		res.render(v,{config: this.config});
-	}catch(e){
-		res.status(404).render("message",{title: "Error 404", message: e.toString(), error: 404, class: "danger"});
+self.prototype.render_other = async function(req,res,next){
+	let view = this.name + "/" + req.params.id;
+	if(this.helper.exist(view)){
+		res.render(view,{config: this.config});
+	}else{
+		return next();
 	}
 }
 module.exports = self;
