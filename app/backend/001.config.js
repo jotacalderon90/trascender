@@ -32,6 +32,7 @@ self.prototype.put = function(req,res){
 self.prototype.delete = function(req,res){
 	try{
 		fs.unlinkSync(this.dir + "/app/backend/001.config.js");
+		fs.writeFileSync(this.path, JSON.stringify(this.json,undefined,"\t"));
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null, error: e});
