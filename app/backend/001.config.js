@@ -3,6 +3,7 @@
 const fs = require("fs");
 
 let self = function(a,p){
+	this.dir = a.dir;
 	this.path = a.dir + "/app.json";
 	this.json = a.config;
 }
@@ -30,10 +31,7 @@ self.prototype.put = function(req,res){
 
 self.prototype.delete = function(req,res){
 	try{
-		if(this.json.backend.indexOf("config")>-1){
-			this.json.backend.splice(this.json.backend.indexOf("config"),1);
-			fs.writeFileSync(this.path, JSON.stringify(this.json,undefined,"\t"));
-		}
+		fs.unlinkSync(this.dir + "/app/backend/001.config.js");
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null, error: e});
