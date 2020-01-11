@@ -9,7 +9,7 @@ console.log(new Date() + " == importando express");
 const express		= require("express");
 console.log(new Date() + " == importando body-parser");
 const bodyParser	= require("body-parser");
-console.log(new Date() + " == importando cookie-parses");
+console.log(new Date() + " == importando cookie-parser");
 const cookieParser	= require("cookie-parser");
 console.log(new Date() + " == importando express-session");
 const session		= require("express-session");
