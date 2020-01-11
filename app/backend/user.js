@@ -62,7 +62,7 @@ self.prototype.render_forget = async function(req,res){
 //@route('/user/recovery')
 //@method(['get'])
 self.prototype.render_recovery = async function(req,res){
-	res.render(this.view + "recovery", {config: this.config});
+	res.render(this.view + "recovery", {config: this.config, hash: req.query.id});
 }
 
 
@@ -85,6 +85,15 @@ self.prototype.render_info = async function(req,res){
 		console.log(e);
 		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger", config: this.config});
 	}
+}
+
+
+
+//@route('/user/subscription')
+//@method(['get'])
+//@roles(['user'])
+self.prototype.render_subcription = async function(req,res){
+	res.render(this.view + "subscription", {config: this.config});
 }
 
 
@@ -338,7 +347,7 @@ self.prototype.create = async function(req,res){
 			memo.bcc = this.config.properties.admin;
 			memo.subject = "Activación de cuenta"
 			memo.nickname = doc.nickname;
-			memo.hash = this.config.public.host + "/" + this.view + "activate/" + new Buffer(doc.password).toString("base64");
+			memo.hash = this.config.public.host + "/api/" + this.view + "activate/" + new Buffer(doc.password).toString("base64");
 			memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "activate_account.html", memo);
 			memo.config = this.config;
 			
@@ -383,7 +392,7 @@ self.prototype.forget = async function(req,res){
 		memo.to = req.body.email;
 		memo.bcc = this.config.properties.admin;
 		memo.subject = "Reestablecer contraseña";
-		memo.hash = this.config.public.host + "/" + this.view + "recovery/" + new Buffer(user[0].password).toString("base64");
+		memo.hash = this.config.public.host + "/api/" + this.view + "recovery?hash=" + new Buffer(user[0].password).toString("base64");
 		memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "recovery_account.html", memo);
 		memo.config = this.config;
 		
