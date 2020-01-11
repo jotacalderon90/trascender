@@ -183,46 +183,36 @@ let trascender = function(){
 				}
 			}
 				
-			//publicar backend
-			if(this.config.backend){
-				for(let i=0;i<this.config.backend.length;i++){
-					let b = this.config.backend[i];
-					let n;
-					let p;
-					if(typeof b=="string"){
-						n = b;
-					}else{
-						n = b.name;
-						p = b.params;
-					}
-					console.log(new Date() + " == publicando backend " + n);
-					let c = fs.readFileSync("./app/backend/" + n + ".js","utf-8");
-					let a = new (require("./app/backend/" + n))(this,p);
-					let r = c.split("//@route");
-					for(let x=1;x<r.length;x++){
-						let data = r[x];
-						let uri = eval(this.extract(data,"(",")"));
-						let method = eval(this.extract(data,"@method(",")"));
-						let action = this.extract(data,"self.prototype.","=").trim();
-						let roles = [];
-						if(data.indexOf("@roles(")>-1){
-							roles = eval(this.extract(data,"@roles(",")"));
-						}
-						for(let y=0;y<method.length;y++){
-							this.app[method[y]](uri,this.decodeUser(), this.newRequest("API"), this.hasRole(roles), this.getAPI(a,action));
-						}
-					}
-				}
-			}
-			
 			//publicar api
-			if(this.config.api){
-				for(let i=0;i<this.config.api.length;i++){
-					console.log(new Date() + " == publicando modulo " + this.config.api[i].name);
-					let module = new (require("./app/backend/" + this.config.api[i].name))(this,this.config.api[i].params);
-					for(let x=0;x<this.config.api[i].services.length;x++){
-						let service = this.config.api[i].services[x];
-						this.app[service.method](service.uri,this.decodeUser(), this.newRequest("API"), this.hasRole(service.roles), this.getAPI(module,service.action));
+			let api = fs.readdirSync("./app/backend","utf8").filter(function(row){
+				return fs.statSync(path.join("./app/backend",row)).isFile();
+			});
+			api.sort();
+			for(let i=0;i<api.length;i++){
+				let b = api[i];
+				let n;
+				let p;
+				if(typeof b=="string"){
+					n = b;
+				}else{
+					n = b.name;
+					p = b.params;
+				}
+				console.log(new Date() + " == publicando api " + n);
+				let c = fs.readFileSync("./app/backend/" + n,"utf-8");
+				let a = new (require("./app/backend/" + n))(this,p);
+				let r = c.split("//@route");
+				for(let x=1;x<r.length;x++){
+					let data = r[x];
+					let uri = eval(this.extract(data,"(",")"));
+					let method = eval(this.extract(data,"@method(",")"));
+					let action = this.extract(data,"self.prototype.","=").trim();
+					let roles = [];
+					if(data.indexOf("@roles(")>-1){
+						roles = eval(this.extract(data,"@roles(",")"));
+					}
+					for(let y=0;y<method.length;y++){
+						this.app[method[y]](uri,this.decodeUser(), this.newRequest("API"), this.hasRole(roles), this.getAPI(a,action));
 					}
 				}
 			}
