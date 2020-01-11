@@ -6,6 +6,7 @@ const http 	 = require("http");
 const https  = require("https");
 
 var self = function(){
+	
 }
 
 self.prototype.random = function(length){
