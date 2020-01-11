@@ -3,7 +3,7 @@
 var fs = require("fs");
 var path = require("path");
 
-let self = function(a,params){
+let self = function(a,p){
 	this.dir = a.dir + "/app/frontend/";
 	this.client = {
 		name: "Directorio público",
