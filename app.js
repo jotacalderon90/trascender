@@ -121,7 +121,6 @@ let trascender = function(){
 							
 							for(let i=0;i<roles.length;i++){
 								if(req.user.roles.indexOf(roles[i])>-1){
-									console.log("TIENE ROL!!!!");
 									return next();
 								}
 							}
@@ -164,6 +163,8 @@ let trascender = function(){
 			
 			//publicar archivos
 			console.log(new Date() + " == publicando archivos");
+			this.app.get("/favicon.ico", this.decodeUser(), this.newRequest("FILE"), this.hasRole([]), this.getFile(this.dir + "/app/frontend/media/img/favicon.ico"));
+			this.app.get("/robots.txt", this.decodeUser(), this.newRequest("FILE"), this.hasRole([]), this.getFile(this.dir + "/app/frontend/media/doc/robots.txt"));
 			if(this.config.files){
 				for(let i=0;i<this.config.files.length;i++){
 					this.app.get(this.config.files[i].uri, this.decodeUser(), this.newRequest("FILE"), this.hasRole(this.config.files[i].roles), this.getFile(this.dir + this.config.files[i].src));
@@ -172,6 +173,7 @@ let trascender = function(){
 				
 			//publicar carpetas
 			console.log(new Date() + " == publicando carpetas");
+			this.app.use("/",this.decodeUser(), this.newRequest("FOLDER"), this.hasRole([]), express.static(this.dir + "/app/frontend"));
 			if(this.config.folders){
 				for(let i=0;i<this.config.folders.length;i++){
 					this.app.use(this.config.folders[i].uri,this.decodeUser(), this.newRequest("FOLDER"), this.hasRole(this.config.folders[i].roles), express.static(this.dir + this.config.folders[i].src));

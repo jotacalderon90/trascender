@@ -9,7 +9,7 @@ let self = function(application,params){
 		return decodeURIComponent(new Buffer(value,"base64"));
 	};
 	
-	this.base = application.dir + "/app/media/";
+	this.base = application.dir + "/";
 	this.client = {
 		name: "Directorio privado",
 		file: "/api/file/private/",

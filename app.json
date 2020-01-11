@@ -29,24 +29,5 @@
 		"enabled": false,
 		"public": "x",
 		"private": "x"
-	},
-	"files": [
-		{
-			"uri": "/favicon.ico",
-			"src": "/app/frontend/media/img/favicon.ico",
-			"roles": []
-		},
-		{
-			"uri": "/robots.txt",
-			"src": "/app/frontend/media/doc/robots.txt",
-			"roles": []
-		}
-	],
-	"folders": [
-		{
-			"uri": "/",
-			"src": "/app/frontend",
-			"roles": []
-		}
-	]
+	}
 }
