@@ -39,6 +39,9 @@ let trascender = function(){
 			
 			this.dir		= __dirname;
 			this.config		= JSON.parse(fs.readFileSync("./app.json","utf8"));
+			this.config.properties.views = "/app/frontend/html/";
+			this.config.properties.mailing = "/app/frontend/html/mailing/templates_back/";
+			
 			this.server		= http.Server(this.app);
 			
 			let libs = fs.readdirSync("./app/backend/lib","utf8").filter(function(row){

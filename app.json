@@ -3,9 +3,7 @@
 		"port": 80,
 		"host": "http://localhost:80",
 		"admin": "jcalderon.aprog@gmail.com",
-		"secret": "trascender-con-sso",
-		"views": "/app/frontend/html/",
-		"mailing": "/app/frontend/html/mailing/templates_back/"
+		"secret": "trascender-con-sso"
 	},
 	"database": {
 		"url": "mongodb://127.0.0.1:27017/trascender"
