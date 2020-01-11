@@ -25,7 +25,7 @@ app.controller("configCtrl", function(trascender,$scope){
 		},
 		afterDelete: function(success,xhttp){
 			if(success){
-				alert("Archivo de configuración editado correctamente");
+				alert("Archivo de configuración eliminado correctamente");
 				location.reload();
 			}else{
 				alert("Error!");
