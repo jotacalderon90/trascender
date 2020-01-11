@@ -24,7 +24,7 @@ rl.question('email: ', (email) => {
 				doc.activate = true;
 				let db = await mongodb.connect(config.database.url);
 				await mongodb.insertOne(db,"user",doc,true);
-				console.log("usuario administrador configurado correctamente");
+				console.log("usuario creado correctamente");
 			}
 			create(email,password,roles);
 		});
