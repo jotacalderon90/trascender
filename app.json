@@ -2,18 +2,11 @@
 	"properties": {
 		"port": 80,
 		"host": "http://localhost:80",
-		"admin": "jcalderon.aprog@gmail.com",
+		"admin": "demo@demo.cl",
 		"secret": "trascender-con-sso"
 	},
 	"database": {
 		"url": "mongodb://127.0.0.1:27017/trascender"
-	},
-	"google": {
-		"auth": {
-			"clientId": "",
-			"clientSecret": "",
-			"redirect": ""
-		}
 	},
 	"smtp": {
 		"enabled": false,
@@ -27,5 +20,12 @@
 		"enabled": false,
 		"public": "x",
 		"private": "x"
+	},
+	"google": {
+		"auth": {
+			"clientId": "",
+			"clientSecret": "",
+			"redirect": ""
+		}
 	}
 }
