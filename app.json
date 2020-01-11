@@ -39,6 +39,7 @@
 		}
 	},
 	"smtp": {
+		"enabled": false,
 		"host": "smtp.gmail.com",
 		"secureConnection": true,
 		"port": 587,
@@ -71,152 +72,10 @@
 	],
 	"backend": [
 		"demo",
-		"config"
+		"config",
+		"user"
 	],
 	"api": [
-		{
-			"description": "backend of user module",
-			"name": "user",
-			"params": [
-				"trascender",
-				"user"
-			],
-			"services": [
-				{
-					"method": "post",
-					"uri": "/user",
-					"action": "create",
-					"roles": []
-				},
-				{
-					"method": "get",
-					"uri": "/user/activate/:hash",
-					"action": "activate",
-					"roles": []
-				},
-				{
-					"method": "get",
-					"uri": "/user/desactivate/:hash",
-					"action": "desactivate",
-					"roles": []
-				},
-				{
-					"method": "get",
-					"uri": "/user/forget",
-					"action": "forget",
-					"roles": []
-				},
-				{
-					"method": "post",
-					"uri": "/user/forget",
-					"action": "forget",
-					"roles": []
-				},
-				{
-					"method": "get",
-					"uri": "/user/recovery/:hash",
-					"action": "recovery",
-					"roles": []
-				},
-				{
-					"method": "post",
-					"uri": "/user/recovery",
-					"action": "recovery",
-					"roles": []
-				},
-				{
-					"method": "get",
-					"uri": "/user/login",
-					"action": "login",
-					"roles": []
-				},
-				{
-					"method": "post",
-					"uri": "/user/login",
-					"action": "login",
-					"roles": []
-				},
-				{
-					"method": "get",
-					"uri": "/user/logout",
-					"action": "logout",
-					"roles": [
-						"user"
-					]
-				},
-				{
-					"method": "get",
-					"uri": "/user/info",
-					"action": "info",
-					"roles": [
-						"user"
-					]
-				},
-				{
-					"method": "post",
-					"uri": "/user/update",
-					"action": "update",
-					"roles": [
-						"user"
-					]
-				},
-				{
-					"method": "put",
-					"uri": "/user/update/ext",
-					"action": "update_ext",
-					"roles": [
-						"user"
-					]
-				},
-				{
-					"method": "get",
-					"uri": "/api/user",
-					"action": "read",
-					"roles": []
-				},
-				{
-					"method": "get",
-					"uri": "/api/user/:id",
-					"action": "public",
-					"roles": [
-						"user"
-					]
-				},
-				{
-					"method": "get",
-					"uri": "/user/auth/google/callback",
-					"action": "login_google",
-					"roles": []
-				},
-				{
-					"method": "post",
-					"uri": "/user/subscriber",
-					"action": "subscriber",
-					"roles": []
-				}
-			]
-		},
-		{
-			"description": "frontend of user module",
-			"name": "generic",
-			"params": [
-				"user"
-			],
-			"services": [
-				{
-					"method": "get",
-					"uri": "/user",
-					"action": "render",
-					"roles": []
-				},
-				{
-					"method": "get",
-					"uri": "/user/:id",
-					"action": "render",
-					"roles": []
-				}
-			]
-		},
 		{
 			"description": "backend of mailing module to get html templates",
 			"name": "filemanager",

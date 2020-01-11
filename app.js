@@ -126,6 +126,7 @@ let trascender = function(){
 							
 							for(let i=0;i<roles.length;i++){
 								if(req.user.roles.indexOf(roles[i])>-1){
+									console.log("TIENE ROL!!!!");
 									return next();
 								}
 							}
@@ -205,7 +206,7 @@ let trascender = function(){
 						let action = this.extract(data,"self.prototype.","=").trim();
 						let roles = [];
 						if(data.indexOf("@roles(")>-1){
-							roles = this.extract(data,"@roles(",")");
+							roles = eval(this.extract(data,"@roles(",")"));
 						}
 						for(let y=0;y<method.length;y++){
 							this.app[method[y]](uri,this.decodeUser(), this.newRequest("API"), this.hasRole(roles), this.getAPI(a,action));
