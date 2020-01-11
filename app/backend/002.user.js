@@ -3,17 +3,10 @@
 const fs = require("fs");
 
 var self = function(application,params){
-	//get main dbs
-	let mdbs;
-	for(db in application.config.database){
-		if(application.config.database[db].main){
-			mdbs = application.config.database[db];
-		}
-	}
 	
 	this.dir		= application.dir;
 	this.config		= application.config;
-	this.url		= mdbs.url;
+	this.url		= application.config.database.url;
 	this.mongodb	= application.mongodb;
 	this.render 	= application.render;
 	this.helper		= application.helper;
@@ -347,7 +340,7 @@ self.prototype.create = async function(req,res){
 			memo.bcc = this.config.properties.admin;
 			memo.subject = "Activación de cuenta"
 			memo.nickname = doc.nickname;
-			memo.hash = this.config.public.host + "/api/" + this.view + "activate/" + new Buffer(doc.password).toString("base64");
+			memo.hash = this.config.properties.host + "/api/" + this.view + "activate/" + new Buffer(doc.password).toString("base64");
 			memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "activate_account.html", memo);
 			memo.config = this.config;
 			
@@ -392,7 +385,7 @@ self.prototype.forget = async function(req,res){
 		memo.to = req.body.email;
 		memo.bcc = this.config.properties.admin;
 		memo.subject = "Reestablecer contraseña";
-		memo.hash = this.config.public.host + "/api/" + this.view + "recovery?hash=" + new Buffer(user[0].password).toString("base64");
+		memo.hash = this.config.properties.host + "/api/" + this.view + "recovery?hash=" + new Buffer(user[0].password).toString("base64");
 		memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "recovery_account.html", memo);
 		memo.config = this.config;
 		
@@ -474,7 +467,7 @@ self.prototype.subscriber = async function(req,res){
 		doc.password = this.helper.toHash("123456" + req.body.email,doc.hash);
 		doc.nickname = req.body.email;
 		doc.notification = true;
-		doc.thumb = this.config.public.host + "/media/img/user.png";
+		doc.thumb = this.config.properties.host + "/media/img/user.png";
 		doc.roles = ["user"];
 		doc.created = new Date;
 		
@@ -487,7 +480,7 @@ self.prototype.subscriber = async function(req,res){
 		memo.bcc = this.config.properties.admin;
 		memo.subject = "Activación de cuenta"
 		memo.nickname = doc.nickname;
-		memo.hash = this.config.public.host + "/" + this.view + "activate/" + new Buffer(doc.password).toString("base64");
+		memo.hash = this.config.properties.host + "/" + this.view + "activate/" + new Buffer(doc.password).toString("base64");
 		memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "activate_account.html", memo);
 		memo.config = this.config;
 		

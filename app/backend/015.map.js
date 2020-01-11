@@ -4,19 +4,11 @@ const fs = require("fs");
 const txtomp3 = require("text-to-mp3");
 
 let self = function(application,params){
-	//get main dbs
-	let mdbs;
-	for(db in application.config.database){
-		if(application.config.database[db].main){
-			mdbs = application.config.database[db];
-		}
-	}
-	
 	this.dir				= application.dir;
 	this.config				= application.config;
 	this.helper				= application.helper;
 	this.mongodb			= application.mongodb;
-	this.url				= mdbs.url;
+	this.url				= application.config.database.url;
 	this.collection_name	= "map";
 	
 }

@@ -1,16 +1,8 @@
 "use strict";
 
 let self = function(application,params){
-	//get main dbs
-	let mdbs;
-	for(db in application.config.database){
-		if(application.config.database[db].main){
-			mdbs = application.config.database[db];
-		}
-	}
-	
 	this.config				= application.config;
-	this.url				= mdbs.url;
+	this.url				= application.config.database.url;
 	this.helper				= application.helper;
 	this.collection_name	= "wall";
 	this.view_coll			= "wall/collection";

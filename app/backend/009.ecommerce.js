@@ -3,15 +3,7 @@
 const fs = require("fs");
 
 let self = function(application,params){
-	//get main dbs
-	let mdbs;
-	for(db in application.config.database){
-		if(application.config.database[db].main){
-			mdbs = application.config.database[db];
-		}
-	}
-	
-	this.url				= mdbs.url;
+	this.url				= application.config.database.url;
 	this.config				= application.config;
 	this.dir				= application.dir;
 	this.render				= application.render;
@@ -252,7 +244,7 @@ self.prototype.setMemoAdmin = function(doc){
 	doc.btn = this.workflow.on[doc.status.toString()].btnToAdmin;
 	if(doc.btn!=undefined){
 		for(var i=0;i<doc.btn.length;i++){
-			doc.btn[i].href = this.config.public.host + "/" + this.name + "/transaction/" + (new Buffer(doc.insertedId+":"+doc.insertedId).toString("base64"));
+			doc.btn[i].href = this.config.properties.host + "/" + this.name + "/transaction/" + (new Buffer(doc.insertedId+":"+doc.insertedId).toString("base64"));
 		}
 	}
 	doc.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "" + this.name + ".html", doc);
@@ -356,7 +348,7 @@ self.prototype.ecommerce_read = async function(req,res){
 			document:	row, 
 			title:		this.workflow.on[row.status.toString()].title,
 			message:	this.workflow.on[row.status.toString()].message,
-			action:		this.config.public.host + "/" + this.name + "/transaction/" + new Buffer((isadmin)?params[0] + ":" + params[0]:params[0]).toString("base64"),
+			action:		this.config.properties.host + "/" + this.name + "/transaction/" + new Buffer((isadmin)?params[0] + ":" + params[0]:params[0]).toString("base64"),
 			btn:		this.workflow.on[row.status.toString()][((isadmin)?"btnToAdmin":"btnToClient")],
 			config:		this.config
 		});
@@ -426,7 +418,7 @@ self.prototype.ecommerce_update = async function(req,res){
 			document:	row, 
 			title:		this.workflow.on[row.status.toString()].title,
 			message:	this.workflow.on[row.status.toString()].message,
-			action:		this.config.public.host + "/" + this.name + "/transaction/" + new Buffer((isadmin)?params[0] + ":" + params[0]:params[0]).toString("base64"),
+			action:		this.config.properties.host + "/" + this.name + "/transaction/" + new Buffer((isadmin)?params[0] + ":" + params[0]:params[0]).toString("base64"),
 			btn:		this.workflow.on[row.status.toString()][((isadmin)?"btnToAdmin":"btnToClient")],
 			config:		this.config
 		});

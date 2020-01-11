@@ -1,14 +1,7 @@
 "use strict";
 
 let self = function(application,params){
-	//get main dbs
-	let mdbs;
-	for(db in application.config.database){
-		if(application.config.database[db].main){
-			mdbs = application.config.database[db];
-		}
-	}
-	this.url		= mdbs.url;
+	this.url		= application.config.database.url;
 	this.mongodb	= application.mongodb;
 	this.name		= "comment";
 }

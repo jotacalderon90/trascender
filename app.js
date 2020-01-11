@@ -97,12 +97,7 @@ let trascender = function(){
 			}
 			
 			//tercera funcion a ejecutar para peticion http - valida autenticacion
-			let mdbs;
-			for(db in this.config.database){
-				if(this.config.database[db].main){
-					mdbs = this.config.database[db].url;
-				}
-			}
+			let mdbs = this.config.database.url;
 			const mongodb = this.mongodb;
 			this.hasRole = function(roles){
 				return async function(req,res,next){

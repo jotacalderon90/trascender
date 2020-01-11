@@ -6,18 +6,9 @@ var self = function(application,params){
 	this.helper = application.helper;
 	this.url = "https://cdn.syndication.twimg.com/timeline/profile?screen_name=";
 	this.tweets = {};
-	
-	//get main dbs
-	let mdbs;
-	for(db in application.config.database){
-		if(application.config.database[db].main){
-			mdbs = application.config.database[db];
-		}
-	}
-	
 	this.dir				= application.dir;
 	this.config				= application.config;
-	this.url				= mdbs.url;
+	this.url				= application.config.database.url;
 	this.helper				= application.helper;
 	this.collection_name	= "twitter";
 	this.view = "twitter/";

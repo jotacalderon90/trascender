@@ -1,21 +1,14 @@
 {
 	"properties": {
 		"port": 80,
+		"host": "http://localhost:80",
 		"admin": "jcalderon.aprog@gmail.com",
 		"secret": "trascender-con-sso",
 		"views": "/app/frontend/html/",
 		"mailing": "/app/frontend/html/mailing/templates_back/"
 	},
-	"public": {
-		"host": "http://localhost:80",
-		"phone": "+11111111",
-		"mailto": "jcalderon.aprog@gmail.com"
-	},
 	"database": {
-		"trascender": {
-			"url": "mongodb://127.0.0.1:27017/trascender",
-			"main": true
-		}
+		"url": "mongodb://127.0.0.1:27017/trascender"
 	},
 	"google": {
 		"auth": {

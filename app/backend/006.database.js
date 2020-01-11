@@ -3,20 +3,12 @@
 const fs = require("fs");
 
 let self = function(application,params){
-	//get main dbs
-	let mdbs;
-	for(db in application.config.database){
-		if(application.config.database[db].main){
-			mdbs = application.config.database[db];
-		}
-	}
 	this.dir 		= application.dir;
 	this.config		= application.config;
-	this.url		= mdbs.url;
+	this.url		= application.config.database.url;
 	this.helper		= application.helper;
 	this.mongodb	= application.mongodb;
 	this.view = "database/";
-	
 }
 
 

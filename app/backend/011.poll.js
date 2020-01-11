@@ -3,16 +3,9 @@
 const fs = require("fs");
 
 var self = function(application,params){
-	//get main dbs
-	let mdbs;
-	for(db in application.config.database){
-		if(application.config.database[db].main){
-			mdbs = application.config.database[db];
-		}
-	}
+	this.url		= application.config.database.url;
 	this.config		= application.config;
 	this.dir		= application.dir;
-	this.url		= mdbs.url;
 	this.render 	= application.render;
 	this.helper		= application.helper;
 	this.mongodb	= application.mongodb;
@@ -170,7 +163,7 @@ self.prototype.notify = async function(req,res){
 			to: to,
 			subject: row.title,
 			poll: row,
-			encode: this.config.public.host + "/api/poll/" + row._id + "/answer/" + hash
+			encode: this.config.properties.host + "/api/poll/" + row._id + "/answer/" + hash
 		}
 		
 		//set template
@@ -214,7 +207,7 @@ self.prototype.answer = async function(req,res){
 				if(row.answer[indexof]!=null){
 					throw("Su solicitud ya ha sido procesada");
 				}
-				res.render(this.view + "poll",{poll: row, action: this.config.public.host +"/api/poll/" + row._id + "/answer/" + req.params.encode});
+				res.render(this.view + "poll",{poll: row, action: this.config.properties.host +"/api/poll/" + row._id + "/answer/" + req.params.encode});
 			break;
 			case "POST":
 				row.answer[indexof] = req.body.option;
@@ -250,7 +243,7 @@ self.prototype.answer_anon = async function(req,res){
 		
 		switch(req.method){
 			case "GET":
-				res.render(this.view + "poll",{poll: row, action: this.config.public.host +"/api/poll/" + row._id + "/answer"});
+				res.render(this.view + "poll",{poll: row, action: this.config.properties.host +"/api/poll/" + row._id + "/answer"});
 			break;
 			case "POST":
 				row.anons.push(req.body.option);
