@@ -15,7 +15,7 @@ app.controller("databaseCtrl", function(trascender,$scope){
 	
 	this.object = new trascender({
 		increase: true,
-		baseurl: "api/object",
+		baseurl: "api/document/object",
 		default: function(){
 			return {content: {name: "", schema: {}}};
 		},

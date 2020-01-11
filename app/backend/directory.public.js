@@ -9,61 +9,28 @@ let self = function(application,params){
 		return decodeURIComponent(new Buffer(value,"base64"));
 	};
 	
-	this.base = application.dir + params[0];
-	
+	this.base = application.dir + "/app/frontend/";
+	this.client = {
+		name: "Directorio público",
+		file: "/api/file/public/",
+		folder: "/api/folder/public/",
+		path: "/"
+	};
 }
 
-self.prototype.getTotalFolder = function(req,res){
-	try{
-		let dir = this.base + this.decode(req.params.id);
-		let response = fs.readdirSync(dir,"utf8").filter(function(row){
-			return !fs.statSync(path.join(dir,row)).isFile();
-		}).length;
-		res.send({data: response});
-	}catch(e){
-		res.send({data: null, error: e.toString()});
-	}
+
+
+//@route('/directory/public')
+//@method(['get'])
+self.prototype.render = async function(req,res){
+	res.render("directory/index",{config: this.config, client: this.client});
 }
 
-self.prototype.getCollectionFolder = function(req,res){
-	try{
-		let dir = this.base + this.decode(req.params.id);
-		let response = fs.readdirSync(dir,"utf8").filter(function(row){
-			return !fs.statSync(path.join(dir,row)).isFile();
-		});
-		res.send({data: response});
-	}catch(e){
-		res.send({data: null, error: e.toString()});
-	}
-}
 
-self.prototype.createFolder = function(req,res){
-	try{
-		fs.mkdirSync(this.base + this.decode(req.params.id) + req.body.name);
-		res.send({data: true});
-	}catch(e){
-		res.send({data: null, error: e.toString()});
-	}
-}
 
-self.prototype.updateFolder = function(req,res){
-	try{
-		fs.renameSync(this.base + this.decode(req.params.id), this.base + "/" + req.body.name);
-		res.send({data: true});
-	}catch(e){
-		res.send({data: null, error: e.toString()});
-	}
-}
-
-self.prototype.deleteFolder = function(req,res){
-	try{
-		fs.rmdirSync(this.base + this.decode(req.params.id));
-		res.send({data: true});
-	}catch(e){
-		res.send({data: null, error: e.toString()});
-	}
-}
-
+//@route('/api/folder/public/full')
+//@method(['get'])
+//@roles(['admin','ADM_FileDirectory'])
 self.prototype.fullDirectory = function(req,res){
 	try{
 		let getDirectory = function(src, dirbase){
@@ -85,6 +52,84 @@ self.prototype.fullDirectory = function(req,res){
 	}
 }
 
+
+
+//@route('/api/folder/public/:id/total')
+//@method(['get'])
+self.prototype.getTotalFolder = function(req,res){
+	try{
+		let dir = this.base + this.decode(req.params.id);
+		let response = fs.readdirSync(dir,"utf8").filter(function(row){
+			return !fs.statSync(path.join(dir,row)).isFile();
+		}).length;
+		res.send({data: response});
+	}catch(e){
+		res.send({data: null, error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/folder/public/:id/collection')
+//@method(['get'])
+self.prototype.getCollectionFolder = function(req,res){
+	try{
+		let dir = this.base + this.decode(req.params.id);
+		let response = fs.readdirSync(dir,"utf8").filter(function(row){
+			return !fs.statSync(path.join(dir,row)).isFile();
+		});
+		res.send({data: response});
+	}catch(e){
+		res.send({data: null, error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/folder/public/:id')
+//@method(['post'])
+//@roles(['admin','ADM_FileDirectory'])
+self.prototype.createFolder = function(req,res){
+	try{
+		fs.mkdirSync(this.base + this.decode(req.params.id) + req.body.name);
+		res.send({data: true});
+	}catch(e){
+		res.send({data: null, error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/folder/public/:id')
+//@method(['put'])
+//@roles(['admin','ADM_FileDirectory'])
+self.prototype.updateFolder = function(req,res){
+	try{
+		fs.renameSync(this.base + this.decode(req.params.id), this.base + "/" + req.body.name);
+		res.send({data: true});
+	}catch(e){
+		res.send({data: null, error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/folder/public/:id')
+//@method(['delete'])
+//@roles(['admin','ADM_FileDirectory'])
+self.prototype.deleteFolder = function(req,res){
+	try{
+		fs.rmdirSync(this.base + this.decode(req.params.id));
+		res.send({data: true});
+	}catch(e){
+		res.send({data: null, error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/file/public/:id/total')
+//@method(['get'])
 self.prototype.getTotalFile = function(req,res){
 	try{
 		let dir = this.base + this.decode(req.params.id);
@@ -97,6 +142,10 @@ self.prototype.getTotalFile = function(req,res){
 	}
 }
 
+
+
+//@route('/api/file/public/:id/collection')
+//@method(['get'])
 self.prototype.getCollectionFile = function(req,res){
 	try{
 		let dir = this.base + this.decode(req.params.id);
@@ -109,6 +158,11 @@ self.prototype.getCollectionFile = function(req,res){
 	}
 }
 
+
+
+//@route('/api/file/public/:id')
+//@method(['post'])
+//@roles(['admin','ADM_FileDirectory'])
 self.prototype.createFile = function(req,res){
 	try{
 		fs.writeFileSync(this.base + this.decode(req.params.id) + req.body.name, (req.body.content)?req.body.content:"");
@@ -118,6 +172,10 @@ self.prototype.createFile = function(req,res){
 	}
 }
 
+
+
+//@route('/api/file/public/:id')
+//@method(['get'])
 self.prototype.readFile = function(req,res){
 	try{
 		res.send({data: fs.readFileSync(this.base + this.decode(req.params.id),"utf8")});
@@ -126,6 +184,11 @@ self.prototype.readFile = function(req,res){
 	}
 }
 
+
+
+//@route('/api/file/public/:id')
+//@method(['put'])
+//@roles(['admin','ADM_FileDirectory'])
 self.prototype.updateFile = function(req,res){
 	try{
 		fs.writeFileSync(this.base + this.decode(req.params.id), req.body.content);
@@ -135,6 +198,11 @@ self.prototype.updateFile = function(req,res){
 	}
 }
 
+
+
+//@route('/api/file/public/:id')
+//@method(['delete'])
+//@roles(['admin','ADM_FileDirectory'])
 self.prototype.deleteFile = function(req,res){
 	try{
 		fs.unlinkSync(this.base + this.decode(req.params.id));
@@ -144,6 +212,11 @@ self.prototype.deleteFile = function(req,res){
 	}
 }
 
+
+
+//@route('/api/file/public/:id/rename')
+//@method(['put'])
+//@roles(['admin','ADM_FileDirectory'])
 self.prototype.renameFile = function(req,res){
 	try{
 		fs.renameSync(this.base + this.decode(req.params.id),this.base + "/" + req.body.name);
@@ -153,6 +226,10 @@ self.prototype.renameFile = function(req,res){
 	}
 }
 
+
+
+//@route('/api/file/public/:id/download')
+//@method(['get'])
 self.prototype.downloadFile = function(req,res){
 	try{
 		res.download(this.base + this.decode(req.params.id));
@@ -161,6 +238,10 @@ self.prototype.downloadFile = function(req,res){
 	}
 }
 
+
+
+//@route('/api/file/public/:id/getfile')
+//@method(['get'])
 self.prototype.getFile = function(req,res){
 	try{
 		res.sendFile(this.base + this.decode(req.params.id));
@@ -169,18 +250,11 @@ self.prototype.getFile = function(req,res){
 	}
 }
 
-self.prototype.upload_process = function(file,path){
-	return new Promise(function(resolve,reject){
-		file.mv(path, function(err) {
-			if (err){
-				return reject(error);
-			}else{
-				resolve(true);
-			}
-		});
-	});
-}
 
+
+//@route('/api/file/public/:id/uploader')
+//@method(['post'])
+//@roles(['admin','ADM_FileDirectory'])
 self.prototype.upload = async function(req,res){
 	try{
 		if (!req.files || Object.keys(req.files).length === 0) {
@@ -204,6 +278,20 @@ self.prototype.upload = async function(req,res){
 	}catch(e){
 		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger", config: this.config});
 	}
+}
+
+
+
+self.prototype.upload_process = function(file,path){
+	return new Promise(function(resolve,reject){
+		file.mv(path, function(err) {
+			if (err){
+				return reject(error);
+			}else{
+				resolve(true);
+			}
+		});
+	});
 }
 
 module.exports = self;

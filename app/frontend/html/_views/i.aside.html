@@ -29,7 +29,10 @@
 		<a href="/database">Documentos</a>
 	</li>
 	<li data-ng-show="ctrl.user.doc.roles.indexOf('user')>-1">
-		<a href="/filemanager">Archivos</a>
+		<a href="/directory/public">Directorio Público</a>
+	</li>
+	<li data-ng-show="ctrl.user.doc.roles.indexOf('admin')>-1">
+		<a href="/directory/private">Directorio Privado</a>
 	</li>
 	<li data-ng-show="ctrl.user.doc.roles.indexOf('admin')>-1">
 		<a href="/wysiwyg" target="_blank">Editor</a>

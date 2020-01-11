@@ -191,7 +191,7 @@ app.controller("storyCtrl", function(trascender,$scope){
 						speech = speech.split("ll").join("y");
 						speech = speech.split(" ").join("");
 						speech = speech.split(".").join("");
-						speech = "/story/audio/" + speech;
+						speech = "/map/audio/" + speech;
 						
 						this.speech.src = speech;
 						this.speech.currentTime = 0;

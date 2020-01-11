@@ -2,11 +2,7 @@
 
 const fs = require("fs");
 
-var self = function(application,params){
-	this.helper = application.helper;
-	this.url = "https://cdn.syndication.twimg.com/timeline/profile?screen_name=";
-	this.tweets = {};
-	
+let self = function(application,params){
 	//get main dbs
 	let mdbs;
 	for(db in application.config.database){
@@ -14,48 +10,72 @@ var self = function(application,params){
 			mdbs = application.config.database[db];
 		}
 	}
+	this.dir 		= application.dir;
+	this.config		= application.config;
+	this.url		= mdbs.url;
+	this.helper		= application.helper;
+	this.mongodb	= application.mongodb;
+	this.view = "database/";
 	
-	this.dir				= application.dir;
-	this.config				= application.config;
-	this.url				= mdbs.url;
-	this.helper				= application.helper;
-	this.collection_name	= "twitter";
-	this.view = "twitter/";
 }
 
 
 
-//@route('/api/tweet/:name')
+//@route('/api/document/:name/export')
 //@method(['get'])
-self.prototype.read = async function(req,res){
+self.prototype.export = async function(req,res){
 	try{
-		let n = req.params.name.toLowerCase();
-		let c = null;
-		if(this.tweets[n]){
-			let d = this.tweets[n].d - new Date();
-			//var diffDays = Math.floor(diffMs / 86400000); // days
-			//var diffHrs = Math.floor((diffMs % 86400000) / 3600000); // hours
-			//var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
-			d = Math.round(((d % 86400000) % 3600000) / 60000);
-			c = (d<5)?this.tweets[n].c:null;
+		let db = await this.mongodb.connect(this.url);
+		let o = await this.mongodb.find(db,"object",{name: req.params.name},{});
+		if(o.length!=1){
+			throw("Problemas con el objeto");
 		}
-		if(c==null){
-			c = await this.helper.request(this.url + n);
-			this.tweets[n] = {c: c, d: new Date()}
+		if(!o[0].public){
+			throw("Problemas con el objeto (2)");
 		}
-		res.send({data: c});
+		let data = await this.mongodb.find(db,req.params.name,{},{},true);
+		res.send({data: data});
 	}catch(e){
-		console.log(e);
-		res.send({data: null, error: e.toString()});
+		res.send({data: null,error: e.toString()});
 	}
 }
 
 
-//@route('/api/twitter/total')
+
+//@route('/api/document/:name/import')
+//@method(['post'])
+//@roles(['admin','ADM_Data'])
+self.prototype.import = async function(req,res){
+	try{
+		let request = await this.helper.request(req.body.uri);
+		if(!request.data){
+			throw(request.error);
+		}
+		
+		let db = await this.mongodb.connect(this.url);
+		for(let i=0;i<request.data.length;i++){
+			request.data[i]._id = this.mongodb.toId(request.data[i]._id);
+			await this.mongodb.insertOne(db,req.params.name,request.data[i]);
+			console.log("INSERTADO " + (i+1) + "/" + request.data.length);
+		}
+		
+		db.close();
+		
+		res.send({data: true});
+	}catch(e){
+		console.log(e);
+		res.send({data: null,error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/document/:name/total')
 //@method(['get'])
+//@roles(['user'])
 self.prototype.total = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
+		let collection = req.params.name;
 		let db = await this.mongodb.connect(this.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let total = await this.mongodb.count(db,collection,query,{},true);
@@ -67,11 +87,12 @@ self.prototype.total = async function(req,res){
 
 
 
-//@route('/api/twitter/collection')
+//@route('/api/document/:name/collection')
 //@method(['get'])
+//@roles(['user'])
 self.prototype.collection = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
+		let collection = req.params.name;
 		let db = await this.mongodb.connect(this.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
@@ -84,11 +105,12 @@ self.prototype.collection = async function(req,res){
 
 
 
-//@route('/api/twitter/tag/collection')
+//@route('/api/document/:name/tags')
 //@method(['get'])
+//@roles(['user'])
 self.prototype.tags = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
+		let collection = req.params.name;
 		let db = await this.mongodb.connect(this.url);
 		let data = await this.mongodb.distinct(db,collection,"tag",true);
 		res.send({data: data});
@@ -99,12 +121,12 @@ self.prototype.tags = async function(req,res){
 
 
 
-//@route('/api/twitter')
+//@route('/api/document/:name')
 //@method(['post'])
-//@roles(['admin'])
+//@roles(['admin','ADM_Data'])
 self.prototype.create = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
+		let collection = req.params.name;
 		let db = await this.mongodb.connect(this.url);
 		await this.mongodb.insertOne(db,collection,req.body,true);
 		res.send({data: true});
@@ -115,12 +137,28 @@ self.prototype.create = async function(req,res){
 
 
 
-//@route('/api/twitter/:id')
+//@route('/api/document/:name/:id')
+//@method(['get'])
+//@roles(['user'])
+self.prototype.read = async function(req,res){
+	try{
+		let collection = req.params.name;
+		let db = await this.mongodb.connect(this.url);
+		let row = await this.mongodb.findOne(db,collection,req.params.id,true);
+		res.send({data: row});
+	}catch(e){
+		res.send({data: null,error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/document/:name/:id')
 //@method(['put'])
-//@roles(['admin'])
+//@roles(['admin','ADM_Data'])
 self.prototype.update = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
+		let collection = req.params.name;
 		let db = await this.mongodb.connect(this.url);
 		await this.mongodb.updateOne(db,collection,req.params.id,req.body,true);
 		res.send({data: true});
@@ -131,12 +169,12 @@ self.prototype.update = async function(req,res){
 
 
 
-//@route('/api/twitter/:id')
+//@route('/api/document/:name/:id')
 //@method(['delete'])
-//@roles(['admin'])
+//@roles(['admin','ADM_Data'])
 self.prototype.delete = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
+		let collection = req.params.name;
 		let db = await this.mongodb.connect(this.url);
 		await this.mongodb.deleteOne(db,collection,req.params.id,true);
 		res.send({data: true});
@@ -147,8 +185,10 @@ self.prototype.delete = async function(req,res){
 
 
 
-//@route('/twitter')
+
+//@route('/database')
 //@method(['get'])
+//@roles(['user'])
 self.prototype.render_index = async function(req,res){
 	try{
 		var v = this.view + "index";
@@ -163,8 +203,9 @@ self.prototype.render_index = async function(req,res){
 
 
 
-//@route('/twitter/:id')
+//@route('/database/:id')
 //@method(['get'])
+//@roles(['user'])
 self.prototype.render_other = async function(req,res){
 	try{
 		var v = this.view + req.params.id;

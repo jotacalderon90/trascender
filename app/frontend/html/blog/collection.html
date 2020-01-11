@@ -11,7 +11,7 @@
 <!--define:main-->
 <div data-ng-controller="blogCtrl as ctrl">
 	<div class="page-header">
-		<a class="pull-right" href="/blog/new" data-ng-show="ctrl.user.isAdmin()">
+		<a class="pull-right" data-toggle="modal" data-target="#mdAdmin" data-ng-click="ctrl.document.new()" data-ng-show="ctrl.user.isAdmin()">
 			<i class="fa fa-plus"></i>
 		</a>
 		<div class="pull-right btn-group">
@@ -53,19 +53,7 @@
 		
 	</div>
 	
-	<div class="modal fade" id="mdAdmin" tabindex="-1" role="dialog">
-		<div class="modal-dialog modal-lg" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					<h4 class="modal-title">Administración del Blog</h4>
-				</div>
-				<div class="modal-body">
-					<!--include:blog/form-->
-				</div>
-			</div>
-		</div>
-	</div>
+	<!--include:blog/admin-->
 	
 </div>
 <!--/define:main-->

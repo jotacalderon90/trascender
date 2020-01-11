@@ -3,23 +3,122 @@
 const fs = require("fs");
 
 var self = function(application,params){
-	
-	/*********************************************/
-	/*params[0] = (required)	url db connection
-	/*params[1] = (optional) 	path of view
-	/*********************************************/
-	
+	//get main dbs
+	let mdbs;
+	for(db in application.config.database){
+		if(application.config.database[db].main){
+			mdbs = application.config.database[db];
+		}
+	}
 	this.config		= application.config;
 	this.dir		= application.dir;
-	this.url		= application.config.database[params[0]].url;
+	this.url		= mdbs.url;
 	this.render 	= application.render;
 	this.helper		= application.helper;
 	this.mongodb	= application.mongodb;
 	this.mailing	= application.mailing;
-	this.view		= (params[1]!=undefined)?params[1] + "/":"";
+	this.name		= "poll";
+	this.view		= this.name + "/";
 	
 }
 
+
+//@route('/api/poll/total')
+//@method(['get'])
+//@roles(['admin'])
+self.prototype.total = async function(req,res){
+	try{
+		let db = await this.mongodb.connect(this.url);
+		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
+		let total = await this.mongodb.count(db,this.name,query,{},true);
+		res.send({data: total});
+	}catch(e){
+		res.send({data: null,error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/poll/collection')
+//@method(['get'])
+//@roles(['admin'])
+self.prototype.collection = async function(req,res){
+	try{
+		let db = await this.mongodb.connect(this.url);
+		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
+		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
+		let data = await this.mongodb.find(db,this.name,query,options,true);
+		res.send({data: data});
+	}catch(e){
+		res.send({data: null,error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/poll')
+//@method(['post'])
+//@roles(['admin'])
+self.prototype.create = async function(req,res){
+	try{
+		let db = await this.mongodb.connect(this.url);
+		await this.mongodb.insertOne(db,this.name,req.body,true);
+		res.send({data: true});
+	}catch(e){
+		res.send({data: null,error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/poll/:id')
+//@method(['get'])
+//@roles(['admin'])
+self.prototype.read = async function(req,res){
+	try{
+		let db = await this.mongodb.connect(this.url);
+		let row = await this.mongodb.findOne(db,this.name,req.params.id,true);
+		res.send({data: row});
+	}catch(e){
+		res.send({data: null,error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/poll/:id')
+//@method(['put'])
+//@roles(['admin'])
+self.prototype.update = async function(req,res){
+	try{
+		let db = await this.mongodb.connect(this.url);
+		await this.mongodb.updateOne(db,this.name,req.params.id,req.body,true);
+		res.send({data: true});
+	}catch(e){
+		res.send({data: null,error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/poll/:id')
+//@method(['delete'])
+//@roles(['admin'])
+self.prototype.delete = async function(req,res){
+	try{
+		let db = await this.mongodb.connect(this.url);
+		await this.mongodb.deleteOne(db,this.name,req.params.id,true);
+		res.send({data: true});
+	}catch(e){
+		res.send({data: null,error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/poll/start/:id')
+//@method(['put'])
+//@roles(['admin'])
 self.prototype.start = async function(req,res){
 	try{
 		
@@ -52,6 +151,11 @@ self.prototype.start = async function(req,res){
 	}
 }
 
+
+
+//@route('/api/poll/notify/:id/:to')
+//@method(['put'])
+//@roles(['admin'])
 self.prototype.notify = async function(req,res){
 	try{
 		
@@ -84,6 +188,10 @@ self.prototype.notify = async function(req,res){
 	}
 }
 
+
+
+//@route('/api/poll/:id/answer/:encode')
+//@method(['get','post'])
 self.prototype.answer = async function(req,res){
 	try{
 		
@@ -121,6 +229,10 @@ self.prototype.answer = async function(req,res){
 	}
 }
 
+
+
+//@route('/api/poll/:id/answer')
+//@method(['get','post'])
 self.prototype.answer_anon = async function(req,res){
 	try{
 		
@@ -153,6 +265,10 @@ self.prototype.answer_anon = async function(req,res){
 	}
 }
 
+
+
+//@route('/api/poll/:id/result')
+//@method(['get'])
 self.prototype.result = async function(req,res){
 	try{
 		
@@ -173,4 +289,20 @@ self.prototype.result = async function(req,res){
 	}
 }
 
+
+
+//@route('/poll')
+//@method(['get'])
+//@roles(['admin'])
+self.prototype.render_ = async function(req,res){
+	try{
+		var v = this.view + "index";
+		if(!fs.existsSync(this.dir + this.config.properties.views + "/" + v + ".html")){
+			throw("URL no encontrada");
+		}
+		res.render(v,{config: this.config});
+	}catch(e){
+		res.status(404).render("message",{title: "Error 404", message: e.toString(), error: 404, class: "danger"});
+	}
+}
 module.exports = self;

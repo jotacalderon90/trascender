@@ -1,54 +1,64 @@
 "use strict";
 
 let self = function(application,params){
-	
-	/***************************************************
-	/*params[0] = (required)	url db connection
-	/*params[1] = (optional)	static object (undefined = all object)
-	/****************************************************/
-	
-	this.config				= application.config;
-	this.url				= application.config.database[params[0]].url;
-	this.helper				= application.helper;
-	this.collection_name	= "user";
-	this.mongodb			= application.mongodb;
-	
+	//get main dbs
+	let mdbs;
+	for(db in application.config.database){
+		if(application.config.database[db].main){
+			mdbs = application.config.database[db];
+		}
+	}
+	this.url		= mdbs.url;
+	this.mongodb	= application.mongodb;
+	this.name		= "comment";
 }
 
+
+
+//@route('/api/comment/total')
+//@method(['get'])
 self.prototype.total = async function(req,res){
 	try{
 		let db = await this.mongodb.connect(this.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
-		query.roles = {$in: ["JV"]};
-		let total = await this.mongodb.count(db,this.collection_name,query,{},true);
+		let total = await this.mongodb.count(db,this.name,query,{},true);
 		res.send({data: total});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
 	}
 }
 
+
+
+//@route('/api/comment/collection')
+//@method(['get'])
 self.prototype.collection = async function(req,res){
 	try{
 		let db = await this.mongodb.connect(this.url);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
-		query.roles = {$in: ["JV"]};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
-		options.fields = {public: 1};
-		let data = await this.mongodb.find(db,this.collection_name,query,options,true);
+		let data = await this.mongodb.find(db,this.name,query,options,true);
 		res.send({data: data});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
 	}
 }
 
-self.prototype.tags = async function(req,res){
+
+
+//@route('/api/comment')
+//@method(['post'])
+//@roles(['user'])
+self.prototype.create = async function(req,res){
 	try{
 		let db = await this.mongodb.connect(this.url);
-		let data = await this.mongodb.distinct(db,this.collection_name,"public.tag",true);
-		res.send({data: data});
+		await this.mongodb.insertOne(db,this.name,req.body,true);
+		res.send({data: true});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
 	}
 }
+
+
 
 module.exports = self;

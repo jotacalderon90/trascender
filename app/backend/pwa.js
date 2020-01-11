@@ -4,8 +4,11 @@ let self = function(application,params){
 	
 }
 
+
+
+//@route('/manifest.json')
+//@method(['get'])
 self.prototype.manifest = async function(req,res){
-	console.log(req.query.id);
 	res.set('Content-Type','text/json');
 	res.send({ 
 		"name": "PWA - Trascender",
@@ -27,8 +30,11 @@ self.prototype.manifest = async function(req,res){
 	});
 }
 
+
+
+//@route('/loader.js')
+//@method(['get'])
 self.prototype.loader = async function(req,res){
-	console.log(req.query.id);
 	res.set('Content-Type','application/javascript');
 	res.send(""+
 		"if ('serviceWorker' in navigator) {\n"+
@@ -42,8 +48,11 @@ self.prototype.loader = async function(req,res){
 	);
 }
 
+
+
+//@route('/sw.js')
+//@method(['get'])
 self.prototype.sw = async function(req,res){
-	console.log(req.query.id);
 	res.set('Content-Type','application/javascript');
 	res.send("console.log('sw');");
 }

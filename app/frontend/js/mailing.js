@@ -2,12 +2,14 @@ app.controller("mailingCtrl", function(trascender,$scope){
 	
 	var self = this;
 	
+	let path = "/html/mailing/templates_front/";
+	
 	this.template = new trascender({
 		increase: true,
 		service: {
-			total: 		["GET", "/api/mailing/file/" + btoa("/") + "/total"],
-			collection: ["GET", "/api/mailing/file/" + btoa("/") + "/collection"],
-			read: 		["GET", "/api/mailing/file/:id"]
+			total: 		["GET", "/api/file/public/" + btoa(path) + "/total"],
+			collection: ["GET", "/api/file/public/" + btoa(path) + "/collection"],
+			read: 		["GET", "/api/file/public/:id"]
 		},
 		start: function(){
 			this.getTotal();
@@ -29,7 +31,7 @@ app.controller("mailingCtrl", function(trascender,$scope){
 		select: async function(){
 			try{
 				if(this.doc!=""){
-					this.content = await this.service_read({id: btoa("/" + this.doc + ".html")});
+					this.content = await this.service_read({id: btoa(path + this.doc + ".html")});
 					this.metadata = this.getMetadata(this.content);
 					$("#dvTemplate").html(this.content);
 					$scope.$digest(function(){});

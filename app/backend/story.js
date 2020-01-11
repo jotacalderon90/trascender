@@ -1,5 +1,7 @@
 "use strict";
 
+const fs = require("fs");
+
 let self = function(application,params){
 	//get main dbs
 	let mdbs;
@@ -9,21 +11,22 @@ let self = function(application,params){
 		}
 	}
 	
+	this.dir				= application.dir;
 	this.config				= application.config;
 	this.url				= mdbs.url;
 	this.helper				= application.helper;
-	this.collection_name	= "blog";
-	this.view_doc			= "blog/document";
-	this.view_coll			= "blog/collection";
-	this.match				= "uri";
-	this.sort				= {created: -1};
+	this.collection_name	= "story";
+	this.view_doc			= "story/document";
+	this.view_coll			= "story/collection";
+	this.match				= "title";
+	this.sort				= {year: -1, month: -1, day: -1, title: -1};
 	this.mongodb			= application.mongodb;
-	
+	this.view = "story/";
 }
 
 
 
-//@route('/blog')
+//@route('/story')
 //@method(['get'])
 self.prototype.renderCollection = async function(req,res){
 	try{
@@ -48,7 +51,7 @@ self.prototype.renderCollection = async function(req,res){
 
 
 
-//@route('/blog/categoria/:id')
+//@route('/story/categoria/:id')
 //@method(['get'])
 self.prototype.renderCollectionTag = async function(req,res){
 	try{
@@ -73,31 +76,7 @@ self.prototype.renderCollectionTag = async function(req,res){
 
 
 
-//@route('/blog/:id')
-//@method(['get'])
-self.prototype.renderDocument = async function(req,res){
-	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let query = {};
-		query[this.match] = req.params.id;		
-		let db = await this.mongodb.connect(this.url);
-		let data = await this.mongodb.find(db,collection,query,{},true);
-		if(data.length!=1){
-			throw("No se encontró el documento solicitado");
-		}
-		res.render(this.view_doc,{
-			row: data[0],
-			config: this.config
-		});
-	}catch(e){
-		console.log(e);
-		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger", config: this.config});
-	}
-}
-
-
-
-//@route('/api/blog/total')
+//@route('/api/story/total')
 //@method(['get'])
 self.prototype.total = async function(req,res){
 	try{
@@ -113,7 +92,7 @@ self.prototype.total = async function(req,res){
 
 
 
-//@route('/api/blog/collection')
+//@route('/api/story/collection')
 //@method(['get'])
 self.prototype.collection = async function(req,res){
 	try{
@@ -130,7 +109,7 @@ self.prototype.collection = async function(req,res){
 
 
 
-//@route('/api/blog/tag/collection')
+//@route('/api/story/tag/collection')
 //@method(['get'])
 self.prototype.tags = async function(req,res){
 	try{
@@ -145,7 +124,7 @@ self.prototype.tags = async function(req,res){
 
 
 
-//@route('/api/blog/:id')
+//@route('/api/story/:id')
 //@method(['get'])
 self.prototype.read = async function(req,res){
 	try{
@@ -160,9 +139,9 @@ self.prototype.read = async function(req,res){
 
 
 
-//@route('/api/blog')
+//@route('/api/story')
 //@method(['post'])
-//@roles(['admin','BLOGUER'])
+//@roles(['admin'])
 self.prototype.create = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
@@ -176,9 +155,9 @@ self.prototype.create = async function(req,res){
 
 
 
-//@route('/api/blog/:id')
+//@route('/api/story/:id')
 //@method(['put'])
-//@roles(['admin','BLOGUER'])
+//@roles(['admin'])
 self.prototype.update = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
@@ -192,9 +171,9 @@ self.prototype.update = async function(req,res){
 
 
 
-//@route('/api/blog/:id')
+//@route('/api/story/:id')
 //@method(['delete'])
-//@roles(['admin','BLOGUER'])
+//@roles(['admin'])
 self.prototype.delete = async function(req,res){
 	try{
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
@@ -205,5 +184,23 @@ self.prototype.delete = async function(req,res){
 		res.send({data: null,error: e.toString()});
 	}
 }
+
+
+
+//@route('/story/:id')
+//@method(['get'])
+self.prototype.render_other = async function(req,res){
+	try{
+		var v = this.view + req.params.id;
+		if(!fs.existsSync(this.dir + this.config.properties.views + "/" + v + ".html")){
+			throw("URL no encontrada");
+		}
+		res.render(v,{config: this.config});
+	}catch(e){
+		res.status(404).render("message",{title: "Error 404", message: e.toString(), error: 404, class: "danger"});
+	}
+}
+
+
 
 module.exports = self;

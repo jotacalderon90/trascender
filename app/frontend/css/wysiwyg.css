@@ -33,7 +33,7 @@ label[for="abrir-cerrar"] {
     padding: 1rem 0;
     box-sizing:border-box;
 }
-[treecontrol] {
+#nav-main ul li {
 	color: #FFF;
 	margin:0px;
 }

@@ -1,6 +1,6 @@
 {
-	"name": "cl.jotacalderon.transcend.main",
-	"description": "Gestor de modulos frontend para transcend.main",
+	"name": "cl.jotacalderon.trascender",
+	"description": "Gestor de modulos frontend para trascender",
 	"version": "0.0.1",
 	"private": true,
 	"dependencies": {

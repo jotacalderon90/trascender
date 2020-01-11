@@ -6,37 +6,19 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 		return btoa(encodeURIComponent(value));
 	}
 	
+	let path = "/html/simpleweb/";
+	
 	/*directorio de archivos*/
 	self.directory = new transcend({
 		scope: $scope,
 		service: {
-			collection:	["GET", "api/simpleweb/directory"],
-			read:		["GET", "/api/simpleweb/file/:id"],
-			update:		["PUT", "/api/simpleweb/file/:id"]
+			total: 		["GET", "/api/file/public/" + btoa(path) + "/total"],
+			collection: ["GET", "/api/file/public/" + btoa(path) + "/collection"],
+			read: 		["GET", "/api/file/public/:id"],
+			update: 	["PUT", "/api/file/public/:id"]
 		},
 		start: function(){
 			this.getCollection();
-			this.treeoptions = {
-				equality: function(node1, node2) {
-					if (node1 === undefined || node2 === undefined || node2==null)
-						return false;
-					return node1.id === node2.id;
-				}
-			};
-		},
-		formatToClient: function(doc){
-			if(typeof doc=="string"){
-				this.doc.content = doc;
-				return this.doc;
-			}else{
-				if(doc.children){
-					for(var i=0;i<doc.children.length;i++){
-						doc.children[i] = this.formatToClient(doc.children[i]);
-					}
-				}
-				doc.name = doc.text;
-				return doc;
-			}
 		},
 		formatToServer: function(doc){
 			if(self.dom.isCompleteHTML){
@@ -60,12 +42,17 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 		afterChangeMode: function(action,doc){
 			switch(action){
 				case "select":
-				this.read({id: encode(doc.id)});
+				this.doc_id = encode(path + doc);
+				this.read({id: this.doc_id});
 				//$("[for='abrir-cerrar']").click();//jc:20180328=nuevo editor
 				break;
 			}
 		},
 		afterRead: function(){
+			this.doc = {
+				id: this.doc_id,
+				content: this.doc
+			}
 			this.process_onclick(true);
 			self.dom.taken();
 		},
@@ -83,7 +70,7 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 			}*/
 		},
 		paramsToUpdate: function(){
-			return {id: encode(this.doc.id)};
+			return {id: this.doc.id};
 		},
 		afterUpdate: function(){
 			if(self.directory.reloadDoc){
@@ -105,7 +92,7 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 		increase: true,
 		baseurl: "/api/document/html",
 		start: function(){
-			this.getTotal();
+			//this.getTotal();
 		},
 		afterGetTotal: function(){
 			this.getCollection();
