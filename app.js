@@ -152,8 +152,8 @@ let trascender = function(){
 			
 			//funcion para URLS que enlazan una API
 			this.getAPI = function(api,method){
-				return function(req,res){
-					api[method](req,res);
+				return function(req,res,next){
+					api[method](req,res,next);
 				}
 			}
 			
