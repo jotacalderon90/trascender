@@ -51,6 +51,13 @@ self.prototype.create = async function(req,res,next){
 			req.body.to = req.body.email;
 			req.body.bcc = this.config.properties.admin;
 			req.body.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "message.html",{config: this.config, memo: req.body});
+			
+			let f = "";
+			for(item in req.body){
+				f += item + ": " + req.body[item] + "<br>";
+			}
+			req.body.fields = f;
+			
 			await this.mongodb.insertOne(db,"message",req.body,true);
 			if(this.config.smtp.enabled){
 				next();
