@@ -208,3 +208,6 @@ html,body{
 		padding: 0px;
 	}
 }
+.g-recaptcha{
+	overflow: hidden;
+}
