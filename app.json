@@ -18,8 +18,8 @@
 	},
 	"recaptcha": {
 		"enabled": false,
-		"public": "x",
-		"private": "x"
+		"public": "",
+		"private": ""
 	},
 	"google": {
 		"auth": {

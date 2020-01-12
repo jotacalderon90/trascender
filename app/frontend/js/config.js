@@ -6,7 +6,7 @@ app.controller("configCtrl", function(trascender,$scope){
 		},
 		start: function(){
 			this.doc = {
-				content: JSON.stringify(config,undefined,"\t")
+				content: JSON.stringify(c,undefined,"\t")
 			};
 		},
 		beforeUpdate: function(){

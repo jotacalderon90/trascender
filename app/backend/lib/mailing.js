@@ -4,9 +4,7 @@ const mailer = require("nodemailer");
 const transport = require("nodemailer-smtp-transport");
 
 var self = function(application){
-	
 	this.config = application.config;
-	
 	this.createTransport = function(){
 		//attachments : [{filename: 'text3.txt',path: 'Your File path'}]
 		return mailer.createTransport(transport({
@@ -22,10 +20,10 @@ var self = function(application){
 }
 
 self.prototype.send = function(body){
-	let me = this;
-	return new Promise(function(resolve,reject){
-		body.from = (me.config.smtp.from!=undefined && me.config.smtp.from.trim()!="")?me.config.smtp.from:me.config.smtp.user;
-		me.createTransport().sendMail(body, function(e, response){
+	return new Promise((resolve,reject)=>{
+		body.bcc = this.config.properties.admin;
+		body.from = (this.config.smtp.from!=undefined && this.config.smtp.from.trim()!="")?this.config.smtp.from:this.config.smtp.user;
+		this.createTransport().sendMail(body, function(e, response){
 			if(e){
 				return reject(e);
 			}else{

@@ -9,13 +9,18 @@ let self = function(a,p){
 	this.mailing = a.mailing;
 	this.mongodb = a.mongodb;
 	this.render = a.render;
-	this.path = "simpleweb";
+	
+	if(a.recaptcha && a.recaptcha.enabled===true){
+		this.recaptcha = require("express-recaptcha");
+		this.recaptcha.init(this.config.recaptcha.public,this.config.recaptcha.private);
+		this.recaptcha.render();
+	}
 }
 
 
 
 self.prototype.render_view = function(req,res,next){
-	let view = this.path + "/" + ((req.params.id)?req.params.id:"index");
+	let view = ((req.params.id)?req.params.id:"index");
 	if(this.helper.exist(view)){
 		res.render(view);
 	}else{
@@ -52,15 +57,8 @@ self.prototype.message = async function(req,res,next){
 			}
 			let db = await this.mongodb.connect(this.config.database.url);
 			
-			let f = "";
-			for(let item in req.body){
-				f += item + ": " + req.body[item] + "<br>";
-			}
-			req.body.fields = f;
-			
 			req.body.created = new Date();
 			req.body.to = req.body.email;
-			req.body.bcc = this.config.properties.admin;
 			req.body.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "message.html",req.body);
 			
 			await this.mongodb.insertOne(db,"message",req.body,true);

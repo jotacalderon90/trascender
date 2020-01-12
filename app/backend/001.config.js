@@ -4,24 +4,17 @@ const fs = require("fs");
 
 let self = function(a,p){
 	this.dir = a.dir;
-	this.config = a.config;
-}
-
-//@route('/config')
-//@method(['get','put','delete'])
-self.prototype.plain = function(req,res){
-	this[req.method.toLowerCase()](req,res);
 }
 
 self.prototype.get = function(req,res){
-	res.render("config",{config: this.config});
+	let c = fs.readFileSync(this.dir + "/app.json","utf-8");
+	res.render("config",{c: c});
 }
 
 self.prototype.put = function(req,res){
 	try{
-		let config = JSON.parse(req.body.content);
-		fs.writeFileSync(this.dir + "/app.json", JSON.stringify(config,undefined,"\t"));
-		this.config = config;
+		let c = JSON.parse(req.body.content);
+		fs.writeFileSync(this.dir + "/app.json", JSON.stringify(c,undefined,"\t"));
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null, error: e});
@@ -31,11 +24,22 @@ self.prototype.put = function(req,res){
 self.prototype.delete = function(req,res){
 	try{
 		fs.unlinkSync(this.dir + "/app/backend/001.config.js");
-		fs.writeFileSync(this.dir + "/app.json", JSON.stringify(this.config,undefined,"\t"));
+		let c = fs.readFileSync(this.dir + "/app.json","utf-8");
+		fs.writeFileSync(this.dir + "/app.json", JSON.stringify(c,undefined,"\t"));
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null, error: e});
 	}
 }
+
+
+
+//@route('/config')
+//@method(['get','put','delete'])
+self.prototype.plain = function(req,res){
+	this[req.method.toLowerCase()](req,res);
+}
+
+
 
 module.exports = self;
