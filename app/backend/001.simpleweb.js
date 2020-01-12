@@ -63,8 +63,9 @@ self.prototype.create = async function(req,res,next){
 			await this.mongodb.insertOne(db,"message",req.body,true);
 			if(this.config.smtp.enabled){
 				next();
+			}else{
+				res.send({data: true});
 			}
-			res.send({data: true});
 		}else{
 			throw("IMAIL INVALIDO");
 		}
