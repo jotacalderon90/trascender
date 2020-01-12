@@ -40,14 +40,13 @@ self.prototype.send = async function(req,res){
 self.prototype.create = async function(req,res){
 	try{
 		await this.mailing.send(req.body);
-		res.send({data: true});
 	}catch(e){
 		console.error("ERROR-ERROR-ERROR-ERROR");
 		console.error("ERROR-ERROR-ERROR-ERROR");
 		console.error("ERROR-ERROR-ERROR-ERROR");
 		console.error(e);
-		res.send({data: true});
 	}
+	res.send({data: true});
 }
 
 
