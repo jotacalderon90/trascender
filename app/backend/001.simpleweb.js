@@ -53,7 +53,7 @@ self.prototype.create = async function(req,res,next){
 			req.body.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "message.html",{config: this.config, memo: req.body});
 			
 			let f = "";
-			for(item in req.body){
+			for(let item in req.body){
 				f += item + ": " + req.body[item] + "<br>";
 			}
 			req.body.fields = f;
