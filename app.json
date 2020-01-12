@@ -23,6 +23,7 @@
 	},
 	"google": {
 		"auth": {
+			"enabled": false,
 			"clientId": "",
 			"clientSecret": "",
 			"redirect": ""

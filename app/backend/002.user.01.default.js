@@ -1,0 +1,325 @@
+"use strict";
+
+var self = function(a,p){
+	this.dir = a.dir;
+	this.config = a.config;
+	this.auth = a.auth;
+	this.helper = a.helper;
+	this.mailing = a.mailing;
+	this.mongodb = a.mongodb;
+	this.render = a.render;
+	
+	if(this.config.recaptcha && this.config.recaptcha.enabled===true){
+		this.recaptcha = require("express-recaptcha");
+		this.recaptcha.init(this.config.recaptcha.public,this.config.recaptcha.private);
+		this.recaptcha.render();
+	}
+	
+	this.google_url = "";
+	if(this.config.google && this.config.google.auth && this.config.google.auth.enabled){
+		this.google = a.google;
+		this.google_url = this.google.getURL();
+	}
+}
+
+
+
+//@route('/user')
+//@method(['get','post'])
+self.prototype.create = async function(req,res){
+	try{
+		switch(req.method.toLowerCase()){
+			case "get":
+				res.render("user/new",{google_url: this.google_url});
+			break;
+			case "post":
+				req.body.email = req.body.email.toLowerCase();
+				if(!this.helper.isEmail(req.body.email)){
+					throw("El email ingresado no es válido");
+				}else{
+					if(this.recaptcha!=undefined){
+						await this.helper.recaptcha(this.recaptcha,req);
+					}
+					if(req.body.password==undefined || req.body.password==null || req.body.password.length < 5){ 
+						throw("La contraseña ingresada debe tener al menos 5 caracteres");
+					}else{
+						let db = await this.mongodb.connect(this.config.database.url);
+						let ce = await this.mongodb.count(db,"user",{email: req.body.email},{});
+						if(ce!=0){
+							throw("El email ingresado ya está registrado");
+						}else{
+							let doc = {};
+							doc.email = req.body.email;
+							doc.hash = this.helper.random(10);
+							doc.password = this.helper.toHash(req.body.password + req.body.email,doc.hash);
+							doc.nickname = req.body.email;
+							doc.notification = true;
+							doc.thumb = "/media/img/user.png";
+							doc.roles = ["user"];
+							doc.created = new Date;
+							doc.activate = (this.config.smtp.enabled)?false:true;
+							await this.mongodb.insertOne(db,"user",doc,true);
+							if(this.config.smtp.enabled===true){
+								let memo = {};
+								memo.to = doc.email;
+								memo.subject = "Activación de cuenta"
+								memo.nickname = doc.nickname;
+								memo.hash = this.config.properties.host + "/api/user/activate/" + new Buffer(doc.password).toString("base64");
+								memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "activate.html", memo);
+								await this.mailing.send(memo);
+								res.render("message",{title: "Usuario registrado", message: "Se ha enviado un correo para validar su registro", class: "success"});
+							}else{
+								res.render("message",{title: "Usuario registrado", message: "Se ha completado su registro correctamente", class: "success"});
+							}
+						}
+					}
+				}
+			break;
+		}
+	}catch(e){
+		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+	}
+}
+
+
+
+//@route('/user/login')
+//@method(['get','post'])
+self.prototype.login = async function(req,res){
+	try{
+		switch(req.method.toLowerCase()){
+			case "get":
+				res.render("user/login",{google_url: this.google_url});
+			break;
+			case "post":
+				if(this.recaptcha!=undefined){
+					await this.helper.recaptcha(this.recaptcha,req);
+				}
+				req.body.email = req.body.email.toLowerCase();
+				let db = await this.mongodb.connect(this.config.database.url);
+				let rows = await this.mongodb.find(db,"user",{email: req.body.email, activate: true},{});
+				if(rows.length!=1){
+					throw("Los datos ingresados no corresponden");
+				}else{
+					if(this.helper.toHash(req.body.password+req.body.email,rows[0].hash) != rows[0].password){
+						throw("Los datos ingresados no corresponden");
+					}else{
+						res.cookie("Authorization",this.auth.encode(rows[0]));
+						let active = await this.mongodb.find(db,"user_active",{user_id: rows[0]._id.toString()},{});
+						if(active.length!=1){
+							await this.mongodb.insertOne(db,"user_active",{user_id: rows[0]._id.toString(), email: rows[0].email, date: new Date()},true);
+						}
+						if(req.session.redirectTo){
+							res.redirect(req.session.redirectTo);
+						}else{
+							res.redirect("/user/info");
+						}
+					}
+				}
+			break;
+		}
+	}catch(e){
+		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+	}
+}
+
+
+
+//@route('/user/info')
+//@method(['get'])
+//@roles(['user'])
+self.prototype.info = async function(req,res){
+	try{
+		let db = await this.mongodb.connect(this.config.database.url);
+		let user = await this.mongodb.findOne(db,"user",req.user.sub,true);
+		res.render("user/info",{user: user});
+	}catch(e){
+		console.log(e);
+		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+	}
+}
+
+
+
+//@route('/user/update')
+//@method(['post'])
+//@roles(['user'])
+self.prototype.update = async function(req,res){
+	try{
+		let db = await this.mongodb.connect(this.config.database.url);
+		let user = await this.mongodb.findOne(db,"user",req.user.sub);
+		let updated = {
+			$set: {
+				nickname: req.body.nickname,
+				thumb: req.body.thumb,
+				notification: req.body.notification
+			}
+		};
+		let redirect = "/user/info";
+		if(!user.google && req.body.password!=user.password){
+			if(req.body.password==undefined || req.body.password==null || req.body.password.length < 5){
+				throw("La contraseña ingresada debe tener al menos 5 caracteres");
+			}else{
+				updated["$set"]["password"] = this.helper.toHash(req.body.password + user.email,user.hash);
+				redirect = "/user/logout";
+			}
+		}
+		await this.mongodb.updateOne(db,"user",user._id,updated,true);
+		res.redirect(redirect);
+	}catch(e){
+		console.log(e);
+		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+	}
+}
+
+
+
+//@route('/user/logout')
+//@method(['get'])
+//@roles(['user'])
+self.prototype.logout = async function(req,res){
+	try{
+		if(req.user==null){
+			throw("empty");
+		}else if(req.user.error){
+			throw(req.user.error);
+		}else{
+			let db = await this.mongodb.connect(this.config.database.url);
+			let user = await this.mongodb.find(db,"user_active",{user_id: req.user.sub},{});
+			if(user.length==1){
+				await this.mongodb.deleteOne(db,"user_active",user[0]._id,true);
+			}
+			req.session.destroy();
+			res.render("user/login");
+		}
+	}catch(e){
+		console.log(e);
+		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+	}
+}
+
+
+
+//@route('/user/forget')
+//@method(['get','post'])
+self.prototype.forget = async function(req,res){
+	try{
+		switch(req.method.toLowerCase()){
+			case "get":
+				res.render("user/forget");
+			break;
+			case "post":
+				if(this.recaptcha!=undefined){
+					await this.helper.recaptcha(this.recaptcha,req);
+				}
+				let db = await this.mongodb.connect(this.config.database.url);
+				req.body.email = req.body.email.toLowerCase();
+				let user = await this.mongodb.find(db,"user",{email: req.body.email},{});
+				if(user.length!=1){
+					throw("Los datos ingresados no corresponden");
+				}else{
+					let memo = {};
+					memo.to = req.body.email;
+					memo.bcc = this.config.properties.admin;
+					memo.subject = "Reestablecer contraseña";
+					memo.hash = this.config.properties.host + "/user/recovery?hash=" + new Buffer(user[0].password).toString("base64");
+					memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "recovery.html", memo);
+					await this.mailing.send(memo);
+					res.render("message",{title: "Recuperación de cuenta", message: "Se ha enviado un correo para poder reestablecer su contraseña", class: "success"});
+				}
+			break;
+		}
+	}catch(e){
+		console.log(e);
+		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+	}
+}
+
+
+
+//@route('/user/recovery')
+//@method(['get','post'])
+self.prototype.recovery = async function(req,res){
+	try{
+		switch(req.method.toLowerCase()){
+			case "get":
+				res.render("user/recovery",{hash: req.query.hash});
+			break;
+			case "post":
+				if(this.recaptcha!=undefined){
+					await this.helper.recaptcha(this.recaptcha,req);
+				}
+				let db = await this.mongodb.connect(this.config.database.url);
+				let user = await this.mongodb.find(db,"user",{password:  new Buffer(req.body.hash,"base64").toString("ascii")},{});
+				if(user.length!=1){
+					throw("Los datos ingresados no corresponden");
+				}else{
+					let updated = {$set: {password: this.helper.toHash(req.body.password + user[0].email,user[0].hash)}};
+					await this.mongodb.updateOne(db,"user",user[0]._id,updated,true);
+					res.render("message",{title: "Actualización de contraseña", message: "Se ha actualizaco la contraseña correctamente", class: "success"});
+				}
+			break;
+		}
+	}catch(e){
+		console.log(e);
+		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+	}
+}
+
+
+
+//@route('/user/auth/google/callback')
+//@method(['get'])
+self.prototype.google = async function(req,res){
+	try{
+		let user = await this.google.getUserInfo(req.query.code);
+		if(user==null){
+			throw(this.google.error);
+		}else{
+			let db = await this.mongodb.connect(this.config.database.url);
+			let row = await this.mongodb.find(db,"user",{email: user.emails[0].value},{});
+			if(row.length!=1){
+				row = {};
+				row.email = user.emails[0].value;
+				row.hash = this.helper.random(10);
+				row.password = this.helper.toHash(row.hash + user.emails[0].value,row.hash);
+				row.nickname = user.displayName;
+				row.notification = true;
+				row.thumb = user.image.url;
+				row.roles = ["user"];
+				row.created = new Date;
+				row.activate = true
+				row.google = user;
+				await this.mongodb.insertOne(db,"user",row);
+				row = await this.mongodb.find(db,"user",{email: user.emails[0].value},{});
+			}else{
+				let updated = {
+					$set: {
+						nickname: user.displayName,
+						thumb: user.image.url,
+						google: user
+					}
+				};
+				row = row[0];
+				await this.mongodb.updateOne(db,"user",row._id,updated);
+			}
+			res.cookie("Authorization",this.auth.encode(row));
+			let active = await this.mongodb.find(db,"user_active",{user_id: row._id.toString()},{});
+			if(active.length!=1){
+				await this.mongodb.insertOne(db,"user_active",{user_id: row._id.toString(), email: row.email, date: new Date()},true);
+			}
+			if(req.session.redirectTo){
+				res.redirect(req.session.redirectTo);
+			}else{
+				res.redirect("/user/info");
+			}
+		}
+	}catch(e){
+		console.log(e);
+		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+	}
+}
+
+
+
+module.exports = self;

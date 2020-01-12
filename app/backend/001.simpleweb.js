@@ -1,7 +1,5 @@
 "use strict";
 
-const fs = require("fs");
-
 let self = function(a,p){
 	this.dir = a.dir;
 	this.config = a.config;
@@ -10,7 +8,7 @@ let self = function(a,p){
 	this.mongodb = a.mongodb;
 	this.render = a.render;
 	
-	if(a.recaptcha && a.recaptcha.enabled===true){
+	if(this.config.recaptcha && this.config.recaptcha.enabled===true){
 		this.recaptcha = require("express-recaptcha");
 		this.recaptcha.init(this.config.recaptcha.public,this.config.recaptcha.private);
 		this.recaptcha.render();
