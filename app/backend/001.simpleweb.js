@@ -47,16 +47,18 @@ self.prototype.create = async function(req,res,next){
 		}
 		if(this.helper.isEmail(req.body.email)){
 			let db = await this.mongodb.connect(this.config.database.url);
-			req.body.created = new Date();
-			req.body.to = req.body.email;
-			req.body.bcc = this.config.properties.admin;
-			req.body.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "message.html",{config: this.config, memo: req.body});
 			
 			let f = "";
 			for(let item in req.body){
 				f += item + ": " + req.body[item] + "<br>";
 			}
 			req.body.fields = f;
+			
+			req.body.created = new Date();
+			req.body.to = req.body.email;
+			req.body.bcc = this.config.properties.admin;
+			
+			req.body.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "message.html",{config: this.config, memo: req.body});
 			
 			await this.mongodb.insertOne(db,"message",req.body,true);
 			if(this.config.smtp.enabled){
