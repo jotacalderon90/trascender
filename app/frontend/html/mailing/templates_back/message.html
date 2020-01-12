@@ -9,7 +9,13 @@
 			</p>
 			<hr>
 			<p style="font-size:14px;line-height:20px;font-family:'HelveticaNeue-Light','Helvetica Neue Light',Helvetica,Arial,sans-serif;color:#898989">
-				{{data:doc.memo.message}}
+				<strong>Correo: </strong><span>{{data:doc.memo.email}}</span>
+				<strong>Fecha: </strong><span>{{data:doc.memo.created}}</span>
+				<strong>Mensaje: </strong><span>{{data:doc.memo.message}}</span>
+			</p>
+			<strong>Otros datos</strong>
+			<p style="font-size:14px;line-height:20px;font-family:'HelveticaNeue-Light','Helvetica Neue Light',Helvetica,Arial,sans-serif;color:#898989">
+				{{data:doc.memo.fields}}
 			</p>
 			<hr>
 			<p style="font-size:14px;line-height:20px;font-family:'HelveticaNeue-Light','Helvetica Neue Light',Helvetica,Arial,sans-serif;color:#898989">
