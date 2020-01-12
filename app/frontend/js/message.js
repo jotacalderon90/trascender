@@ -37,11 +37,6 @@ app.controller("messageCtrl", function(trascender,$scope){
 				}
 			}
 			
-			doc.fields = "";
-			for(item in doc){
-				doc.fields += item + ": " + doc[item] + "<br>";
-			}
-			
 			return true;
 		},
 		afterCreate: function(success, xhttp){
