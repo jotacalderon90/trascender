@@ -277,7 +277,7 @@ self.prototype.ecommerce_create = async function(req,res){
 		if(this.recaptcha!=undefined){
 			await this.helper.recaptcha(this.recaptcha,req);
 		}
-
+		
 		//format new document
 		let doc = {};
 		doc.ip = req.headers["X-Real-IP"] || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -391,7 +391,7 @@ self.prototype.ecommerce_update = async function(req,res){
 		let row = await this.mongodb.findOne(db,this.name,params[0]);
 		
 		//set document
-		row.message = row.message + "<br>" + ((isadmin)?"Administrador":"Cliente") + ": " + req.body.message + " <small>" + (new Date()).toISOString() + "</small>";
+		row.message += "<br>" + ((isadmin)?"Administrador":"Cliente") + ": " + req.body.message + " <small>" + (new Date()).toISOString() + "</small>";
 		row.status = action;
 		
 		//cache on update

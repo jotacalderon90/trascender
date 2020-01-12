@@ -65,14 +65,6 @@ app.controller("ecommerceCtrl", function(trascender,$scope){
 				}
 			}
 			
-			let msg = "";
-			for(item in doc){
-				msg += item + ": " + doc[item] + "<br>";
-			}
-			doc.message = msg;
-			
-			this.createLog = this.addLog(this.message.create.on);
-			
 			return true;
 		},
 		afterCreate: function(success, xhttp){
