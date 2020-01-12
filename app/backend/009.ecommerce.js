@@ -230,7 +230,7 @@ self.prototype.setMemoClient = function(doc){
 	doc.btn = this.workflow.on[doc.status.toString()].btnToClient;
 	if(doc.btn!=undefined){
 		for(var i=0;i<doc.btn.length;i++){
-			doc.btn[i].href = this.config.public.host + "/" + this.name + "/transaction/" + (new Buffer(doc.insertedId).toString("base64"));
+			doc.btn[i].href = this.config.properties.host + "/" + this.name + "/transaction/" + (new Buffer(doc.insertedId).toString("base64"));
 		}
 	}
 	doc.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "" + this.name + ".html", doc);
