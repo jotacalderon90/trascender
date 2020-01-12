@@ -34,23 +34,6 @@ self.prototype.send = async function(req,res){
 
 
 
-//@route('/api/message')
-//@method(['post'])
-//@description('segunda accion en que usuario/cliente envia informacion al servidor')
-self.prototype.create = async function(req,res){
-	try{
-		await this.mailing.send(req.body);
-	}catch(e){
-		console.error("ERROR-ERROR-ERROR-ERROR");
-		console.error("ERROR-ERROR-ERROR-ERROR");
-		console.error("ERROR-ERROR-ERROR-ERROR");
-		console.error(e);
-	}
-	res.send({data: true});
-}
-
-
-
 
 //@route('/mailing')
 //@method(['get'])

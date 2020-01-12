@@ -1,6 +1,7 @@
 const fs = require("fs");
 
 var self = function(app){
+	this.config = app.config;
 	this.path = "./" + app.config.properties.views;
 	app.app.engine("html", this.engine(this));
 	app.app.set("views", "./" + this.path);
@@ -24,6 +25,7 @@ self.prototype.processTemplateByPath = function(templatename, doc){
 
 self.prototype.processTemplate = function(template,doc){
 	try{
+		Object.assign(doc, {config: this.config});
 		var process_template = template;
 		var next = true;
 		if(template.indexOf("<!--use:")>-1){

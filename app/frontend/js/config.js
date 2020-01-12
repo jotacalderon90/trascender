@@ -15,13 +15,14 @@ app.controller("configCtrl", function(trascender,$scope){
 		afterUpdate: function(success,xhttp){
 			if(success){
 				alert("Archivo de configuración actualizado correctamente");
+				location.reload();
 			}else{
 				alert("Error!");
 				console.log(xhttp);
 			}
 		},
 		beforeDelete: function(){
-			return confirm("Advertencia!\nYa no podrá editar el archivo de configuración desde este medio, ¿desea continuar?");
+			return confirm("Advertencia!\nYa no podrá editar el archivo de configuración por este medio, ¿desea continuar?");
 		},
 		afterDelete: function(success,xhttp){
 			if(success){
