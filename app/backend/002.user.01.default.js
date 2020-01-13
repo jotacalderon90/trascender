@@ -270,7 +270,7 @@ self.prototype.recovery = async function(req,res){
 
 //@route('/user/auth/google/callback')
 //@method(['get'])
-self.prototype.google = async function(req,res){
+self.prototype.login_google = async function(req,res){
 	try{
 		let user = await this.google.getUserInfo(req.query.code);
 		if(user==null){
