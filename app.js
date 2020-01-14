@@ -53,6 +53,11 @@ let trascender = function(){
 				console.log(new Date() + " == instanciando libreria " + l);
 				this[l]	= new(require("./app/backend/lib/" + l))(this);
 			}			
+			
+			if(this.config.properties.cors===true){
+				let cors = require("cors");
+				this.app.use(cors());
+			}
 		}
 		
 		//definir funciones internas propias de trascender

@@ -3,7 +3,8 @@
 		"port": 80,
 		"host": "http://localhost:80",
 		"admin": "demo@demo.cl",
-		"secret": "trascender-con-sso"
+		"secret": "trascender-con-sso",
+		"cors": true
 	},
 	"database": {
 		"url": "mongodb://127.0.0.1:27017/trascender"
