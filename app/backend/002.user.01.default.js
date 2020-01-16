@@ -92,7 +92,7 @@ self.prototype.login = async function(req,res){
 				res.render("user/login",{google_url: this.google_url});
 			break;
 			case "post":
-				if(!req.xhr){
+				if(!req.body.xhr){
 					if(this.recaptcha!=undefined){
 						await this.helper.recaptcha(this.recaptcha,req);
 					}
@@ -111,7 +111,7 @@ self.prototype.login = async function(req,res){
 						if(active.length!=1){
 							await this.mongodb.insertOne(db,"user_active",{user_id: rows[0]._id.toString(), email: rows[0].email, date: new Date()},true);
 						}
-						if(req.xhr){
+						if(req.body.xhr){
 							res.send({data: true});
 						}else{
 							if(req.session.redirectTo){
@@ -126,7 +126,7 @@ self.prototype.login = async function(req,res){
 		}
 	}catch(e){
 		console.error(e);
-		if(req.xhr){
+		if(req.body.xhr){
 			res.send({data: null, error: e.toString()});
 		}else{
 			res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
