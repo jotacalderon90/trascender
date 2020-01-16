@@ -76,7 +76,13 @@ let trascender = function(){
 				return function(req,res,next){
 					try{
 						req.user = null;
-						if(req.headers && req.headers.cookie){
+						if(req.method.toLowerCase()=="get" && req.query.Authorization && req.query.Authorization!=""){
+							let token = auth.decode(req.query.Authorization);
+							req.user = (token==null)?{error: auth.error.toString()}:token;
+						}else if(req.method.toLowerCase()=="post" && req.body.Authorization && req.body.Authorization!=""){
+							let token = auth.decode(req.body.Authorization);
+							req.user = (token==null)?{error: auth.error.toString()}:token;
+						}else if(req.headers && req.headers.cookie){
 							let cookies = req.headers.cookie.split(";");
 							for(let i=0;i<cookies.length;i++){
 								if(cookies[i].indexOf("Authorization=")>-1){
@@ -84,12 +90,6 @@ let trascender = function(){
 									req.user = (token==null)?{error: auth.error.toString()}:token;
 								}
 							}
-						}else if(req.method.toLowerCase()=="get" && req.query.Authorization && req.query.Authorization!=""){
-							let token = auth.decode(req.query.Authorization);
-							req.user = (token==null)?{error: auth.error.toString()}:token;
-						}else if(req.method.toLowerCase()=="post" && req.body.Authorization && req.body.Authorization!=""){
-							let token = auth.decode(req.body.Authorization);
-							req.user = (token==null)?{error: auth.error.toString()}:token;
 						}
 					}catch(e){
 						console.log(e);
