@@ -106,13 +106,14 @@ self.prototype.login = async function(req,res){
 					if(this.helper.toHash(req.body.password+req.body.email,rows[0].hash) != rows[0].password){
 						throw("Los datos ingresados no corresponden");
 					}else{
-						res.cookie("Authorization",this.auth.encode(rows[0]));
+						let cookie = this.auth.encode(rows[0]);
+						res.cookie("Authorization",cookie);
 						let active = await this.mongodb.find(db,"user_active",{user_id: rows[0]._id.toString()},{});
 						if(active.length!=1){
 							await this.mongodb.insertOne(db,"user_active",{user_id: rows[0]._id.toString(), email: rows[0].email, date: new Date()},true);
 						}
 						if(req.body.xhr){
-							res.send({data: true});
+							res.send({data: true, cookie: cookie});
 						}else{
 							if(req.session.redirectTo){
 								res.redirect(req.session.redirectTo);
