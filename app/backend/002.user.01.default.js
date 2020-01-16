@@ -92,8 +92,10 @@ self.prototype.login = async function(req,res){
 				res.render("user/login",{google_url: this.google_url});
 			break;
 			case "post":
-				if(this.recaptcha!=undefined){
-					await this.helper.recaptcha(this.recaptcha,req);
+				if(!req.xhr){
+					if(this.recaptcha!=undefined){
+						await this.helper.recaptcha(this.recaptcha,req);
+					}
 				}
 				req.body.email = req.body.email.toLowerCase();
 				let db = await this.mongodb.connect(this.config.database.url);
