@@ -84,6 +84,12 @@ let trascender = function(){
 									req.user = (token==null)?{error: auth.error.toString()}:token;
 								}
 							}
+						}else if(req.method.toLowerCase()=="get" && req.query.Authorization && req.query.Authorization!=""){
+							let token = auth.decode(req.query.Authorization);
+							req.user = (token==null)?{error: auth.error.toString()}:token;
+						}else if(req.method.toLowerCase()=="post" && req.body.Authorization && req.body.Authorization!=""){
+							let token = auth.decode(req.body.Authorization);
+							req.user = (token==null)?{error: auth.error.toString()}:token;
 						}
 					}catch(e){
 						console.log(e);
