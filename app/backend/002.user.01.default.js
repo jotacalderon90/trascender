@@ -109,17 +109,26 @@ self.prototype.login = async function(req,res){
 						if(active.length!=1){
 							await this.mongodb.insertOne(db,"user_active",{user_id: rows[0]._id.toString(), email: rows[0].email, date: new Date()},true);
 						}
-						if(req.session.redirectTo){
-							res.redirect(req.session.redirectTo);
+						if(req.xhr){
+							res.send({data: true});
 						}else{
-							res.redirect("/user/info");
+							if(req.session.redirectTo){
+								res.redirect(req.session.redirectTo);
+							}else{
+								res.redirect("/user/info");
+							}
 						}
 					}
 				}
 			break;
 		}
 	}catch(e){
-		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+		console.error(e);
+		if(req.xhr){
+			res.send({data: null, error: e.toString()});
+		}else{
+			res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+		}
 	}
 }
 

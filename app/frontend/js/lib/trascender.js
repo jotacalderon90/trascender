@@ -62,7 +62,7 @@ var trascender = function(data){
 
 trascender.prototype.createServices = function(){
 	for(service in this.service){
-		this["service_" + service] = this.serviceCreate(this.service[service][0],this.service[service][1],this.service[service][2],this.headerContentType);
+		this["service_" + service] = this.serviceCreate(this.service[service][0],this.service[service][1]);
 	}
 }
 
@@ -226,14 +226,14 @@ trascender.prototype.getPages = function(){
 /*REST SERVICE*/
 /**************/
 
-trascender.prototype.serviceCreate = function(METHOD,URL,HASBODY,headerContentType){
+trascender.prototype.serviceCreate = function(METHOD,URL){
 	if(METHOD == "GET" || METHOD == "DELETE"){
 		return function(params){
 			return this.execute(METHOD,this.URIBuild(URL,params),undefined,undefined);
 		}
 	}else if(METHOD == "POST" || METHOD == "PUT"){
 		return function(params,body){
-			return this.execute(METHOD,this.URIBuild(URL,params),body,headerContentType);
+			return this.execute(METHOD,this.URIBuild(URL,params),body,this.headerContentType);
 		}
 	}
 }
