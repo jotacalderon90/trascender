@@ -92,7 +92,7 @@ self.prototype.login = async function(req,res){
 				res.render("user/login",{google_url: this.google_url});
 			break;
 			case "post":
-				if(!req.xhr){
+				if(!req.body.xhr){
 					if(this.recaptcha!=undefined){
 						await this.helper.recaptcha(this.recaptcha,req);
 					}
@@ -112,7 +112,7 @@ self.prototype.login = async function(req,res){
 						if(active.length!=1){
 							await this.mongodb.insertOne(db,"user_active",{user_id: rows[0]._id.toString(), email: rows[0].email, date: new Date()},true);
 						}
-						if(req.xhr){
+						if(req.body.xhr){
 							res.send({data: true, cookie: cookie});
 						}else{
 							if(req.session.redirectTo){
@@ -127,7 +127,7 @@ self.prototype.login = async function(req,res){
 		}
 	}catch(e){
 		console.error(e);
-		if(req.xhr){
+		if(req.body.xhr){
 			res.send({data: null, error: e.toString()});
 		}else{
 			res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
@@ -202,7 +202,7 @@ self.prototype.logout = async function(req,res){
 				await this.mongodb.deleteOne(db,"user_active",user[0]._id,true);
 			}
 			req.session.destroy();
-			if(req.xhr){
+			if(req.query.xhr){
 				res.send({data: true});
 			}else{
 				res.render("user/login");
@@ -210,7 +210,7 @@ self.prototype.logout = async function(req,res){
 		}
 	}catch(e){
 		console.log(e);
-		if(req.xhr){
+		if(req.query.xhr){
 			res.send({data: null, error: e.toString()});
 		}else{
 			res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
