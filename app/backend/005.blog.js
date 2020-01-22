@@ -1,12 +1,8 @@
 "use strict";
 
 let self = function(a,p){
-	this.dir = a.dir;
 	this.config = a.config;
-	this.helper = a.helper;
-	this.mailing = a.mailing;
 	this.mongodb = a.mongodb;
-	this.render = a.render;
 }
 
 
