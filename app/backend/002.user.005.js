@@ -37,8 +37,10 @@ self.prototype.create = async function(req,res){
 				if(!this.helper.isEmail(req.body.email)){
 					throw("El email ingresado no es válido");
 				}else{
-					if(this.recaptcha!=undefined){
-						await this.helper.recaptcha(this.recaptcha,req);
+					if(!req.body.xhr){
+						if(this.recaptcha!=undefined){
+							await this.helper.recaptcha(this.recaptcha,req);
+						}
 					}
 					if(req.body.password==undefined || req.body.password==null || req.body.password.length < 5){ 
 						throw("La contraseña ingresada debe tener al menos 5 caracteres");
@@ -67,7 +69,11 @@ self.prototype.create = async function(req,res){
 								memo.hash = this.config.properties.host + "/api/user/activate/" + new Buffer(doc.password).toString("base64");
 								memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "activate.html", memo);
 								await this.mailing.send(memo);
-								res.render("message",{title: "Usuario registrado", message: "Se ha enviado un correo para validar su registro", class: "success"});
+								if(req.body.xhr){
+									res.send({data: true});
+								}else{
+									res.render("message",{title: "Usuario registrado", message: "Se ha enviado un correo para validar su registro", class: "success"});
+								}
 							}else{
 								res.render("message",{title: "Usuario registrado", message: "Se ha completado su registro correctamente", class: "success"});
 							}
@@ -113,13 +119,11 @@ self.prototype.login = async function(req,res){
 							await this.mongodb.insertOne(db,"user_active",{user_id: rows[0]._id.toString(), email: rows[0].email, date: new Date()},true);
 						}
 						if(req.body.xhr){
-							res.send({data: true, cookie: cookie});
+							res.send({data: true, ext: {cookie: cookie}});
+						}else if(req.session.redirectTo){
+							res.redirect(req.session.redirectTo);
 						}else{
-							if(req.session.redirectTo){
-								res.redirect(req.session.redirectTo);
-							}else{
-								res.redirect("/user/info");
-							}
+							res.redirect("/user/info");
 						}
 					}
 				}
@@ -177,10 +181,18 @@ self.prototype.update = async function(req,res){
 			}
 		}
 		await this.mongodb.updateOne(db,"user",user._id,updated,true);
-		res.redirect(redirect);
+		if(req.body.xhr){
+			res.send({data: true, ext: {redirect: redirect}});
+		}else{
+			res.redirect(redirect);
+		}
 	}catch(e){
 		console.log(e);
-		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+		if(req.body.xhr){
+			res.send({data: null, error: e.toString()});
+		}else{
+			res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+		}
 	}
 }
 
@@ -229,8 +241,10 @@ self.prototype.forget = async function(req,res){
 				res.render("user/forget");
 			break;
 			case "post":
-				if(this.recaptcha!=undefined){
-					await this.helper.recaptcha(this.recaptcha,req);
+				if(!req.body.xhr){
+					if(this.recaptcha!=undefined){
+						await this.helper.recaptcha(this.recaptcha,req);
+					}
 				}
 				let db = await this.mongodb.connect(this.config.database.url);
 				req.body.email = req.body.email.toLowerCase();
@@ -245,13 +259,21 @@ self.prototype.forget = async function(req,res){
 					memo.hash = this.config.properties.host + "/user/recovery?hash=" + new Buffer(user[0].password).toString("base64");
 					memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "recovery.html", memo);
 					await this.mailing.send(memo);
-					res.render("message",{title: "Recuperación de cuenta", message: "Se ha enviado un correo para poder reestablecer su contraseña", class: "success"});
+					if(req.body.xhr){
+						res.send({data: true});
+					}else{
+						res.render("message",{title: "Recuperación de cuenta", message: "Se ha enviado un correo para poder reestablecer su contraseña", class: "success"});
+					}
 				}
 			break;
 		}
 	}catch(e){
 		console.log(e);
-		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+		if(req.query.xhr){
+			res.send({data: null, error: e.toString()});
+		}else{
+			res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+		}
 	}
 }
 
@@ -266,8 +288,10 @@ self.prototype.recovery = async function(req,res){
 				res.render("user/recovery",{hash: req.query.hash});
 			break;
 			case "post":
-				if(this.recaptcha!=undefined){
-					await this.helper.recaptcha(this.recaptcha,req);
+				if(!req.body.xhr){
+					if(this.recaptcha!=undefined){
+						await this.helper.recaptcha(this.recaptcha,req);
+					}
 				}
 				let db = await this.mongodb.connect(this.config.database.url);
 				let user = await this.mongodb.find(db,"user",{password:  new Buffer(req.body.hash,"base64").toString("ascii")},{});
@@ -276,21 +300,37 @@ self.prototype.recovery = async function(req,res){
 				}else{
 					let updated = {$set: {password: this.helper.toHash(req.body.password + user[0].email,user[0].hash)}};
 					await this.mongodb.updateOne(db,"user",user[0]._id,updated,true);
-					res.render("message",{title: "Actualización de contraseña", message: "Se ha actualizaco la contraseña correctamente", class: "success"});
+					if(req.body.xhr){
+						res.send({data: true});
+					}else{
+						res.render("message",{title: "Actualización de contraseña", message: "Se ha actualizaco la contraseña correctamente", class: "success"});
+					}
 				}
 			break;
 		}
 	}catch(e){
 		console.log(e);
-		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+		if(req.query.xhr){
+			res.send({data: null, error: e.toString()});
+		}else{
+			res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+		}
 	}
+}
+
+
+
+//@route('/user/auth/google')
+//@method(['get'])
+self.prototype.google_url = async function(req,res){
+	res.send({data: this.google_url});
 }
 
 
 
 //@route('/user/auth/google/callback')
 //@method(['get'])
-self.prototype.login_google = async function(req,res){
+self.prototype.google_login = async function(req,res){
 	try{
 		let user = await this.google.getUserInfo(req.query.code);
 		if(user==null){
@@ -323,12 +363,15 @@ self.prototype.login_google = async function(req,res){
 				row = row[0];
 				await this.mongodb.updateOne(db,"user",row._id,updated);
 			}
-			res.cookie("Authorization",this.auth.encode(row));
+			let cookie = this.auth.encode(row);
+			res.cookie("Authorization",cookie);
 			let active = await this.mongodb.find(db,"user_active",{user_id: row._id.toString()},{});
 			if(active.length!=1){
 				await this.mongodb.insertOne(db,"user_active",{user_id: row._id.toString(), email: row.email, date: new Date()},true);
 			}
-			if(req.session.redirectTo){
+			if(req.body.xhr){
+				res.send({data: true, ext: {cookie: cookie, redirect: ((req.session.redirectTo)?req.session.redirectTo:"/user/info")}});
+			}else if(req.session.redirectTo){
 				res.redirect(req.session.redirectTo);
 			}else{
 				res.redirect("/user/info");
@@ -336,10 +379,105 @@ self.prototype.login_google = async function(req,res){
 		}
 	}catch(e){
 		console.log(e);
-		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+		if(req.query.xhr){
+			res.send({data: null, error: e.toString()});
+		}else{
+			res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
+		}
+	}
+}
+
+
+
+//@route('/api/user')
+//@method(['get'])
+self.prototype.read = async function(req,res){
+	try{
+		if(req.user==null){
+			throw("empty");
+		}else if(req.user.error){
+			throw(req.user.error);
+		}else{
+			let db = await this.mongodb.connect(this.config.database.url);
+			let user = await this.mongodb.findOne(db,"user",req.user.sub);
+			let active = await this.mongodb.find(db,"user_active",{user_id: req.user.sub},{},true);
+			if(active.length==0){
+				throw("empty");
+			}else{
+				res.send({data: user});
+			}
+		}
+	}catch(e){
+		console.log(e);
+		res.send({data: null, error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/user/:id')
+//@method(['get'])
+//@roles(['user'])
+self.prototype.public = async function(req,res){
+	try{
+		let db = await this.mongodb.connect(this.config.database.url);
+		let user = await this.mongodb.findOne(db,"user",req.params.id,true);
+		res.send({data: {
+			nickname: user.nickname,
+			thumb: user.thumb
+		}});
+	}catch(e){
+		console.log(e);
+		res.send({data: null, error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/user/update/ext')
+//@method(['put'])
+//@roles(['user'])
+self.prototype.update_ext = async function(req,res){
+	try{
+		let db = await this.mongodb.connect(this.config.database.url);
+		let user = await this.mongodb.findOne(db,"user",req.user.sub);
+		let enabled = ["lmap","public","jv","interest","location","twitter"];
+		let fields = {};
+		for(let attr in req.body){
+			if(enabled.indexOf(attr)>-1){
+				fields[attr] = req.body[attr];
+			}
+		}
+		let updated = {$set: fields};
+		await this.mongodb.updateOne(db,"user",user._id,updated,true);
+		res.send({data: true});
+	}catch(e){
+		console.log(e);
+		res.send({data: null, error: e});
 	}
 }
 
 
 
 module.exports = self;
+
+
+
+/*
+******versions******
+001:
+	methods:create/login/info/update/logout
+	description: workflow basico para autenticar usuarios
+002:
+	methods:forget/recovery
+	description: workflow para recuperar contraseña
+003:
+	methods:google_url/google_login
+	description: workflow para autenticar por google
+004:
+	methods: read/public/updateext
+	descripcion: metodos de uso generico
+005:
+	methods: all
+	description: se habilita ajax para workflows para apps
+*/

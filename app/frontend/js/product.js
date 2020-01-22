@@ -40,7 +40,7 @@ app.controller("productCtrl", function(trascender,$scope){
 		}
 	}
 
-	var instances = {
+	let i = {
 		collection: function(){
 			return new trascender({
 				increase: true,
@@ -210,8 +210,8 @@ app.controller("productCtrl", function(trascender,$scope){
 		}
 	}
 	
-	for(instance in product_instances){
-		this[product_instances[instance]] = new instances[product_instances[instance]]();
+	for(instance in instances.product){
+		this[instances.product[instance]] = new i[instances.product[instance]]();
 	}
 	
 });

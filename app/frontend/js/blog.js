@@ -1,56 +1,20 @@
 app.controller("blogCtrl", function(trascender,$scope){
 	
-	const self = this;
-
 	if(typeof user!="undefined"){
 		this.user = user;
 		this.user.setAdmin(["admin","BLOGUER"]);
 	}
-	if(typeof wall!="undefined"){
-		this.wall = wall;
-		this.wall.setDoc = function(doc,action){
-			switch(action){
-				case 1:
-					this.newdoc = {
-						content: "<p>Creó una nueva publicación en el Blog: <small>" + doc.title + "</small></p>",
-						url: "/blog/" + doc.uri,
-						tag: (typeof doc.tag=="string")?doc.tag.split(","):doc.tag,
-						author: user.doc._id,
-						created: new Date()
-					};
-				break;
-				case 2:
-					this.newdoc = {
-						content: "<p>Actualizó una publicación del Blog: <small>" + doc.title + "</small></p>",
-						url: "/blog/" + doc.uri,
-						tag: (typeof doc.tag=="string")?doc.tag.split(","):doc.tag,
-						author: user.doc._id,
-						created: new Date()
-					};
-				break;
-				case 3:
-					this.newdoc = {
-						content: "<p>Eliminó una publicación del Blog: <small>" + doc.title + "</small></p>",
-						tag: ["Blog"],
-						author: user.doc._id,
-						created: new Date()
-					};
-				break;
-			}
-			console.log(this);
-		}
-	}
-
-	var instances = {
+	
+	let i = {
 		collection: function(){
 			return new trascender({
 				increase: true,
 				baseurl: "api/blog",
 				start: function(){
-					window.title = document.getElementsByTagName("title")[0].innerHTML.trim();
-					this.coll = _collection;
+					window.title = document.getElementsByTagName("title")[0].innerHTML.trim().toLowerCase();
+					this.coll = this.formatCollectionToClient(_collection);
 					this.obtained = _collection.length;
-					this.query = (window.title!="Blog")?{tag: window.title}:{};
+					this.query = (window.title!="blog")?{tag: window.title}:{};
 					this.getTag();
 					this.getTotal();
 					$(window).scroll(this.scrolling(this));	
@@ -62,9 +26,14 @@ app.controller("blogCtrl", function(trascender,$scope){
 					this.getCollection();
 				},
 				beforeGetCollection: function(){
-					this.options = {skip: this.obtained, limit: this.rowsByPage, sort: {created: -1}, fields: {uri: 1, thumb: 1, resume: 1, title: 1}};
+					this.options = {skip: this.obtained, limit: this.rowsByPage, sort: {created: -1}, fields: {uri: 1, thumb: 1, resume: 1, title: 1, created: 1}};
 					this.collectionLog = this.addLog(this.message.collection.on);
 					return true;
+				},
+				formatToClient: function(row){
+					row.datefromnow = moment(new Date(row.created), "YYYYMMDD, h:mm:ss").fromNow();
+					row.datetitle = moment(new Date(row.created)).format("dddd, DD MMMM YYYY, h:mm:ss");
+					return row;
 				},
 				afterGetCollection: function(){
 					$scope.$digest(function(){});
@@ -87,36 +56,30 @@ app.controller("blogCtrl", function(trascender,$scope){
 					CKEDITOR.replace("input_content");
 					if(typeof _document != "undefined"){
 						this.select(_document);
+					}else{
+						this.new();
 					}
 				},
 				afterChangeMode: function(action,doc){
 					switch(action){
-						case "new":
-							CKEDITOR.instances['input_content'].setReadOnly(false);
-							CKEDITOR.instances["input_content"].setData("");
-							break;
 						case "edit":
 							CKEDITOR.instances['input_content'].setReadOnly(false);
 							break;
 						case "read":
 							$(".asDate").html( moment(new Date(this.doc.created), "YYYYMMDD, h:mm:ss").fromNow() );
-							$(".asDate").attr("title", moment(new Date(this.doc.created)).format("dddd, DD MMMM YYYY, h:mm:ss") );													
-							//utilizado por comment.js
-							//var type = "blog";
-							//var id = "{{data:doc.row._id}}";
+							$(".asDate").attr("title", moment(new Date(this.doc.created)).format("dddd, DD MMMM YYYY, h:mm:ss") );	
+							CKEDITOR.instances["input_content"].setData(this.doc.content);
 					}
 				},
 				beforeCreate: function(doc){
-					if(confirm("Confirme creación del documento")){
-						self.wall.setDoc(doc,1);
-						return true;
-					}
+					return confirm("Confirme creación del documento");
 				},
 				afterCreate: function(s){
 					if(s){
-						self.wall.create();
+						location.href = "/blog";
+					}else{
+						$scope.$digest(function(){});
 					}
-					$scope.$digest(function(){});
 				},
 				afterRead: function(){
 					this.openModal();
@@ -128,38 +91,28 @@ app.controller("blogCtrl", function(trascender,$scope){
 					CKEDITOR.instances["input_content"].setData(this.doc.content);
 				},
 				beforeUpdate: function(doc){
-					if(confirm("Confirme actualización del documento")){
-						self.wall.setDoc(doc,2);
-						return true;
-					}
+					return confirm("Confirme actualización del documento");
 				},
 				afterUpdate: function(s){
 					if(s){
-						self.wall.create();
+						location.reload();
+					}else{
+						$scope.$digest(function(){});
 					}
-					$scope.$digest(function(){});
 				},
 				beforeDelete: function(){
-					if(confirm("Confirme eliminación del documento")){
-						self.wall.setDoc(this.doc,3);
-						return true;
-					}
+					return confirm("Confirme eliminación del documento");
 				},
 				afterDelete: function(s){
 					if(s){
-						self.wall.create();
+						location.href = "/blog";
+					}else{
+						$scope.$digest(function(){});
 					}
-					$scope.$digest(function(){});
 				},
 				formatToServer: function(doc){
 					doc.content = CKEDITOR.instances["input_content"].getData();
 					doc.tag = (typeof doc.tag=="string")?doc.tag.split(","):doc.tag;
-					doc.user = self.user.doc._id;
-					if(this.action=="new"){
-						doc.created = new Date();
-					}else{
-						doc.updated = new Date();
-					}
 					return doc;
 				},
 				titleOnBlur: function(){
@@ -197,13 +150,18 @@ app.controller("blogCtrl", function(trascender,$scope){
 				},
 				beforeGetCollection: function(){
 					this.query = {tag: {$in: [_document.tag_main]}, title: {$ne: _document.title}};
-					this.options = {skip: this.obtained, limit: this.rowsByPage, sort: {created: -1}, fields: {uri: 1, thumb: 1, title: 1}};
+					this.options = {skip: this.obtained, limit: this.rowsByPage, sort: {created: -1}, fields: {uri: 1, thumb: 1, title: 1, created: 1}};
 					this.collectionLog = this.addLog(this.message.collection.on);
 					return true;
 				},
 				afterGetCollection: function(){
 					this.coll = this.randomArray(this.coll).slice(0,3);
 					$scope.$digest(function(){});
+				},
+				formatToClient: function(row){
+					row.datefromnow = moment(new Date(row.created), "YYYYMMDD, h:mm:ss").fromNow();
+					row.datetitle = moment(new Date(row.created)).format("dddd, DD MMMM YYYY, h:mm:ss");
+					return row;
 				},
 				randomArray: function(array){
 					let new_array = [];
@@ -222,7 +180,7 @@ app.controller("blogCtrl", function(trascender,$scope){
 		}
 	}
 	
-	for(instance in blog_instances){
-		this[blog_instances[instance]] = new instances[blog_instances[instance]]();
+	for(instance in instances.blog){
+		this[instances.blog[instance]] = new i[instances.blog[instance]]();
 	}
 });

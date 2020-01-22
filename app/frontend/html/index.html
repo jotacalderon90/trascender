@@ -19,6 +19,7 @@
 		<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css" media="all"/>
 		<link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css" media="all"/>
 		<link rel="stylesheet" href="css/www.css" media="all"/> 
+		<link rel="stylesheet" href="css/blog.css" media="all"/> 
 		<!--Captcha-->
 		<!--if:doc.config.recaptcha.enabled-->
 		<script src='https://www.google.com/recaptcha/api.js'>
@@ -157,8 +158,12 @@
 		  return trascender;
 		  });
 		  moment.locale("es");
-		  var product_instances = ["resume"];
-		  var blog_instances = ["resume"];
+		  var instances = {
+			blog: ["resume"],
+			product: ["resume"]
+		  }
+		</script>
+		<script src="js/user.js">
 		</script>
 		<script src="js/message.js">
 		</script>
