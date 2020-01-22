@@ -56,8 +56,8 @@ app.controller("commentCtrl", function(trascender,$scope){
 			if(!this.users[doc.author] && this.usersToLoad.indexOf(doc.author)==-1){
 				this.usersToLoad.push(doc.author);
 			}
-			doc.dateFrom = moment(new Date(doc.created), "YYYYMMDD, h:mm:ss").fromNow();
-			doc.dateDisplay = moment(new Date(doc.created)).format("dddd, DD MMMM YYYY, h:mm:ss");
+			doc.datefromnow = moment(new Date(doc.created), "YYYYMMDD, h:mm:ss").fromNow();
+			doc.datetitle = moment(new Date(doc.created)).format("dddd, DD MMMM YYYY, h:mm:ss");
 			return doc;
 		},
 		formatToServer: function(doc){

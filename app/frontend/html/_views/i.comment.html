@@ -8,7 +8,7 @@
 		<ul class="list-group">
 			<li class="list-group-item" data-ng-repeat="row in ctrl.comment.coll">
 				<img data-ng-src="{{ctrl.comment.users[row.author].thumb}}" title="{{ctrl.comment.users[row.author].nickname}}" height="40" class="img-circle" style="border: 1px dotted grey;vertical-align: top"/>
-				<small>{{row.created|date:"mediumTime"}}</small>
+				<small title="{{row.datetitle}}">{{row.datefromnow}}</small>
 				<br>
 				<br>
 				<p>{{row.comment}}. </p>
