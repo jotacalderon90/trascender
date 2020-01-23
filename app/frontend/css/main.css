@@ -310,6 +310,9 @@ input:checked + .slider:before {
 .page-header .pull-right{
 	margin-left: 10px;
 }
+.clear{
+	clear: both;
+}
 #cke_10, #cke_18, #cke_20, #cke_24, #cke_29{
 	display: none;
 }

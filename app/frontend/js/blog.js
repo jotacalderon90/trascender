@@ -17,7 +17,8 @@ app.controller("blogCtrl", function(trascender,$scope){
 					this.query = (window.title!="blog")?{tag: window.title}:{};
 					this.getTag();
 					this.getTotal();
-					$(window).scroll(this.scrolling(this));	
+					this.isLoading = false;
+					$(window).scroll(()=>{this.scrolling()});	
 				},
 				restart: function(){
 					this.coll = [];
@@ -28,6 +29,7 @@ app.controller("blogCtrl", function(trascender,$scope){
 				beforeGetCollection: function(){
 					this.options = {skip: this.obtained, limit: this.rowsByPage, sort: {created: -1}, fields: {uri: 1, thumb: 1, resume: 1, title: 1, created: 1}};
 					this.collectionLog = this.addLog(this.message.collection.on);
+					this.isLoading = true;
 					return true;
 				},
 				formatToClient: function(row){
@@ -36,14 +38,13 @@ app.controller("blogCtrl", function(trascender,$scope){
 					return row;
 				},
 				afterGetCollection: function(){
+					this.isLoading = false;
 					$scope.$digest(function(){});
 				},
-				scrolling: function(me){
-					return function(){
-						if(Math.round($(window).scrollTop() + $(window).height()) == Math.round($(document).height())) {
-							if(me.obtained < me.cant){
-								me.getCollection();
-							}
+				scrolling: function(){
+					if(Math.round($(window).scrollTop() + $(window).height()) == Math.round($(document).height())) {
+						if(!this.isLoading && this.obtained < this.cant){
+							this.getCollection();
 						}
 					}
 				}
@@ -69,6 +70,7 @@ app.controller("blogCtrl", function(trascender,$scope){
 							$(".asDate").html( moment(new Date(this.doc.created), "YYYYMMDD, h:mm:ss").fromNow() );
 							$(".asDate").attr("title", moment(new Date(this.doc.created)).format("dddd, DD MMMM YYYY, h:mm:ss") );	
 							CKEDITOR.instances["input_content"].setData(this.doc.content);
+							break;
 					}
 				},
 				beforeCreate: function(doc){
@@ -80,15 +82,6 @@ app.controller("blogCtrl", function(trascender,$scope){
 					}else{
 						$scope.$digest(function(){});
 					}
-				},
-				afterRead: function(){
-					this.openModal();
-					$scope.$digest(function(){});
-				},
-				openModal: function(){
-					$("#mdAdmin").modal("show");
-					CKEDITOR.instances['input_content'].setReadOnly(true);
-					CKEDITOR.instances["input_content"].setData(this.doc.content);
 				},
 				beforeUpdate: function(doc){
 					return confirm("Confirme actualización del documento");

@@ -1,10 +1,22 @@
-<div class="modal fade" id="mdAdmin" tabindex="-1" role="dialog">
-	<div class="modal-dialog modal-lg" role="document">
+<!--use:_views/m.main-->
+
+<!--define:title-->
+{{data:(doc.row)?doc.row.title:"NUEVO"}}
+<!--/define:title-->
+
+<!--define:css-->
+<link rel="stylesheet" href="css/product.css" media="all"/> 
+<!--/define:css-->
+
+<!--define:main-->
+<section id="product" data-ng-controller="productCtrl as ctrl">
+	<div class="page-header">
+		<h1>
+			<a href="/product">Productos</a>
+			<small>{{data:(doc.row)?doc.row.title:"NUEVO"}}</small>
+		</h1>
+	</div>
 		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				<h4 class="modal-title">Administración de Productos</h4>
-			</div>
 			<div class="modal-body">
 				<div class="form-group">
 					<label>Título</label>
@@ -35,14 +47,18 @@
 					<input type="text" class="form-control" placeholder="Tags" data-ng-model="ctrl.document.getDoc().tag" data-ng-disabled="ctrl.document.isReadMode()">
 				</div>
 				<div class="form-group">
+					<label>Tag Principal</label>
+					<input type="text" class="form-control" placeholder="Tag Principal" data-ng-model="ctrl.document.getDoc().tag_main" data-ng-disabled="ctrl.document.isReadMode()">
+				</div>
+				<div class="form-group">
 					<label>Precio</label>
 					<input type="number" class="form-control" placeholder="Precio" data-ng-model="ctrl.document.getDoc().price" data-ng-disabled="ctrl.document.isReadMode()">
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">
-					<i class="fa fa-close"></i>
-				</button>
+				<a class="btn btn-info" href="/product/{{data:doc.row.uri}}" data-ng-show="!ctrl.document.isCreateMode()">
+					<i class="fa fa-eye"></i>
+				</a>
 				<button type="button" class="btn btn-primary" data-ng-click="ctrl.document.create()" data-ng-show="ctrl.document.isCreateMode()" title="ctrl.document.createLog.msg">
 					<i class="fa fa-check" data-ng-show="!ctrl.document.createLog.spinner"></i>
 					<i class="fa fa-spinner fa-spin" data-ng-show="ctrl.document.createLog.spinner"></i>
@@ -60,5 +76,14 @@
 				</button>
 			</div>
 		</div>
-	</div>
-</div>
+</section>
+<!--/define:main-->
+
+<!--define:script-->
+	<script type="text/javascript" src="bower_components/ckeditor/ckeditor.js"></script>
+	<script type="text/javascript">
+		var _document = {{data: JSON.stringify(doc.row)}};
+		var instances = {product: ["document"]}
+	</script>
+	<script type="text/javascript" src="js/product.js"></script>
+<!--/define:script-->

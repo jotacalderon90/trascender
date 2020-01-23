@@ -41,15 +41,13 @@
 			<button class="btn btn-primary btn-in-collection" data-ng-click="ctrl.collection.getCollection()" >CARGAR <i class="fa fa-plus"></i></button>
 		</div>
 	</div>
-	
-	<!--include:blog/admin-->
 </section>
 <!--/define:main-->
 
 <!--define:script-->
 	<script type="text/javascript">
 		var _collection = {{data: JSON.stringify(doc.rows)}};
-		var instances = {blog: ["collection"]}
+		var instances = {blog: ["collection"]};
 	</script>
 	<script type="text/javascript" src="js/blog.js"></script>
 <!--/define:script-->

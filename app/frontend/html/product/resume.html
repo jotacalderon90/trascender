@@ -2,13 +2,7 @@
 	<p>Catálogo de productos y servicios</p>
 	<div class="row">
 		<div class="col-md-4" data-ng-repeat="row in ctrl.resume.coll">
-			<article>
-				<a data-ng-click="ctrl.resume.updateCart(row)">
-					<img data-ng-src="{{row.thumb}}" height="200" alt="{{row.title}}"/>
-					<h2>{{row.title}}</h2>
-					<p class="visible-xs"><strong class="text-success">Solicitar</strong>.</p>
-				</a>
-			</article>
+			<!--include:product/article-->
 		</div>
 	</div>
 	<p><a href="/product">ver más</a></p>
