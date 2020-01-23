@@ -5,6 +5,12 @@ app.controller("blogCtrl", function(trascender,$scope){
 		this.user.setAdmin(["admin","BLOGUER"]);
 	}
 	
+	trascender.prototype.formatToClient = function(row){
+		row.datefromnow = moment(new Date(row.created), "YYYYMMDD, h:mm:ss").fromNow();
+		row.datetitle = moment(new Date(row.created)).format("dddd, DD MMMM YYYY, h:mm:ss");
+		return row;
+	}
+	
 	let i = {
 		collection: function(){
 			return new trascender({
@@ -31,11 +37,6 @@ app.controller("blogCtrl", function(trascender,$scope){
 					this.collectionLog = this.addLog(this.message.collection.on);
 					this.isLoading = true;
 					return true;
-				},
-				formatToClient: function(row){
-					row.datefromnow = moment(new Date(row.created), "YYYYMMDD, h:mm:ss").fromNow();
-					row.datetitle = moment(new Date(row.created)).format("dddd, DD MMMM YYYY, h:mm:ss");
-					return row;
 				},
 				afterGetCollection: function(){
 					this.isLoading = false;
@@ -125,11 +126,6 @@ app.controller("blogCtrl", function(trascender,$scope){
 					this.options.sort = {created: -1};
 					this.getCollection();
 				},
-				formatToClient: function(row){
-					row.datefromnow = moment(new Date(row.created), "YYYYMMDD, h:mm:ss").fromNow();
-					row.datetitle = moment(new Date(row.created)).format("dddd, DD MMMM YYYY, h:mm:ss");
-					return row;
-				},
 				afterGetCollection: function(success, xhttp){
 					$scope.$digest(function(){});
 				}
@@ -150,24 +146,6 @@ app.controller("blogCtrl", function(trascender,$scope){
 				afterGetCollection: function(){
 					this.coll = this.randomArray(this.coll).slice(0,3);
 					$scope.$digest(function(){});
-				},
-				formatToClient: function(row){
-					row.datefromnow = moment(new Date(row.created), "YYYYMMDD, h:mm:ss").fromNow();
-					row.datetitle = moment(new Date(row.created)).format("dddd, DD MMMM YYYY, h:mm:ss");
-					return row;
-				},
-				randomArray: function(array){
-					let new_array = [];
-					let used = [];
-					for(let i=0;i<array.length;i++){
-						let r = Math.round(Math.random() * (array.length-1));
-						while(used.indexOf(r)>-1){
-							r = Math.round(Math.random() * (array.length-1));
-						}
-						used.push(r);
-						new_array.push(array[r]);
-					}
-					return new_array;
 				}
 			});
 		}

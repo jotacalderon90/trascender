@@ -9,13 +9,13 @@ Carro de solicitud
 <!--/define:css-->
 
 <!--define:main-->
-	<div data-ng-controller="ecommerceCtrl as ctrl">
+	<div  id="ecommerce" data-ng-controller="ecommerceCtrl as ctrl">
 		<div class="page-header">
 			<h1>
 				<a href="/">Carro de cotización</a>
 			</h1>
 		</div>
-		<div id="dv-ecommerce">
+		<div>
 			<div class="alert alert-warning" data-ng-show="ctrl.ecommerce.newdoc.product.length==0">
 				<strong>Carro vacío</strong> aún no has seleccionado nada de nuestro catálogo<br>
 				<a href="/product">ir al catálogo de productos</a>
