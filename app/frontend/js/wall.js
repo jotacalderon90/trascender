@@ -1,10 +1,3 @@
-var wall = new trascender({
-	baseurl: "api/wall",
-	afterCreate: function(){
-		location.reload();
-	}
-});
-
 app.controller("wallCtrl", function(trascender,$scope){
 	
 	if(typeof user!="undefined"){
@@ -12,33 +5,30 @@ app.controller("wallCtrl", function(trascender,$scope){
 		this.user.setAdmin(["admin"]);
 	}
 	
-	var instances = {
+	let i = {
 		collection: function(){
 			return new trascender({
 				increase: true,
 				baseurl: "api/wall",
-				start: async function(){
+				start: function(){
 					window.title = document.getElementsByTagName("title")[0].innerHTML.trim();
-					this.service_tag = this.serviceCreate("GET","/api/wall/tag/collection");
-					this.tag = await this.service_tag();
-					
 					this.service_user = this.serviceCreate("GET","/api/user/:id");
 					this.users = {};
 					this.usersToLoad = [];
-					
-					this.query = (window.title!="Wall")?{tag: window.title}:{};
-					this.getTotal();
-					
-					$(window).scroll(this.scrolling(this));
+					this.query = (window.title!="Muro")?{tag: window.title}:{};
+					this.getTag();
+					this.isLoading = false;
+					$(window).scroll(()=>{this.scrolling()});	
 				},
-				scrolling: function(me){
-					return function(){
-						if(Math.round($(window).scrollTop() + $(window).height()) == Math.round($(document).height())) {
-							if(me.obtained < me.cant){
-								me.getCollection();
-							}
+				scrolling: function(){
+					if(Math.round($(window).scrollTop() + $(window).height()) == Math.round($(document).height())) {
+						if(!this.isLoading && this.obtained < this.cant){
+							this.getCollection();
 						}
 					}
+				},
+				afterGetTag: function(){
+					this.getTotal();
 				},
 				afterGetTotal: function(){
 					this.getCollection();
@@ -88,19 +78,13 @@ app.controller("wallCtrl", function(trascender,$scope){
 					switch(action){
 						case "new":
 							CKEDITOR.instances["input_content"].setData("");
-							break;
 						break;
 					}
 				},
 				beforeCreate: function(){
-					if(confirm("Confirme posteo")){
-						this.createLog = this.addLog(this.message.create.on);
-						return true;
-					}
+					return confirm("Confirme posteo");
 				},
 				formatToServer: function(doc){
-					doc.author = self.user.doc._id;
-					doc.created = new Date();
 					doc.content = CKEDITOR.instances["input_content"].getData();
 					doc.tag = ["Muro"];
 					return doc;
@@ -108,29 +92,28 @@ app.controller("wallCtrl", function(trascender,$scope){
 				afterCreate: function(s){
 					if(s){
 						location.reload();
+					}else{
+						alert("Error!");
+						console.log(x);
 					}
 				},
 				beforeDelete: function(){
-					if(confirm("Confirme eliminación")){
-						this.deleteLog = this.addLog(this.message.delete.on);
-						return true;
-					}
+					return confirm("Confirme eliminación");
 				},			
-				afterDelete: function(s){
+				afterDelete: function(s,x){
 					if(s){
 						location.reload();
+					}else{
+						alert("Error!");
+						console.log(x);
 					}
 				},
 			});
 		}
 	}
 	
-	for(instance in wall_instances){
-		this[wall_instances[instance]] = new instances[wall_instances[instance]]();
+	for(instance in instances.wall){
+		this[instances.wall[instance]] = new i[instances.wall[instance]]();
 	}
 	
-	var self = this;
-	
-	setTimeout(function(){$scope.$digest(function(){});}, 500);
-
 });

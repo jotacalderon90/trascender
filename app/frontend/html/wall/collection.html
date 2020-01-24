@@ -12,7 +12,7 @@
 			</a>
 			<h1>
 				<a href="/wall">Muro</a>
-				<!--if:doc.title!='Wall'-->
+				<!--if:doc.title!='Muro'-->
 				<small>{{data:doc.title}}</small>
 				<!--/if-->
 			</h1>
@@ -60,7 +60,7 @@
 <!--define:script-->
 	<script type="text/javascript" src="bower_components/ckeditor/ckeditor.js"></script>
 	<script type="text/javascript">
-		var wall_instances = ["collection","document"];
+		var instances = {wall: ["collection","document"]};
 	</script>
 	<script type="text/javascript" src="js/wall.js"></script>
 <!--/define:script-->
