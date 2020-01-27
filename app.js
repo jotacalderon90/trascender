@@ -77,32 +77,29 @@ let trascender = function(){
 			});
 			
 			//segunda funcion a ejecutar para peticion http - decodifica usuario
-			const auth	= this.auth;
-			this.decodeUser = function(){
-				return function(req,res,next){
-					try{
-						req.user = null;
-						if(req.method.toLowerCase()=="get" && req.query.Authorization && req.query.Authorization!=""){
-							let token = auth.decode(req.query.Authorization);
-							req.user = (token==null)?{error: auth.error.toString()}:token;
-						}else if(req.method.toLowerCase()=="post" && req.body.Authorization && req.body.Authorization!=""){
-							let token = auth.decode(req.body.Authorization);
-							req.user = (token==null)?{error: auth.error.toString()}:token;
-						}else if(req.headers && req.headers.cookie){
-							let cookies = req.headers.cookie.split(";");
-							for(let i=0;i<cookies.length;i++){
-								if(cookies[i].indexOf("Authorization=")>-1){
-									let token = auth.decode(cookies[i].split("=")[1]);
-									req.user = (token==null)?{error: auth.error.toString()}:token;
-								}
+			this.app.use((req,res,next)=>{
+				try{
+					req.user = null;
+					if(req.method.toLowerCase()=="get" && req.query.Authorization && req.query.Authorization!=""){
+						let token = this.auth.decode(req.query.Authorization);
+						req.user = (token==null)?{error: this.auth.error.toString()}:token;
+					}else if(req.method.toLowerCase()=="post" && req.body.Authorization && req.body.Authorization!=""){
+						let token = this.auth.decode(req.body.Authorization);
+						req.user = (token==null)?{error: this.auth.error.toString()}:token;
+					}else if(req.headers && req.headers.cookie){
+						let cookies = req.headers.cookie.split(";");
+						for(let i=0;i<cookies.length;i++){
+							if(cookies[i].indexOf("Authorization=")>-1){
+								let token = this.auth.decode(cookies[i].split("=")[1]);
+								req.user = (token==null)?{error: this.auth.error.toString()}:token;
 							}
 						}
-					}catch(e){
-						console.log(e);
 					}
-					return next();
+				}catch(e){
+					console.log(e);
 				}
-			}
+				return next();
+			});
 			
 			//tercera funcion a ejecutar para peticion http - registra llamada
 			const log = this.log;
@@ -190,20 +187,20 @@ let trascender = function(){
 			
 			//publicar archivos
 			console.log(new Date() + " == publicando archivos");
-			this.app.get("/favicon.ico", this.decodeUser(), this.newRequest("FILE"), this.hasRole([]), this.getFile(this.dir + "/app/frontend/media/img/favicon.ico"));
-			this.app.get("/robots.txt", this.decodeUser(), this.newRequest("FILE"), this.hasRole([]), this.getFile(this.dir + "/app/frontend/media/doc/robots.txt"));
+			this.app.get("/favicon.ico", this.newRequest("FILE"), this.hasRole([]), this.getFile(this.dir + "/app/frontend/media/img/favicon.ico"));
+			this.app.get("/robots.txt", this.newRequest("FILE"), this.hasRole([]), this.getFile(this.dir + "/app/frontend/media/doc/robots.txt"));
 			if(this.config.files){
 				for(let i=0;i<this.config.files.length;i++){
-					this.app.get(this.config.files[i].uri, this.decodeUser(), this.newRequest("FILE"), this.hasRole(this.config.files[i].roles), this.getFile(this.dir + this.config.files[i].src));
+					this.app.get(this.config.files[i].uri, this.newRequest("FILE"), this.hasRole(this.config.files[i].roles), this.getFile(this.dir + this.config.files[i].src));
 				}
 			}
 				
 			//publicar carpetas
 			console.log(new Date() + " == publicando carpetas");
-			this.app.use("/",this.decodeUser(), this.newRequest("FOLDER"), this.hasRole([]), express.static(this.dir + "/app/frontend"));
+			this.app.use("/", this.newRequest("FOLDER"), this.hasRole([]), express.static(this.dir + "/app/frontend"));
 			if(this.config.folders){
 				for(let i=0;i<this.config.folders.length;i++){
-					this.app.use(this.config.folders[i].uri, this.decodeUser(), this.newRequest("FOLDER"), this.hasRole(this.config.folders[i].roles), express.static(this.dir + this.config.folders[i].src));
+					this.app.use(this.config.folders[i].uri, this.newRequest("FOLDER"), this.hasRole(this.config.folders[i].roles), express.static(this.dir + this.config.folders[i].src));
 				}
 			}
 				
@@ -228,7 +225,7 @@ let trascender = function(){
 						roles = eval(this.extract(data,"@roles(",")"));
 					}
 					for(let y=0;y<method.length;y++){
-						this.app[method[y]](uri, this.decodeUser(), this.newRequest("API"), this.hasRole(roles), this.getAPI(a,action));
+						this.app[method[y]](uri, this.newRequest("API"), this.hasRole(roles), this.getAPI(a,action));
 					}
 				}
 			}
@@ -237,7 +234,7 @@ let trascender = function(){
 			if(this.config.redirect){
 				for(let i=0;i<this.config.redirect.length;i++){
 					console.log(new Date() + " == publicando redireccionamientos");
-					this.app.use(this.config.redirect[i].from, this.decodeUser(), this.newRequest("REDIRECT"), this.hasRole(this.config.redirect[i].roles), this.getRedirect(this.config.redirect[i].to));
+					this.app.use(this.config.redirect[i].from, this.newRequest("REDIRECT"), this.hasRole(this.config.redirect[i].roles), this.getRedirect(this.config.redirect[i].to));
 				}
 			}
 			
