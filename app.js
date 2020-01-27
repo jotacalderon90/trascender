@@ -19,6 +19,10 @@ console.log(new Date() + " == importando helmet");
 const helmet 		= require("helmet");
 console.log(new Date() + " == importando http");
 const http			= require("http");
+console.log(new Date() + " == importando trascender.router");
+const router 		= require("trascender.router");
+console.log(new Date() + " == importando trascender.render");
+const render 		= require("trascender.render");
 			
 //kernel/core/motor del sistema trascender
 let trascender = function(){
@@ -44,6 +48,8 @@ let trascender = function(){
 			
 			this.server		= http.Server(this.express);
 			
+			this.render = new render(this, __dirname + "/app/frontend/html/");
+			
 			let libs = fs.readdirSync("./app/backend/lib","utf8").filter(function(row){
 				return fs.statSync(path.join("./app/backend/lib",row)).isFile();
 			});
@@ -52,7 +58,7 @@ let trascender = function(){
 				let l = libs[i].replace(".js","");
 				console.log(new Date() + " == instanciando libreria " + l);
 				this[l]	= new(require("./app/backend/lib/" + l))(this);
-			}			
+			}
 			
 			if(this.config.properties.cors===true){
 				let cors = require("cors");
@@ -185,8 +191,6 @@ let trascender = function(){
 			}
 				
 			//importar router
-			let router = require("trascender.router");
-			this.express = this.express;
 			new router(this,__dirname + "/app/backend");
 			
 			//publicar redireccionamientos
