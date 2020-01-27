@@ -26,7 +26,7 @@ self.prototype.create = async function(req){
 				user = await this.mongodb.findOne(db,"user",req.user.sub);
 				user.ip = (user.ip)?user.ip:[];
 				if(user.ip.indexOf(req.ip)==-1){
-					user.push(req.ip);
+					user.ip.push(req.ip);
 				}
 				await this.mongodb.updateOne(db,"user",user._id,user);
 			}else{
