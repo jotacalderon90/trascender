@@ -73,10 +73,7 @@ let trascender = function(){
 			//primera funcion a ejecutar para peticion http - obtener ip
 			this.getIP = function(){
 				return function(req,res,next){
-					req.ip = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
-					req.ip2 = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
 					req.real_ip = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
-					console.log("IP: " + req.ip);
 					next();
 				}
 			}
@@ -113,7 +110,6 @@ let trascender = function(){
 			const log = this.log;
 			this.newRequest = function(type){
 				return function(req,res,next){
-					req.ip = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
 					req.type = type;
 					req.created = new Date();
 					req.dateref = {
@@ -121,7 +117,7 @@ let trascender = function(){
 						month: req.created.getMonth(), 
 						day: req.created.getDate()
 					}
-					let content = "\n" + req.created.toISOString() + ";" + req.type + ";" + req.ip + ";" + req.originalUrl + ";" + req.method + ";" + JSON.stringify(req.body);
+					let content = "\n" + req.created.toISOString() + ";" + req.type + ";" + req.real_ip + ";" + req.originalUrl + ";" + req.method + ";" + JSON.stringify(req.body);
 					console.log(content);
 					fs.appendFile("./log.csv", content, function (err) {});
 					log.create(req);
