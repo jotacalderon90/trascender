@@ -111,7 +111,6 @@ let trascender = function(){
 				return next();
 			});
 			
-			//cuarta funcion a ejecutar para peticion http - valida autenticacion
 			let mdbs = this.config.database.url;
 			const mongodb = this.mongodb;
 			this.hasRole = function(roles){
@@ -150,21 +149,18 @@ let trascender = function(){
 				}
 			}
 			
-			//funcion para URLS que enlazan un archivo
 			this.getFile = function(file){
 				return function(req,res){
 					res.sendFile(file);
 				};
 			}
 			
-			//funcion para URLS que redireccionan
 			this.getRedirect = function(to){
 				return function(req,res){
 					res.redirect(to);
 				};
 			}
 			
-			//funcion para URLS que enlazan una API
 			this.getAPI = function(api,method){
 				return function(req,res,next){
 					api[method](req,res,next);
