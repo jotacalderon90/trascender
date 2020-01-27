@@ -12,6 +12,7 @@ let self = function(a){
 self.prototype.create = async function(req){
 	try{
 		console.log(req.ip);
+		console.log("real_ip:: " + req.real_ip);
 		//si cambio la fecha, entonces limpiar cache
 		if(req.dateref.year!=this.dateref.year || req.dateref.month!=this.dateref.month || req.dateref.day!=this.dateref.day){
 			let d = new Date();

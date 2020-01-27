@@ -75,6 +75,7 @@ let trascender = function(){
 				return function(req,res,next){
 					req.ip = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
 					req.ip2 = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
+					req.real_ip = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
 					console.log("IP: " + req.ip);
 					next();
 				}
