@@ -3,12 +3,12 @@
 const fs = require("fs");
 const txtomp3 = require("text-to-mp3");
 
-let self = function(application,params){
-	this.dir				= application.dir;
-	this.config				= application.config;
-	this.helper				= application.helper;
-	this.mongodb			= application.mongodb;
-	this.collection_name	= "map";
+let self = function(a){
+	this.dir = a.dir;
+	this.config = a.config;
+	this.helper = a.helper;
+	this.mongodb = a.mongodb;
+	this.collection_name = "map";
 }
 
 

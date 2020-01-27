@@ -1,17 +1,17 @@
 const fs = require("fs");
 
-var self = function(app){
-	this.config = app.config;
-	this.path = "./" + app.config.properties.views;
-	app.app.engine("html", this.engine(this));
-	app.app.set("views", "./" + this.path);
-	app.app.set("view engine", "html");
+var self = function(a){
+	this.config = a.config;
+	this.path = "./" + a.config.properties.views;
+	a.express.engine("html", this.engine(this));
+	a.express.set("views", "./" + this.path);
+	a.express.set("view engine", "html");
 }
 
-self.prototype.engine = function(app){
+self.prototype.engine = function(a){
 	return function(filePath,data,callback){
 		try{
-			return callback(null, app.processTemplate(fs.readFileSync(filePath,"utf8").toString(),data));
+			return callback(null, a.processTemplate(fs.readFileSync(filePath,"utf8").toString(),data));
 		}catch(e){
 			return callback(new Error(e));
 		}

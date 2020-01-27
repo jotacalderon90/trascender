@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 
-let self = function(a,p){
+let self = function(a){
 	this.dir = a.dir;
 	this.config = a.config;
 	this.helper = a.helper;

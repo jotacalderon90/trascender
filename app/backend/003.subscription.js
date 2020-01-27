@@ -1,6 +1,6 @@
 "use strict";
 
-var self = function(a,p){
+var self = function(a){
 	this.dir = a.dir;
 	this.config = a.config;
 	this.auth = a.auth;

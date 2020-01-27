@@ -27,13 +27,13 @@ let trascender = function(){
 		//configurar estandar de aplicacion web/nodejs/express/trascender
 		if(true){
 			console.log(new Date() + " == configurando aplicacion");
-			this.app = express();
-			this.app.use(bodyParser.json({limit: "50mb"})); 
-			this.app.use(bodyParser.urlencoded({extended: true}));
-			this.app.use(cookieParser());
-			this.app.use(session({secret: (new Date()).toISOString(), resave: false, saveUninitialized: false}));
-			this.app.use(upload());
-			this.app.use(helmet());
+			this.express = express();
+			this.express.use(bodyParser.json({limit: "50mb"})); 
+			this.express.use(bodyParser.urlencoded({extended: true}));
+			this.express.use(cookieParser());
+			this.express.use(session({secret: (new Date()).toISOString(), resave: false, saveUninitialized: false}));
+			this.express.use(upload());
+			this.express.use(helmet());
 			
 			process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 			
@@ -42,7 +42,7 @@ let trascender = function(){
 			this.config.properties.views = "/app/frontend/html/";
 			this.config.properties.mailing = "/app/frontend/html/mailing/templates_back/";
 			
-			this.server		= http.Server(this.app);
+			this.server		= http.Server(this.express);
 			
 			let libs = fs.readdirSync("./app/backend/lib","utf8").filter(function(row){
 				return fs.statSync(path.join("./app/backend/lib",row)).isFile();
@@ -56,7 +56,7 @@ let trascender = function(){
 			
 			if(this.config.properties.cors===true){
 				let cors = require("cors");
-				this.app.use(cors());
+				this.express.use(cors());
 			}
 		}
 		
@@ -64,13 +64,13 @@ let trascender = function(){
 		if(true){
 					
 			//primera funcion a ejecutar para peticion http - obtener ip
-			this.app.use(function(req,res,next){
+			this.express.use(function(req,res,next){
 				req.real_ip = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
 				next();
 			});
 			
 			//segunda funcion a ejecutar para peticion http - decodifica usuario
-			this.app.use((req,res,next)=>{
+			this.express.use((req,res,next)=>{
 				try{
 					req.user = null;
 					if(req.method.toLowerCase()=="get" && req.query.Authorization && req.query.Authorization!=""){
@@ -95,7 +95,7 @@ let trascender = function(){
 			});
 			
 			//tercera funcion a ejecutar para peticion http - registra llamada
-			this.app.use((req,res,next)=>{
+			this.express.use((req,res,next)=>{
 				req.created = new Date();
 				let content = "\n" + req.created.toISOString() + ";" + req.real_ip + ";" + req.originalUrl + ";" + req.method + ";" + JSON.stringify(req.body);
 				console.log(content);
@@ -167,38 +167,38 @@ let trascender = function(){
 			
 			//publicar archivos
 			console.log(new Date() + " == publicando archivos");
-			this.app.get("/favicon.ico", this.hasRole([]), this.getFile(this.dir + "/app/frontend/media/img/favicon.ico"));
-			this.app.get("/robots.txt", this.hasRole([]), this.getFile(this.dir + "/app/frontend/media/doc/robots.txt"));
+			this.express.get("/favicon.ico", this.hasRole([]), this.getFile(this.dir + "/app/frontend/media/img/favicon.ico"));
+			this.express.get("/robots.txt", this.hasRole([]), this.getFile(this.dir + "/app/frontend/media/doc/robots.txt"));
 			if(this.config.files){
 				for(let i=0;i<this.config.files.length;i++){
-					this.app.get(this.config.files[i].uri, this.hasRole(this.config.files[i].roles), this.getFile(this.dir + this.config.files[i].src));
+					this.express.get(this.config.files[i].uri, this.hasRole(this.config.files[i].roles), this.getFile(this.dir + this.config.files[i].src));
 				}
 			}
 				
 			//publicar carpetas
 			console.log(new Date() + " == publicando carpetas");
-			this.app.use("/", this.hasRole([]), express.static(this.dir + "/app/frontend"));
+			this.express.use("/", this.hasRole([]), express.static(this.dir + "/app/frontend"));
 			if(this.config.folders){
 				for(let i=0;i<this.config.folders.length;i++){
-					this.app.use(this.config.folders[i].uri, this.hasRole(this.config.folders[i].roles), express.static(this.dir + this.config.folders[i].src));
+					this.express.use(this.config.folders[i].uri, this.hasRole(this.config.folders[i].roles), express.static(this.dir + this.config.folders[i].src));
 				}
 			}
 				
 			//importar router
 			let router = require("trascender.router");
-			this.express = this.app;
+			this.express = this.express;
 			new router(this,__dirname + "/app/backend");
 			
 			//publicar redireccionamientos
 			if(this.config.redirect){
 				for(let i=0;i<this.config.redirect.length;i++){
 					console.log(new Date() + " == publicando redireccionamientos");
-					this.app.use(this.config.redirect[i].from, this.hasRole(this.config.redirect[i].roles), this.getRedirect(this.config.redirect[i].to));
+					this.express.use(this.config.redirect[i].from, this.hasRole(this.config.redirect[i].roles), this.getRedirect(this.config.redirect[i].to));
 				}
 			}
 			
 			//publicar error 404
-			this.app.use(function(req,res,next){
+			this.express.use(function(req,res,next){
 				console.log(new Date() + " == publicando error 404");
 				res.status(404).render("message",{title: "Error 404", message: "URL no encontrada", error: 404, class: "danger"});
 			});

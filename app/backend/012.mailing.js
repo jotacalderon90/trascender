@@ -2,7 +2,7 @@
 
 var fs = require("fs");
 
-var self = function(a,p){
+var self = function(a){
 	this.dir = a.dir;
 	this.config = a.config;
 	this.helper = a.helper;

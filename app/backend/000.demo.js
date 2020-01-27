@@ -1,6 +1,6 @@
 "use strict";
 
-let self = function(a,p){
+let self = function(a){
 	
 }
 

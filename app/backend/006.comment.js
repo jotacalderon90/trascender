@@ -1,6 +1,6 @@
 "use strict";
 
-let self = function(a,p){
+let self = function(a){
 	this.config = a.config;
 	this.mongodb = a.mongodb;
 	this.name = "comment";
