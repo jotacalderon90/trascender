@@ -25,7 +25,7 @@ self.prototype.delete = function(req,res){
 	try{
 		fs.unlinkSync(this.dir + "/app/backend/001.config.js");
 		let c = fs.readFileSync(this.dir + "/app.json","utf-8");
-		fs.writeFileSync(this.dir + "/app.json", JSON.stringify(c,undefined,"\t"));
+		fs.writeFileSync(this.dir + "/app.json", c);
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null, error: e});

@@ -99,13 +99,21 @@ let trascender = function(){
 			}
 			
 			//segunda funcion a ejecutar para peticion http - registra llamada
-			const log = "./log.csv";
+			const log = this.log;
 			this.newRequest = function(type){
 				return function(req,res,next){
-					let ip = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
-					let content = "\n" + (new Date()).toISOString() + ";" + type + ";" + ip + ";" + req.originalUrl + ";" + req.method + ";" + JSON.stringify(req.body);
+					req.ip = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
+					req.type = type;
+					req.created = new Date();
+					req.dateref = {
+						year: req.created.getFullYear(), 
+						month: req.created.getMonth(), 
+						day: req.created.getDate()
+					}
+					let content = "\n" + req.created.toISOString() + ";" + req.type + ";" + req.ip + ";" + req.originalUrl + ";" + req.method + ";" + JSON.stringify(req.body);
 					console.log(content);
-					fs.appendFile(log, content, function (err) {});
+					fs.appendFile("./log.csv", content, function (err) {});
+					log.create(req);
 					return next();
 				}
 			}
@@ -201,17 +209,9 @@ let trascender = function(){
 			api.sort();
 			for(let i=0;i<api.length;i++){
 				let b = api[i];
-				let n;
-				let p;
-				if(typeof b=="string"){
-					n = b;
-				}else{
-					n = b.name;
-					p = b.params;
-				}
-				console.log(new Date() + " == publicando api " + n);
-				let c = fs.readFileSync("./app/backend/" + n,"utf-8");
-				let a = new (require("./app/backend/" + n))(this,p);
+				console.log(new Date() + " == publicando api " + b);
+				let c = fs.readFileSync("./app/backend/" + b,"utf-8");
+				let a = new (require("./app/backend/" + b))(this);
 				let r = c.split("//@route");
 				for(let x=1;x<r.length;x++){
 					let data = r[x];
@@ -241,6 +241,8 @@ let trascender = function(){
 				console.log(new Date() + " == publicando error 404");
 				res.status(404).render("message",{title: "Error 404", message: "URL no encontrada", error: 404, class: "danger"});
 			});
+			
+			this.log.mongodb = this.mongodb;
 			
 			//iniciar aplicacion
 			let port = this.config.properties.port;
