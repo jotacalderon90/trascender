@@ -62,14 +62,7 @@ let trascender = function(){
 		
 		//definir funciones internas propias de trascender
 		if(true){
-						
-			this.extract = function(content,from,to){
-				var index1 = content.indexOf(from) + from.length;
-				content = content.substring(index1);
-				var index2 = content.indexOf(to);
-				return content.substring(0,index2);
-			}
-			
+					
 			//primera funcion a ejecutar para peticion http - obtener ip
 			this.app.use(function(req,res,next){
 				req.real_ip = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
@@ -191,31 +184,10 @@ let trascender = function(){
 				}
 			}
 				
-			//publicar api
-			let api = fs.readdirSync("./app/backend","utf8").filter(function(row){
-				return fs.statSync(path.join("./app/backend",row)).isFile();
-			});
-			api.sort();
-			for(let i=0;i<api.length;i++){
-				let b = api[i];
-				console.log(new Date() + " == publicando api " + b);
-				let c = fs.readFileSync("./app/backend/" + b,"utf-8");
-				let a = new (require("./app/backend/" + b))(this);
-				let r = c.split("//@route");
-				for(let x=1;x<r.length;x++){
-					let data = r[x];
-					let uri = eval(this.extract(data,"(",")"));
-					let method = eval(this.extract(data,"@method(",")"));
-					let action = this.extract(data,"self.prototype.","=").trim();
-					let roles = [];
-					if(data.indexOf("@roles(")>-1){
-						roles = eval(this.extract(data,"@roles(",")"));
-					}
-					for(let y=0;y<method.length;y++){
-						this.app[method[y]](uri, this.hasRole(roles), this.getAPI(a,action));
-					}
-				}
-			}
+			//importar router
+			let router = require("trascender.router");
+			this.express = this.app;
+			new router(this,__dirname + "/app/backend");
 			
 			//publicar redireccionamientos
 			if(this.config.redirect){
@@ -247,7 +219,4 @@ let trascender = function(){
 		console.log(e);
 		process.exit();
 	}
-}
-
-//inicio sistema trascender
-new trascender();
+}();
