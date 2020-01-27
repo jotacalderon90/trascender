@@ -12,6 +12,7 @@ var self = function(application,params){
 //@method(['get'])
 self.prototype.ip = async function(req,res){
 	try{
+		console.log("IP INTERNA: " + req.ip2);
 		var ip =  (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
 		res.send({data: ip});
 	}catch(e){

@@ -70,7 +70,17 @@ let trascender = function(){
 				return content.substring(0,index2);
 			}
 			
-			//primera funcion a ejecutar para peticion http - decodifica usuario
+			//primera funcion a ejecutar para peticion http - obtener ip
+			this.getIP = function(){
+				return function(req,res,next){
+					req.ip = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
+					req.ip2 = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
+					console.log("IP: " + req.ip);
+					next();
+				}
+			}
+			
+			//segunda funcion a ejecutar para peticion http - decodifica usuario
 			const auth	= this.auth;
 			this.decodeUser = function(){
 				return function(req,res,next){
@@ -98,7 +108,7 @@ let trascender = function(){
 				}
 			}
 			
-			//segunda funcion a ejecutar para peticion http - registra llamada
+			//tercera funcion a ejecutar para peticion http - registra llamada
 			const log = this.log;
 			this.newRequest = function(type){
 				return function(req,res,next){
@@ -118,7 +128,7 @@ let trascender = function(){
 				}
 			}
 			
-			//tercera funcion a ejecutar para peticion http - valida autenticacion
+			//cuarta funcion a ejecutar para peticion http - valida autenticacion
 			let mdbs = this.config.database.url;
 			const mongodb = this.mongodb;
 			this.hasRole = function(roles){
@@ -189,7 +199,7 @@ let trascender = function(){
 			this.app.get("/robots.txt", this.decodeUser(), this.newRequest("FILE"), this.hasRole([]), this.getFile(this.dir + "/app/frontend/media/doc/robots.txt"));
 			if(this.config.files){
 				for(let i=0;i<this.config.files.length;i++){
-					this.app.get(this.config.files[i].uri, this.decodeUser(), this.newRequest("FILE"), this.hasRole(this.config.files[i].roles), this.getFile(this.dir + this.config.files[i].src));
+					this.app.get(this.config.files[i].uri, this.getIP(), this.decodeUser(), this.newRequest("FILE"), this.hasRole(this.config.files[i].roles), this.getFile(this.dir + this.config.files[i].src));
 				}
 			}
 				
@@ -198,7 +208,7 @@ let trascender = function(){
 			this.app.use("/",this.decodeUser(), this.newRequest("FOLDER"), this.hasRole([]), express.static(this.dir + "/app/frontend"));
 			if(this.config.folders){
 				for(let i=0;i<this.config.folders.length;i++){
-					this.app.use(this.config.folders[i].uri,this.decodeUser(), this.newRequest("FOLDER"), this.hasRole(this.config.folders[i].roles), express.static(this.dir + this.config.folders[i].src));
+					this.app.use(this.config.folders[i].uri, this.getIP(), this.decodeUser(), this.newRequest("FOLDER"), this.hasRole(this.config.folders[i].roles), express.static(this.dir + this.config.folders[i].src));
 				}
 			}
 				
@@ -223,7 +233,7 @@ let trascender = function(){
 						roles = eval(this.extract(data,"@roles(",")"));
 					}
 					for(let y=0;y<method.length;y++){
-						this.app[method[y]](uri,this.decodeUser(), this.newRequest("API"), this.hasRole(roles), this.getAPI(a,action));
+						this.app[method[y]](uri, this.getIP(), this.decodeUser(), this.newRequest("API"), this.hasRole(roles), this.getAPI(a,action));
 					}
 				}
 			}
@@ -232,7 +242,7 @@ let trascender = function(){
 			if(this.config.redirect){
 				for(let i=0;i<this.config.redirect.length;i++){
 					console.log(new Date() + " == publicando redireccionamientos");
-					this.app.use(this.config.redirect[i].from,this.decodeUser(), this.newRequest("REDIRECT"), this.hasRole(this.config.redirect[i].roles), this.getRedirect(this.config.redirect[i].to));
+					this.app.use(this.config.redirect[i].from, this.getIP(), this.decodeUser(), this.newRequest("REDIRECT"), this.hasRole(this.config.redirect[i].roles), this.getRedirect(this.config.redirect[i].to));
 				}
 			}
 			
