@@ -32,12 +32,12 @@ self.prototype.create = async function(req){
 			}else{
 				let possibles = await this.mongodb.count(db,"user",{ip: {$in: [req.ip]}});
 				if(possibles==0){
-					await this.mongodb.insertOne(db,"log",{ip: req.ip, created: req.created, url: req.url, method: method, body: JSON.stringify(req.body)});
+					await this.mongodb.insertOne(db,"log",{ip: req.ip, created: req.created, url: req.url, method: req.method, body: JSON.stringify(req.body)});
 				}
 			}
 			let docip = await this.mongodb.find(db,"ip",{ip: req.ip});
 			if(docip.length!=1){
-				await this.mongodb.insertOne(db,"ip",{ip: req.ip, created: req.created, url: req.url, method: method, body: JSON.stringify(req.body)});
+				await this.mongodb.insertOne(db,"ip",{ip: req.ip, created: req.created, url: req.url, method: req.method, body: JSON.stringify(req.body)});
 			}
 			this.ips.push(req.ip);
 			db.close();
