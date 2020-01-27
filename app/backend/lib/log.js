@@ -11,6 +11,7 @@ let self = function(a){
 //registro de logs que entran sin ser identificados
 self.prototype.create = async function(req){
 	try{
+		console.log(req.ip);
 		//si cambio la fecha, entonces limpiar cache
 		if(req.dateref.year!=this.dateref.year || req.dateref.month!=this.dateref.month || req.dateref.day!=this.dateref.day){
 			let d = new Date();
@@ -20,6 +21,7 @@ self.prototype.create = async function(req){
 		
 		//ingresa por primera vez en el día
 		if(this.ips.indexOf(req.ip)==-1){
+			console.log(req.user);
 			let db = await this.mongodb.connect(this.config.database.url);
 			if(req.user){
 				//nueva ip de usuario authenticado
@@ -37,6 +39,7 @@ self.prototype.create = async function(req){
 			}
 			let docip = await this.mongodb.find(db,"ip",{ip: req.ip});
 			if(docip.length!=1){
+				console.log("inserta nueva ip: " + req.ip);
 				await this.mongodb.insertOne(db,"ip",{ip: req.ip, created: req.created, url: req.url, method: req.method, body: JSON.stringify(req.body)});
 			}
 			this.ips.push(req.ip);
