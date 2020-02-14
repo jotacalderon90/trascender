@@ -68,78 +68,77 @@ let trascender = function(){
 		
 		//definir funciones internas propias de trascender
 		if(true){
-					
-			//primera funcion a ejecutar para peticion http - obtener ip
-			this.express.use(function(req,res,next){
-				req.real_ip = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
-				next();
-			});
 			
-			//segunda funcion a ejecutar para peticion http - decodifica usuario
-			this.express.use((req,res,next)=>{
-				try{
-					req.user = null;
-					if(req.method.toLowerCase()=="get" && req.query.Authorization && req.query.Authorization!=""){
-						let token = this.auth.decode(req.query.Authorization);
-						req.user = (token==null)?{error: this.auth.error.toString()}:token;
-					}else if(req.method.toLowerCase()=="post" && req.body.Authorization && req.body.Authorization!=""){
-						let token = this.auth.decode(req.body.Authorization);
-						req.user = (token==null)?{error: this.auth.error.toString()}:token;
-					}else if(req.headers && req.headers.cookie){
-						let cookies = req.headers.cookie.split(";");
-						for(let i=0;i<cookies.length;i++){
-							if(cookies[i].indexOf("Authorization=")>-1){
-								let token = this.auth.decode(cookies[i].split("=")[1]);
-								req.user = (token==null)?{error: this.auth.error.toString()}:token;
-							}
-						}
-					}
-				}catch(e){
-					console.log(e);
-				}
-				return next();
-			});
-			
-			//tercera funcion a ejecutar para peticion http - registra llamada
-			this.express.use((req,res,next)=>{
-				req.created = new Date();
-				let content = "\n" + req.created.toISOString() + ";" + req.real_ip + ";" + req.originalUrl + ";" + req.method + ";" + JSON.stringify(req.body);
-				console.log(content);
-				fs.appendFile("./log.csv", content, function (err) {});
-				this.log.create(req);
-				return next();
-			});
-			
-			let mdbs = this.config.database.url;
-			const mongodb = this.mongodb;
-			this.hasRole = function(roles){
-				return async function(req,res,next){
+			this.beforeExecute = function(params){
+				return async (req,res,next) => {
 					try{
-						if(roles==undefined || roles.length==0){
-							return next();
-						}else{
-							if(req.user==undefined){
-								throw("Acción restringida");
-							}
-							if(req.user.error){
-								throw(req.user.error);
-							}
-							
-							//validar "usuario activo"
-							let db = await mongodb.connect(mdbs);
-							let active = await mongodb.find(db,"user_active",{user_id: req.user.sub},{},true);
-							if(active.length==0){
-								throw("Acción restringida");
-							}
-							
-							for(let i=0;i<roles.length;i++){
-								if(req.user.roles.indexOf(roles[i])>-1){
-									return next();
+						//SET TYPE:FILE-FOLDER-REDIRECT-API
+						req.type = params.type;
+						
+						//SET REAL IP
+						req.real_ip = (req.connection.remoteAddress!="::ffff:127.0.0.1")?req.connection.remoteAddress:req.headers["x-real-ip"];
+						
+						//DECODE USER AUTHENTICATED
+						let token = null;
+						if(req.method.toLowerCase()=="get" && req.query.Authorization && req.query.Authorization!=""){
+							token = this.auth.decode(req.query.Authorization);
+							token = (token==null)?{error: this.auth.error.toString()}:token;
+						}else if(req.method.toLowerCase()=="post" && req.body.Authorization && req.body.Authorization!=""){
+							token = this.auth.decode(req.body.Authorization);
+							token = (token==null)?{error: this.auth.error.toString()}:token;
+						}else if(req.headers && req.headers.cookie){
+							let cookies = req.headers.cookie.split(";");
+							for(let i=0;i<cookies.length;i++){
+								if(cookies[i].indexOf("Authorization=")>-1){
+									token = this.auth.decode(cookies[i].split("=")[1].split(";")[0]);
+									token = (token==null)?{error: this.auth.error.toString()}:token;
 								}
 							}
-							throw("Acción restringida");
+						}
+						
+						//FIND USER
+						let db = await this.mongodb.connect(this.config.database.url);
+						if(token!=null && token!=undefined && !token.error){
+							req.user = await this.mongodb.findOne(db,"user",token.sub);
+						}
+						
+						//LOG
+						req.created = new Date();
+						let content = "\n";
+						content += req.created.toISOString() + ";";
+						content += req.real_ip + ";";
+						content += ((req.user)?req.user.email:null) + ";";
+						content += req.originalUrl + ";";
+						content += req.method + ";";
+						content += JSON.stringify(req.body);
+						console.log(content);
+						fs.appendFile("./log.csv", content, function (err) {});
+						//this.log.create(req);
+						
+						//VALIDATE USER
+						if(params.roles==undefined || params.roles.length==0){
+							return next();
+						}else if(token==null || token==undefined){
+							throw("Acción restringida"); 
+						}else if(token.error){
+							throw(token.error); 
+						}else{
+							let a = await this.mongodb.find(db,"user_active",{user_id: token.sub},{}, true);
+							if(a.length==0){ throw("Acción restringida"); }
+							a = false;
+							for(let i=0;i<params.roles.length;i++){
+								if(req.user.roles.indexOf(params.roles[i])>-1){
+									a = true;
+								}
+							}
+							if(a){
+								return next();
+							}else{
+								throw("Acción restringida");
+							}
 						}
 					}catch(e){
+						console.error(e);
 						if(req.url.indexOf("/api/")==-1){
 							req.session.redirectTo = req.url;
 						}
@@ -160,12 +159,6 @@ let trascender = function(){
 				};
 			}
 			
-			this.getAPI = function(api,method){
-				return function(req,res,next){
-					api[method](req,res,next);
-				}
-			}
-			
 		}
 		
 		//levantar aplicación solicitada
@@ -173,20 +166,20 @@ let trascender = function(){
 			
 			//publicar archivos
 			console.log(new Date() + " == publicando archivos");
-			this.express.get("/favicon.ico", this.hasRole([]), this.getFile(this.dir + "/app/frontend/media/img/favicon.ico"));
-			this.express.get("/robots.txt", this.hasRole([]), this.getFile(this.dir + "/app/frontend/media/doc/robots.txt"));
+			this.express.get("/favicon.ico", this.getFile(this.dir + "/app/frontend/media/img/favicon.ico"));
+			this.express.get("/robots.txt", this.getFile(this.dir + "/app/frontend/media/doc/robots.txt"));
 			if(this.config.files){
 				for(let i=0;i<this.config.files.length;i++){
-					this.express.get(this.config.files[i].uri, this.hasRole(this.config.files[i].roles), this.getFile(this.dir + this.config.files[i].src));
+					this.express.get(this.config.files[i].uri, this.beforeExecute({type: "FILE", roles: this.config.files[i].roles}), this.getFile(this.dir + this.config.files[i].src));
 				}
 			}
 				
 			//publicar carpetas
 			console.log(new Date() + " == publicando carpetas");
-			this.express.use("/", this.hasRole([]), express.static(this.dir + "/app/frontend"));
+			this.express.use("/",  express.static(this.dir + "/app/frontend"));
 			if(this.config.folders){
 				for(let i=0;i<this.config.folders.length;i++){
-					this.express.use(this.config.folders[i].uri, this.hasRole(this.config.folders[i].roles), express.static(this.dir + this.config.folders[i].src));
+					this.express.use(this.config.folders[i].uri, this.beforeExecute({type: "FOLDER", roles: this.config.folders[i].roles}), express.static(this.dir + this.config.folders[i].src));
 				}
 			}
 				
@@ -197,7 +190,7 @@ let trascender = function(){
 			if(this.config.redirect){
 				for(let i=0;i<this.config.redirect.length;i++){
 					console.log(new Date() + " == publicando redireccionamientos");
-					this.express.use(this.config.redirect[i].from, this.hasRole(this.config.redirect[i].roles), this.getRedirect(this.config.redirect[i].to));
+					this.express.use(this.config.redirect[i].from, this.beforeExecute({type: "REDIRECT", roles: this.config.redirect[i].roles}), this.getRedirect(this.config.redirect[i].to));
 				}
 			}
 			

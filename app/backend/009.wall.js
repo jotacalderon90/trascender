@@ -88,13 +88,9 @@ self.prototype.tags = async function(req,res){
 self.prototype.create = async function(req,res){
 	try{
 		let db = await this.mongodb.connect(this.config.database.url);
-		
-		let user = await this.mongodb.findOne(db,"user",req.user.sub);
-		req.body.author = user._id;
+		req.body.author = req.user._id;
 		req.body.created = new Date();
-		
 		await this.mongodb.insertOne(db,"wall",req.body);
-		
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null,error: e.toString()});

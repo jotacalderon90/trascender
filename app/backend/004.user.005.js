@@ -146,9 +146,7 @@ self.prototype.login = async function(req,res){
 //@roles(['user'])
 self.prototype.info = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
-		let user = await this.mongodb.findOne(db,"user",req.user.sub,true);
-		res.render("user/info",{user: user});
+		res.render("user/info",{user: req.user});
 	}catch(e){
 		console.log(e);
 		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger"});
@@ -162,8 +160,6 @@ self.prototype.info = async function(req,res){
 //@roles(['user'])
 self.prototype.update = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
-		let user = await this.mongodb.findOne(db,"user",req.user.sub);
 		let updated = {
 			$set: {
 				nickname: req.body.nickname,
@@ -172,15 +168,16 @@ self.prototype.update = async function(req,res){
 			}
 		};
 		let redirect = "/user/info";
-		if(!user.google && req.body.password!=user.password){
+		if(!req.user.google && req.body.password!=req.user.password){
 			if(req.body.password==undefined || req.body.password==null || req.body.password.length < 5){
 				throw("La contraseña ingresada debe tener al menos 5 caracteres");
 			}else{
-				updated["$set"]["password"] = this.helper.toHash(req.body.password + user.email,user.hash);
+				updated["$set"]["password"] = this.helper.toHash(req.body.password + req.user.email,req.user.hash);
 				redirect = "/user/logout";
 			}
 		}
-		await this.mongodb.updateOne(db,"user",user._id,updated,true);
+		let db = await this.mongodb.connect(this.config.database.url);
+		await this.mongodb.updateOne(db,"user",req.user._id,updated,true);
 		if(req.body.xhr){
 			res.send({data: true, ext: {redirect: redirect}});
 		}else{
@@ -203,22 +200,16 @@ self.prototype.update = async function(req,res){
 //@roles(['user'])
 self.prototype.logout = async function(req,res){
 	try{
-		if(req.user==null){
-			throw("empty");
-		}else if(req.user.error){
-			throw(req.user.error);
+		let db = await this.mongodb.connect(this.config.database.url);
+		let user = await this.mongodb.find(db,"user_active",{user_id: req.user._id.toString()});
+		if(user.length==1){
+			await this.mongodb.deleteOne(db,"user_active",user[0]._id,true);
+		}
+		req.session.destroy();
+		if(req.query.xhr){
+			res.send({data: true});
 		}else{
-			let db = await this.mongodb.connect(this.config.database.url);
-			let user = await this.mongodb.find(db,"user_active",{user_id: req.user.sub},{});
-			if(user.length==1){
-				await this.mongodb.deleteOne(db,"user_active",user[0]._id,true);
-			}
-			req.session.destroy();
-			if(req.query.xhr){
-				res.send({data: true});
-			}else{
-				res.render("user/login");
-			}
+			res.render("user/login");
 		}
 	}catch(e){
 		console.log(e);
@@ -393,19 +384,10 @@ self.prototype.google_login = async function(req,res){
 //@method(['get'])
 self.prototype.read = async function(req,res){
 	try{
-		if(req.user==null){
+		if(req.user==undefined){
 			throw("empty");
-		}else if(req.user.error){
-			throw(req.user.error);
 		}else{
-			let db = await this.mongodb.connect(this.config.database.url);
-			let user = await this.mongodb.findOne(db,"user",req.user.sub);
-			let active = await this.mongodb.find(db,"user_active",{user_id: req.user.sub},{},true);
-			if(active.length==0){
-				throw("empty");
-			}else{
-				res.send({data: user});
-			}
+			res.send({data: req.user});
 		}
 	}catch(e){
 		console.log(e);
@@ -440,7 +422,6 @@ self.prototype.public = async function(req,res){
 self.prototype.update_ext = async function(req,res){
 	try{
 		let db = await this.mongodb.connect(this.config.database.url);
-		let user = await this.mongodb.findOne(db,"user",req.user.sub);
 		let enabled = ["lmap","public","jv","interest","location","twitter"];
 		let fields = {};
 		for(let attr in req.body){
@@ -449,7 +430,7 @@ self.prototype.update_ext = async function(req,res){
 			}
 		}
 		let updated = {$set: fields};
-		await this.mongodb.updateOne(db,"user",user._id,updated,true);
+		await this.mongodb.updateOne(db,"user",req.user._id,updated,true);
 		res.send({data: true});
 	}catch(e){
 		console.log(e);

@@ -146,8 +146,7 @@ self.prototype.create = async function(req,res){
 	try{
 		let db = await this.mongodb.connect(this.config.database.url);
 		
-		let user = await this.mongodb.findOne(db,"user",req.user.sub);
-		req.body.user = user._id;
+		req.body.user = req.user._id;
 		req.body.created = new Date();
 		
 		await this.mongodb.insertOne(db,"blog",req.body);
@@ -175,8 +174,7 @@ self.prototype.update = async function(req,res){
 	try{
 		let db = await this.mongodb.connect(this.config.database.url);
 		
-		let user = await this.mongodb.findOne(db,"user",req.user.sub);
-		req.body.user = user._id;
+		req.body.user = req.user._id;
 		req.body.updated = new Date();
 		
 		await this.mongodb.updateOne(db,"blog",req.params.id,req.body);
@@ -203,20 +201,14 @@ self.prototype.update = async function(req,res){
 self.prototype.delete = async function(req,res){
 	try{
 		let db = await this.mongodb.connect(this.config.database.url);
-		
-		let user = await this.mongodb.findOne(db,"user",req.user.sub);
-		
 		let row = await this.mongodb.findOne(db,"blog",req.params.id);
-		
 		await this.mongodb.deleteOne(db,"blog",req.params.id);
-		
 		await this.mongodb.insertOne(db,"wall",{
 			content: "<p>Eliminó una publicación del Blog: <small>" + row.title + "</small></p>",
 			tag: ["Blog"],
-			author: req.body.user,
+			author: req.user._id,
 			created: new Date()
 		},true);
-		
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null,error: e.toString()});

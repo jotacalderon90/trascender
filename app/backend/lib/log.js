@@ -24,12 +24,11 @@ self.prototype.create = async function(req){
 				await this.mongodb.insertOne(db,"ip",{ip: req.real_ip, created: req.created, url: req.url, method: req.method, body: JSON.stringify(req.body)});
 			}
 			if(req.user){
-				user = await this.mongodb.findOne(db,"user",req.user.sub);
-				user.ip = (user.ip)?user.ip:[];
-				if(user.ip.indexOf(req.real_ip)==-1){
-					user.ip.push(req.real_ip);
+				req.user.ip = (req.user.ip)?req.user.ip:[];
+				if(req.user.ip.indexOf(req.real_ip)==-1){
+					req.user.ip.push(req.real_ip);
 				}
-				await this.mongodb.updateOne(db,"user",user._id,user);
+				await this.mongodb.updateOne(db,"user",req.user._id,user);
 			}else{
 				let possibles = await this.mongodb.count(db,"user",{ip: {$in: [req.real_ip]}});
 				if(possibles==0){
