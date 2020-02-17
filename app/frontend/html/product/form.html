@@ -44,11 +44,21 @@
 				</div>
 				<div class="form-group">
 					<label>Tags</label>
-					<input type="text" class="form-control" placeholder="Tags" data-ng-model="ctrl.document.getDoc().tag" data-ng-disabled="ctrl.document.isReadMode()">
+					<input type="text" class="form-control input_tag" placeholder="Agregar tag" data-ng-model="ctrl.document.getDoc().tagbk" data-ng-disabled="ctrl.document.isReadMode()" data-ng-keypress="ctrl.document.addTag($event)">
+					<ul class="list-unstyled list-inline">
+						<li data-ng-repeat="row in ctrl.document.getDoc().tag">
+							<span class="label label-default">
+								{{row}} 
+								<i class="fa fa-close text-danger" data-ng-click="ctrl.document.removeTag($index)" data-ng-show="!ctrl.document.isReadMode()"></i>
+							</span>
+						</li>
+					</ul>
 				</div>
 				<div class="form-group">
 					<label>Tag Principal</label>
-					<input type="text" class="form-control" placeholder="Tag Principal" data-ng-model="ctrl.document.getDoc().tag_main" data-ng-disabled="ctrl.document.isReadMode()">
+					<select class="form-control" data-ng-model="ctrl.document.getDoc().tag_main" data-ng-disabled="ctrl.document.isReadMode()">
+						<option data-ng-repeat="row in ctrl.document.getDoc().tag">{{row}}</option>
+					</select>
 				</div>
 				<div class="form-group">
 					<label>Precio</label>

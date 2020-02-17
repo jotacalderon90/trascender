@@ -54,6 +54,9 @@ app.controller("blogCtrl", function(trascender,$scope){
 		document: function(){
 			return new trascender({
 				baseurl: "api/blog",
+				default: function(){
+					return {tag: ["Blog"]};
+				},
 				start: function(){
 					CKEDITOR.replace("input_content");
 					if(typeof _document != "undefined"){
@@ -61,6 +64,7 @@ app.controller("blogCtrl", function(trascender,$scope){
 					}else{
 						this.new();
 					}
+					this.getTag();
 				},
 				afterChangeMode: function(action,doc){
 					switch(action){
@@ -105,8 +109,8 @@ app.controller("blogCtrl", function(trascender,$scope){
 					}
 				},
 				formatToServer: function(doc){
+					delete doc.tagbk;
 					doc.content = CKEDITOR.instances["input_content"].getData();
-					doc.tag = (typeof doc.tag=="string")?doc.tag.split(","):doc.tag;
 					return doc;
 				},
 				titleOnBlur: function(){
@@ -115,6 +119,22 @@ app.controller("blogCtrl", function(trascender,$scope){
 					}else{
 						this.doc.uri = this.cleaner(this.doc.title);
 					}
+				},
+				addTag: function(event){
+					if(event.which === 13) {
+						if(this.getDoc().tag.indexOf(this.getDoc().tagbk)==-1){
+							this.getDoc().tag.push(this.getDoc().tagbk);
+							this.getDoc().tagbk = "";
+						}
+					}
+				},
+				removeTag: function(i){
+					this.getDoc().tag.splice(i,1);
+				},
+				afterGetTag: function(){
+					$(".input_tag").autocomplete({source: this.tag, select: ( event, ui )=>{
+						this.getDoc().tagbk = ui.item.value;
+					}});
 				}
 			});
 		},
