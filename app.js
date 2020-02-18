@@ -113,7 +113,7 @@ let trascender = function(){
 						content += JSON.stringify(req.body);
 						console.log(content);
 						fs.appendFile("./log.csv", content, function (err) {});
-						//this.log.create(req);
+						this.log.create(req);
 						
 						//VALIDATE USER
 						if(params.roles==undefined || params.roles.length==0){
