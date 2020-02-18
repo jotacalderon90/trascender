@@ -72,6 +72,7 @@ app.controller("blogCtrl", function(trascender,$scope){
 							CKEDITOR.instances['input_content'].setReadOnly(false);
 							break;
 						case "read":
+							//CKEDITOR.instances['input_content'].setReadOnly(true);
 							$(".asDate").html( moment(new Date(this.doc.created), "YYYYMMDD, h:mm:ss").fromNow() );
 							$(".asDate").attr("title", moment(new Date(this.doc.created)).format("dddd, DD MMMM YYYY, h:mm:ss") );	
 							CKEDITOR.instances["input_content"].setData(this.doc.content);

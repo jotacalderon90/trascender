@@ -66,6 +66,7 @@ app.controller("productCtrl", function(trascender,$scope){
 							CKEDITOR.instances['input_content'].setReadOnly(false);
 							break;
 						case "read":
+							//CKEDITOR.instances['input_content'].setReadOnly(true);
 							CKEDITOR.instances["input_content"].setData(this.doc.content);
 							break;
 					}

@@ -32,6 +32,7 @@ self.prototype.new = async function(req,res){
 
 //@route('/product/edit/:id')
 //@method(['get'])
+//@roles(['admin','SELLER'])
 self.prototype.edit = async function(req,res){
 	try{	
 		let db = await this.mongodb.connect(this.config.database.url);
