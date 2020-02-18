@@ -1,44 +1,46 @@
 let self = function(a){
 	this.config = a.config;
 	this.mongodb;
-	
-	this.ips = [];
-	
+	this.restart();
+}
+
+self.prototype.restart = function(){
 	let d = new Date();
-	this.dateref = {year: d.getFullYear(), month: d.getMonth(), day: d.getDate()};
+	this.dateref = { year: d.getFullYear(), month: d.getMonth(), day: d.getDate()};
+	this.ips = {};
+}
+
+self.prototype.setBody = function(req){
+	return {ip: req.real_ip, created: req.created, url: req.url, method: req.method, body: JSON.stringify(req.body)};
+}
+
+self.prototype.saveBackup = async function(req){
+	let db = await this.mongodb.connect(this.config.database.url);
+	for(ip in this.ips){
+		await this.mongodb.insertOne(db,"log",this.ips[ip]);
+	}
+	db.close();
 }
 
 self.prototype.create = async function(req){
 	try{
-		if(req.real_ip && this.ips.indexOf(req.real_ip)==-1){
-			this.ips.push(req.real_ip);
-			if(req.created.getFullYear!=this.dateref.year || req.created.getMonth()!=this.dateref.month || req.created.d.getDate()!=this.dateref.day){
-				let d = new Date();
-				this.dateref = { year: d.getFullYear(), month: d.getMonth(), day: d.getDate()};
-				this.ips = [];
-				this.ips.push(req.real_ip);
-			}
-			let db = await this.mongodb.connect(this.config.database.url);
-			let docip = await this.mongodb.find(db,"ip",{ip: req.real_ip});
-			if(docip.length!=1){
-				await this.mongodb.insertOne(db,"ip",{ip: req.real_ip, created: req.created, url: req.url, method: req.method, body: JSON.stringify(req.body)});
-			}
+		if(req.created.getFullYear!=this.dateref.year || req.created.getMonth()!=this.dateref.month || req.created.d.getDate()!=this.dateref.day){
+			this.restart();
+			this.saveBackup();
+		}
+		if(!this.ips[req.real_ip]){
+			this.ips[req.real_ip] = this.setBody(req);
 			if(req.user){
 				req.user.ip = (req.user.ip)?req.user.ip:[];
 				if(req.user.ip.indexOf(req.real_ip)==-1){
 					req.user.ip.push(req.real_ip);
-				}
-				await this.mongodb.updateOne(db,"user",req.user._id,user);
-			}else{
-				let possibles = await this.mongodb.count(db,"user",{ip: {$in: [req.real_ip]}});
-				if(possibles==0){
-					await this.mongodb.insertOne(db,"log",{ip: req.real_ip, created: req.created, url: req.url, method: req.method, body: JSON.stringify(req.body)});
+					let db = await this.mongodb.connect(this.config.database.url);
+					await this.mongodb.updateOne(db,"user",req.user._id,{$set: {ip: req.user.ip}},true);
 				}
 			}
-			db.close();
 		}
 	}catch(e){
-		console.log(e);
+		console.error(e);
 	}
 }
 
