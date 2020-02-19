@@ -4,13 +4,21 @@
 Mailing
 <!--/define:title-->
 
+<!--define:css-->
+<link rel="stylesheet" href="css/mailing.css" media="all"/> 
+<!--/define:css-->
+
 <!--define:main-->
 	<div data-ng-controller="mailingCtrl as ctrl">
 		<div class="page-header">
 			<h1>Sistema de Mailing</h1>
 		</div>
 		<div class="row">
-			<div class="col-md-6" style="padding: 10px;">
+			<div class="col-md-4" style="padding: 10px;">
+				<div class="form-group">
+					<label>Asunto del mail</label>
+					<input type="text" class="form-control input-sm" data-ng-model="ctrl.mailing.subject"/>
+				</div>
 				<div class="form-group">
 					<label>Destinatarios</label>
 					<div class="input-group">
@@ -26,27 +34,13 @@ Mailing
 					</div>
 				</div>
 				<div class="form-group">
-					<label>Asunto del mail</label>
-					<input type="text" class="form-control input-sm" data-ng-model="ctrl.mailing.subject"/>
-				</div>
-				<div class="text-center">
-					<button class="btn btn-primary btn-xs" data-ng-click="ctrl.mailing.process()">
-						<i class="fa fa-send"></i> enviar correos
-					</button>
-					<button class="btn btn-primary btn-xs" data-ng-click="ctrl.mailing.plane()">
-						<i class="fa fa-send"></i> enviar texto plano
-					</button>
-				</div>
-			</div>
-			<div class="col-md-6" style="padding: 10px;">
-				<div class="form-group">
 					<label>Seleccione plantilla para enviar mails</label>
 					<select class="form-control" data-ng-model="ctrl.template.doc" data-ng-change="ctrl.template.select()">
 						<option></option>
 						<option data-ng-repeat="row in ctrl.template.coll">{{row.name}}</option>
 					</select>
 				</div>
-				<table class="table">
+				<table class="table" data-ng-show="ctrl.template.doc!=null && ctrl.template.doc!=''">
 					<thead>
 						<tr>
 							<th>Metadata</th>
@@ -56,41 +50,32 @@ Mailing
 					</thead>
 					<tbody>
 						<tr data-ng-repeat="row in ctrl.template.metadata">
-							<td>{{row.name}}</td>
+							<td>{{row.label}}</td>
 							<td>
-								<select data-ng-model="row.type" class="form-control">
+								<select data-ng-model="row.type" class="form-control input-sm">
 									<option value="static">Definir valor</option>
 									<option value="document">Usar valor del usuario</option>
 								</select>
 							</td>
 							<td>
-								<input type="text" class="form-control" data-ng-model="row.value" data-ng-show="row.type=='static'"/>
+								<input type="text" class="form-control input-sm" data-ng-model="row.value" data-ng-show="row.type=='static'"/>
 							</td>
 						</tr>
 					</tbody>
 				</table>
+				<div class="text-center">
+					<button class="btn btn-primary btn-xs" data-ng-click="ctrl.mailing.plane()">
+						<i class="fa fa-send"></i> enviar texto plano
+					</button>
+					<button class="btn btn-primary btn-xs" data-ng-click="ctrl.mailing.process()">
+						<i class="fa fa-send"></i> enviar correos
+					</button>
+				</div>
+			</div>
+			<div class="col-md-8" style="padding: 10px;">
+				<iframe id="iframe_view"></iframe>
 			</div>
 		</div>
-		<hr>
-		<div id="dvTemplate"></div>
-				<!--Users-->
-				<!--<div class="panel panel-default font-normal">
-					<div class="panel-heading">
-						<i class="fa fa-user"></i> Usuarios
-						<input type="checkbox" class="pull-right" data-ng-model="ctrl.user.check" data-ng-change="ctrl.user.checkAll()"/>
-						<button class="btn btn-link btn-xs pull-right" data-ng-click="ctrl.user.getTotal()">
-							<i class="fa fa-refresh"></i>
-						</button>
-					</div>
-					<table class="table table-hover">
-						<tr data-ng-repeat="doc in ctrl.user.coll">
-							<td>{{(doc.username)?doc.username:doc.email}}</td>
-							<td class="text-right">
-								<input type="checkbox" data-ng-model="doc.sendmail"/>
-							</td>
-						</tr>
-					</table>
-				</div>-->
 	</div>
 <!--/define:main-->
 

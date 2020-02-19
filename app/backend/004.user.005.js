@@ -67,7 +67,7 @@ self.prototype.create = async function(req,res){
 								memo.subject = "Activación de cuenta"
 								memo.nickname = doc.nickname;
 								memo.hash = this.config.properties.host + "/api/user/activate/" + new Buffer(doc.password).toString("base64");
-								memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "activate.html", memo);
+								memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.views + "mailing/template_activate.html", memo);
 								await this.mailing.send(memo);
 								if(req.body.xhr){
 									res.send({data: true});
@@ -248,7 +248,7 @@ self.prototype.forget = async function(req,res){
 					memo.bcc = this.config.properties.admin;
 					memo.subject = "Reestablecer contraseña";
 					memo.hash = this.config.properties.host + "/user/recovery?hash=" + new Buffer(user[0].password).toString("base64");
-					memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "recovery.html", memo);
+					memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.views + "mailing/template_recovery.html", memo);
 					await this.mailing.send(memo);
 					if(req.body.xhr){
 						res.send({data: true});

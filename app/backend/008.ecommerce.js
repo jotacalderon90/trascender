@@ -40,7 +40,7 @@ self.prototype.setMemoClient = function(doc){
 			doc.btn[i].href = this.config.properties.host + "/" + "ecommerce" + "/transaction/" + (new Buffer(doc.insertedId).toString("base64"));
 		}
 	}
-	doc.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "" + "ecommerce" + ".html", doc);
+	doc.html = this.render.processTemplateByPath(this.dir + this.config.properties.views + "mailing/template_ecommerce.html", doc);
 	return doc;
 }
 	
@@ -53,7 +53,7 @@ self.prototype.setMemoAdmin = function(doc){
 			doc.btn[i].href = this.config.properties.host + "/" + "ecommerce" + "/transaction/" + (new Buffer(doc.insertedId+":"+doc.insertedId).toString("base64"));
 		}
 	}
-	doc.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "" + "ecommerce" + ".html", doc);
+	doc.html = this.render.processTemplateByPath(this.dir + this.config.properties.views + "mailing/template_ecommerce.html", doc);
 	return doc;
 }
 

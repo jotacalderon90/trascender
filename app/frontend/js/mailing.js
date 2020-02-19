@@ -2,7 +2,7 @@ app.controller("mailingCtrl", function(trascender,$scope){
 	
 	var self = this;
 	
-	let path = "/html/mailing/templates_front/";
+	let path = "/html/mailing/";
 	
 	this.template = new trascender({
 		increase: true,
@@ -25,15 +25,17 @@ app.controller("mailingCtrl", function(trascender,$scope){
 			if(this.obtained<this.cant){
 				this.getCollection();
 			}else{
+				this.coll = this.coll.filter(function(row){return row.name.indexOf("template_")>-1;});
 				$scope.$digest(function(){});
 			}
 		},
 		select: async function(){
 			try{
+				$("#iframe_view").attr("src","");
 				if(this.doc!=""){
 					this.content = await this.service_read({id: btoa(path + this.doc + ".html")});
 					this.metadata = this.getMetadata(this.content);
-					$("#dvTemplate").html(this.content);
+					$("#iframe_view").attr("src","mailing/" + this.doc);
 					$scope.$digest(function(){});
 				}
 			}catch(e){
@@ -47,7 +49,7 @@ app.controller("mailingCtrl", function(trascender,$scope){
 				var tmp = template.substring(index1);
 				var index2 = tmp.indexOf("}}");
 				var tempTemplate = tmp.substring(2,index2);
-				rows.push({name: tempTemplate,type: "static", value: ""});
+				rows.push({label: tempTemplate.replace("data:doc.","") ,name: tempTemplate,type: "static", value: ""});
 				template = template.split("{{"+tempTemplate+"}}").join("metadata");
 			}
 			return rows;
@@ -138,8 +140,7 @@ app.controller("mailingCtrl", function(trascender,$scope){
 							this.newdoc = {
 								to: this.to[i],
 								subject: this.subject,
-								text: p,
-								html: p
+								text: p
 							};
 							this.create();
 						}
@@ -157,23 +158,18 @@ app.controller("mailingCtrl", function(trascender,$scope){
 					for(let i=0;i<this.to.length;i++){
 						let user = self.user.getByEmail(this.to[i]);
 						if(user.length==1){
-							user = user[0];
-							let html = $("#dvTemplate").html();
+							this.newdoc = {};
 							for(var x=0;x<self.template.metadata.length;x++){
 								let m = self.template.metadata[x];
 								if(m.type=="static"){
-									html = html.split("{{"+m.name+"}}").join(m.value);
+									this.newdoc[m.label] = m.value;
 								}else if(m.type=="document"){
-									html = html.split("{{"+m.name+"}}").join(user[m.name]);
+									this.newdoc[m.label] = user[0][m.label];
 								}
 							}
-							html = html.split("--hash--").join(btoa(user.password));
-							this.newdoc = {
-								to: this.to[i],
-								subject: this.subject,
-								text: html,
-								html: html
-							};
+							this.newdoc.template = self.template.doc;
+							this.newdoc.to = this.to[i];
+							this.newdoc.subject = this.subject;
 							this.create();
 						}
 					}

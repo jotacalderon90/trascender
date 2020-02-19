@@ -45,7 +45,7 @@ self.prototype.subscriber = async function(req,res){
 							memo.subject = "Activación de cuenta"
 							memo.nickname = doc.nickname;
 							memo.hash = this.config.properties.host + "/user/activate/" + new Buffer(doc.password).toString("base64");
-							memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "activate.html", memo);
+							memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.views + "mailing/template_activate.html", memo);
 							memo.config = this.config;
 							await this.mailing.send(memo);
 							res.render("message",{title: "Usuario registrado", message: "Se ha enviado un correo para validar su registro", class: "success"});

@@ -163,7 +163,7 @@ self.prototype.notify = async function(req,res){
 		}
 		
 		//set template
-		doc.html = this.render.processTemplateByPath(this.dir + this.config.properties.mailing + "poll.html", doc);
+		doc.html = this.render.processTemplateByPath(this.dir + this.config.properties.views + "mailing/template_poll.html", doc);
 		
 		//send memo
 		await this.mailing.send(doc);

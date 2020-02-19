@@ -1,15 +1,11 @@
 "use strict";
 
-var fs = require("fs");
-
 var self = function(a){
 	this.dir = a.dir;
 	this.config = a.config;
 	this.helper = a.helper;
 	this.mailing = a.mailing;
-	this.mongodb = a.mongodb;
 	this.render = a.render;
-	this.path = "mailing";
 	
 	if(a.config.recaptcha.enabled===true){
 		this.recaptcha = require("express-recaptcha");
@@ -20,18 +16,14 @@ var self = function(a){
 
 
 
-//@route('/api/mailing/message')
-//@method(['post'])
-//@roles(['admin'])
-self.prototype.send = async function(req,res){
-	try{
-		await this.mailing.send(req.body);
-		res.send({data: true});
-	}catch(e){
-		res.send({data: null, error: e});
+self.prototype.render_view = function(req,res,next){
+	let view = "mailing/" + ((req.params.id)?req.params.id:"index");
+	if(this.helper.exist(view)){
+		res.render(view);
+	}else{
+		return next();
 	}
 }
-
 
 
 
@@ -39,12 +31,7 @@ self.prototype.send = async function(req,res){
 //@method(['get'])
 //@roles(['admin'])
 self.prototype.render_index = function(req,res,next){
-	let view = this.path + "/" + "index";
-	if(this.helper.exist(view)){
-		res.render(view,{config: this.config});
-	}else{
-		return next();
-	}
+	this.render_view(req,res,next);
 }
 
 
@@ -53,14 +40,23 @@ self.prototype.render_index = function(req,res,next){
 //@method(['get'])
 //@roles(['admin'])
 self.prototype.render_other = function(req,res,next){
-	let view = this.path + "/" + req.params.id;
-	if(this.helper.exist(view)){
-		res.render(view,{config: this.config});
-	}else{
-		return next();
-	}
+	this.render_view(req,res,next);
 }
 
 
 
+//@route('/api/mailing/message')
+//@method(['post'])
+//@roles(['admin'])
+self.prototype.send = async function(req,res){
+	try{
+		if(req.body.template){
+			req.body.html = this.render.processTemplateByPath(this.dir + this.config.properties.views + "mailing/" + req.body.template + ".html",req.body);
+		}
+		await this.mailing.send(req.body);
+		res.send({data: true});
+	}catch(e){
+		res.send({data: null, error: e});
+	}
+}
 module.exports = self;
