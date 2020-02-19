@@ -41,6 +41,7 @@ app.controller("databaseCtrl", function(trascender,$scope){
 			if(this.obtained<this.cant){
 				this.getCollection();
 			}else{
+				this.coll = this.SOABF(this.coll,"label");
 				$scope.$digest(function(){});
 			}
 		},
