@@ -24,7 +24,7 @@ self.prototype.saveBackup = async function(req){
 
 self.prototype.create = async function(req){
 	try{
-		if(req.created.getFullYear!=this.dateref.year || req.created.getMonth()!=this.dateref.month || req.created.d.getDate()!=this.dateref.day){
+		if(req.created.getFullYear()!=this.dateref.year || req.created.getMonth()!=this.dateref.month || req.created.getDate()!=this.dateref.day){
 			this.restart();
 			this.saveBackup();
 		}
