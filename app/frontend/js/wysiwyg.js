@@ -6,7 +6,7 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 		return btoa(encodeURIComponent(value));
 	}
 	
-	let path = "/html/simpleweb/";
+	let path = "/html/";
 	
 	/*directorio de archivos*/
 	self.directory = new transcend({
