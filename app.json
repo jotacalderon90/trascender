@@ -7,7 +7,8 @@
 		"cors": true
 	},
 	"database": {
-		"url": "mongodb://127.0.0.1:27017/trascender"
+		"url": "mongodb://127.0.0.1:27017",
+		"db": "trascender"
 	},
 	"smtp": {
 		"enabled": false,

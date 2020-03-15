@@ -17,7 +17,7 @@ var self = function(a){
 //@roles(['admin'])
 self.prototype.total = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let total = await this.mongodb.count(db,"poll",query,{},true);
 		res.send({data: total});
@@ -33,7 +33,7 @@ self.prototype.total = async function(req,res){
 //@roles(['admin'])
 self.prototype.collection = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
 		let data = await this.mongodb.find(db,"poll",query,options,true);
@@ -50,7 +50,7 @@ self.prototype.collection = async function(req,res){
 //@roles(['admin'])
 self.prototype.create = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		await this.mongodb.insertOne(db,"poll",req.body,true);
 		res.send({data: true});
 	}catch(e){
@@ -65,7 +65,7 @@ self.prototype.create = async function(req,res){
 //@roles(['admin'])
 self.prototype.read = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let row = await this.mongodb.findOne(db,"poll",req.params.id,true);
 		res.send({data: row});
 	}catch(e){
@@ -80,7 +80,7 @@ self.prototype.read = async function(req,res){
 //@roles(['admin'])
 self.prototype.update = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		await this.mongodb.updateOne(db,"poll",req.params.id,req.body,true);
 		res.send({data: true});
 	}catch(e){
@@ -95,7 +95,7 @@ self.prototype.update = async function(req,res){
 //@roles(['admin'])
 self.prototype.delete = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		await this.mongodb.deleteOne(db,"poll",req.params.id,true);
 		res.send({data: true});
 	}catch(e){
@@ -112,7 +112,7 @@ self.prototype.start = async function(req,res){
 	try{
 		
 		//get document
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let row = await this.mongodb.findOne(db,"poll",req.params.id);
 		
 		row.sent = [];
@@ -149,7 +149,7 @@ self.prototype.notify = async function(req,res){
 	try{
 		
 		//get document
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let row = await this.mongodb.findOne(db,"poll",req.params.id);
 		let to = req.params.to;
 		let hash = this.helper.toHash(to, row._id.toString());
@@ -185,7 +185,7 @@ self.prototype.answer = async function(req,res){
 	try{
 		
 		//get document
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let row = await this.mongodb.findOne(db,"poll",req.params.id);
 		
 		if(row.status!="Enviada"){
@@ -226,7 +226,7 @@ self.prototype.answer_anon = async function(req,res){
 	try{
 		
 		//get document
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let row = await this.mongodb.findOne(db,"poll",req.params.id);
 		
 		if(row.status!="Enviada"){
@@ -262,7 +262,7 @@ self.prototype.result = async function(req,res){
 	try{
 		
 		//get document
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let row = await this.mongodb.findOne(db,"poll",req.params.id);
 		
 		if(row.private && (req.user==undefined || req.user.roles.indexOf("admin")==-1)){

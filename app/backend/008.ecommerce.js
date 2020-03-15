@@ -61,7 +61,7 @@ self.prototype.setWorkflow = async function(name){
 	try{
 		
 		//get document
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		this.workflow = await this.mongodb.find(db,"workflow",{name: name},{},true);
 		this.workflow = this.workflow[0];
 		
@@ -107,7 +107,7 @@ self.prototype.ecommerce_create = async function(req,res){
 		doc.created = new Date();
 		
 		//insert document
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let row = await this.mongodb.insertOne(db,"ecommerce",doc,true);
 		
 		//config notification
@@ -146,7 +146,7 @@ self.prototype.ecommerce_read = async function(req,res){
 		}
 		
 		//get document
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let row = await this.mongodb.findOne(db,"ecommerce",params[0],true);
 		
 		//finish
@@ -194,7 +194,7 @@ self.prototype.ecommerce_update = async function(req,res){
 		}
 		
 		//get document
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let row = await this.mongodb.findOne(db,"ecommerce",params[0]);
 		
 		//set document

@@ -57,7 +57,7 @@ app.controller("jvCtrl", function(trascender,$scope){
 		increase: true,
 		baseurl: "api/jv",
 		start: function(){
-			this.options.fields = {name: 1};
+			this.options.projection = {name: 1};
 			//this.getTotal();
 		},
 		afterGetTotal: function(){

@@ -23,7 +23,7 @@ self.prototype.subscriber = async function(req,res){
 			case "post":
 				req.body.email = req.body.email.toLowerCase();
 				if(this.helper.isEmail(req.body.email)){
-					let db = await this.mongodb.connect(this.config.database.url);
+					let db = await this.mongodb.connect(this.config.database);
 					let ce = await this.mongodb.count(db,"user",{email: req.body.email},{});
 					if(ce!=0){
 						throw("El email ingresado ya está registrado");
@@ -71,7 +71,7 @@ self.prototype.subscriber = async function(req,res){
 self.prototype.activate = async function(req,res){
 	try{
 		let hash = new Buffer(req.params.hash, "base64").toString("ascii");
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let row = await this.mongodb.find(db,"user",{password: hash},{});
 		if(row.length!=1){
 			throw("se ha encontrado más de un usuario asociado a este hash");
@@ -93,7 +93,7 @@ self.prototype.activate = async function(req,res){
 self.prototype.desactivate = async function(req,res){
 	try{
 		let hash = new Buffer(req.params.hash, "base64").toString("ascii");
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let row = await this.mongodb.find(db,"user",{password: hash},{});
 		if(row.length!=1){
 			throw("se ha encontrado más de un usuario asociado a este hash");

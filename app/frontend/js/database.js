@@ -20,7 +20,7 @@ app.controller("databaseCtrl", function(trascender,$scope){
 			return {content: {name: "", schema: {}}};
 		},
 		start: function(){
-			this.options = {skip: this.obtained, limit: this.rowsByPage, fields: {name: 1, label: 1}};
+			this.options = {skip: this.obtained, limit: this.rowsByPage, projection: {name: 1, label: 1}};
 			this.getTotal();
 		},
 		beforeGetTotal: function(){
@@ -33,7 +33,7 @@ app.controller("databaseCtrl", function(trascender,$scope){
 			this.getCollection();
 		},
 		beforeGetCollection: function(){
-			this.options = {skip: this.obtained, limit: this.rowsByPage, fields: {name: 1, label: 1}};
+			this.options = {skip: this.obtained, limit: this.rowsByPage, projection: {name: 1, label: 1}};
 			this.collectionLog = this.addLog(this.message.collection.on);
 			return true;
 		},

@@ -45,7 +45,7 @@ self.prototype.create = async function(req,res){
 					if(req.body.password==undefined || req.body.password==null || req.body.password.length < 5){ 
 						throw("La contraseña ingresada debe tener al menos 5 caracteres");
 					}else{
-						let db = await this.mongodb.connect(this.config.database.url);
+						let db = await this.mongodb.connect(this.config.database);
 						let ce = await this.mongodb.count(db,"user",{email: req.body.email},{});
 						if(ce!=0){
 							throw("El email ingresado ya está registrado");
@@ -104,7 +104,7 @@ self.prototype.login = async function(req,res){
 					}
 				}
 				req.body.email = req.body.email.toLowerCase();
-				let db = await this.mongodb.connect(this.config.database.url);
+				let db = await this.mongodb.connect(this.config.database);
 				let rows = await this.mongodb.find(db,"user",{email: req.body.email, activate: true},{});
 				if(rows.length!=1){
 					throw("Los datos ingresados no corresponden");
@@ -176,7 +176,7 @@ self.prototype.update = async function(req,res){
 				redirect = "/user/logout";
 			}
 		}
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		await this.mongodb.updateOne(db,"user",req.user._id,updated,true);
 		if(req.body.xhr){
 			res.send({data: true, ext: {redirect: redirect}});
@@ -200,7 +200,7 @@ self.prototype.update = async function(req,res){
 //@roles(['user'])
 self.prototype.logout = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let user = await this.mongodb.find(db,"user_active",{user_id: req.user._id.toString()});
 		if(user.length==1){
 			await this.mongodb.deleteOne(db,"user_active",user[0]._id,true);
@@ -237,7 +237,7 @@ self.prototype.forget = async function(req,res){
 						await this.helper.recaptcha(this.recaptcha,req);
 					}
 				}
-				let db = await this.mongodb.connect(this.config.database.url);
+				let db = await this.mongodb.connect(this.config.database);
 				req.body.email = req.body.email.toLowerCase();
 				let user = await this.mongodb.find(db,"user",{email: req.body.email},{});
 				if(user.length!=1){
@@ -284,7 +284,7 @@ self.prototype.recovery = async function(req,res){
 						await this.helper.recaptcha(this.recaptcha,req);
 					}
 				}
-				let db = await this.mongodb.connect(this.config.database.url);
+				let db = await this.mongodb.connect(this.config.database);
 				let user = await this.mongodb.find(db,"user",{password:  new Buffer(req.body.hash,"base64").toString("ascii")},{});
 				if(user.length!=1){
 					throw("Los datos ingresados no corresponden");
@@ -327,7 +327,7 @@ self.prototype.google_login = async function(req,res){
 		if(user==null){
 			throw(this.google.error);
 		}else{
-			let db = await this.mongodb.connect(this.config.database.url);
+			let db = await this.mongodb.connect(this.config.database);
 			let row = await this.mongodb.find(db,"user",{email: user.emails[0].value},{});
 			if(row.length!=1){
 				row = {};
@@ -402,7 +402,7 @@ self.prototype.read = async function(req,res){
 //@roles(['user'])
 self.prototype.public = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let user = await this.mongodb.findOne(db,"user",req.params.id,true);
 		res.send({data: {
 			nickname: user.nickname,
@@ -421,7 +421,7 @@ self.prototype.public = async function(req,res){
 //@roles(['user'])
 self.prototype.update_ext = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let enabled = ["lmap","public","jv","interest","location","twitter"];
 		let fields = {};
 		for(let attr in req.body){

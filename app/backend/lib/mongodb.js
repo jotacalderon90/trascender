@@ -1,48 +1,36 @@
 "use strict";
 
-var mongo	= require("mongodb");
-var client	= mongo.MongoClient;
+var mongodb	= require("mongodb");
+var MongoClient	= mongodb.MongoClient;
 
 var self = function(){
 	
 }
 
 self.prototype.toId = function(id){
-	return new mongo.ObjectID(id);
+	return new mongodb.ObjectID(id);
 }
 
-self.prototype.connect = function(url){
+self.prototype.connect = function(config){
 	return new Promise(function(resolve,reject){
-		client.connect(url, function(error, db) {
+		MongoClient.connect(config.url, {useUnifiedTopology: true}, function(error, client) {
 			if(error){
 				return reject(error);
 			}else{
-				resolve(db);
+				resolve({
+					c: client,
+					d: client.db(config.db)
+				});
 			}
 		});
 	});
 }
 
-self.prototype.count = function(db,collection,query,options,close){
+self.prototype.count = function(client,collection,query,options,close){
 	return new Promise(function(resolve,reject){
-		db.collection(collection).count(query, options, function(error, data){
+		client.d.collection(collection).countDocuments(query, options, function(error, data){
 			if(close){
-				db.close();
-			}
-			if(error){
-				return reject(error);
-			}else{
-				resolve(data);
-			}
-		});
-	});
-}
-
-self.prototype.find = function(db,collection,query,options,close){
-	return new Promise(function(resolve,reject){
-		db.collection(collection).find(query, options).toArray(function(error, data){
-			if(close){
-				db.close();
+				client.c.close();
 			}
 			if(error){
 				return reject(error);
@@ -53,11 +41,26 @@ self.prototype.find = function(db,collection,query,options,close){
 	});
 }
 
-self.prototype.insertOne = function(db,collection,document,close){
+self.prototype.find = function(client,collection,query,options,close){
 	return new Promise(function(resolve,reject){
-		db.collection(collection).insertOne(document, function(error, data) {
+		client.d.collection(collection).find(query, options).toArray(function(error, data){
 			if(close){
-				db.close();
+				client.c.close();
+			}
+			if(error){
+				return reject(error);
+			}else{
+				resolve(data);
+			}
+		});
+	});
+}
+
+self.prototype.insertOne = function(client,collection,document,close){
+	return new Promise(function(resolve,reject){
+		client.d.collection(collection).insertOne(document, function(error, data) {
+			if(close){
+				client.c.close();
 			}
 			if (error){
 				return reject(error);
@@ -68,11 +71,11 @@ self.prototype.insertOne = function(db,collection,document,close){
 	});
 }
 
-self.prototype.findOne = function(db,collection,id,close){
+self.prototype.findOne = function(client,collection,id,close){
 	return new Promise(function(resolve,reject){
-		db.collection(collection).findOne({_id: new mongo.ObjectID(id)}, function(error, data) {
+		client.d.collection(collection).findOne({_id: new mongodb.ObjectID(id)}, function(error, data) {
 			if(close){
-				db.close();
+				client.c.close();
 			}
 			if (error){
 				return reject(error);
@@ -83,12 +86,12 @@ self.prototype.findOne = function(db,collection,id,close){
 	});
 }
 
-self.prototype.updateOne = function(db,collection,id,document,close){
+self.prototype.updateOne = function(client,collection,id,document,close){
 	delete document._id;
 	return new Promise(function(resolve,reject){
-		db.collection(collection).updateOne({_id: new mongo.ObjectID(id)}, document, function(error, data) {
+		client.d.collection(collection).replaceOne({_id: new mongodb.ObjectID(id)}, document, function(error, data) {
 			if(close){
-				db.close();
+				client.c.close();
 			}
 			if (error){
 				return reject(error);
@@ -99,11 +102,11 @@ self.prototype.updateOne = function(db,collection,id,document,close){
 	});
 }
 
-self.prototype.deleteOne = function(db,collection,id,close){
+self.prototype.deleteOne = function(client,collection,id,close){
 	return new Promise(function(resolve,reject){
-		db.collection(collection).deleteOne({_id: new mongo.ObjectID(id)}, function(error, data) {
+		client.d.collection(collection).deleteOne({_id: new mongodb.ObjectID(id)}, function(error, data) {
 			if(close){
-				db.close();
+				client.c.close();
 			}
 			if (error){
 				return reject(error);
@@ -114,11 +117,11 @@ self.prototype.deleteOne = function(db,collection,id,close){
 	});
 }
 
-self.prototype.distinct = function(db,collection,field,close){
+self.prototype.distinct = function(client,collection,field,close){
 	return new Promise(function(resolve,reject){
-		db.collection(collection).distinct(field, function(error, data) {
+		client.d.collection(collection).distinct(field, function(error, data) {
 			if(close){
-				db.close();
+				client.c.close();
 			}
 			if (error){
 				return reject(error);

@@ -11,7 +11,7 @@ let self = function(a){
 //@method(['get'])
 self.prototype.renderCollection = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let data = await this.mongodb.find(db,"product",{},{limit: 10, sort: {title: 1}},true);
 		res.render("product/collection",{title: "Product", rows: data});
 	}catch(e){
@@ -35,7 +35,7 @@ self.prototype.new = async function(req,res){
 //@roles(['admin','SELLER'])
 self.prototype.edit = async function(req,res){
 	try{	
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let row = await this.mongodb.findOne(db,"product",req.params.id,true);
 		res.render("product/form",{row: row});
 	}catch(e){
@@ -51,7 +51,7 @@ self.prototype.edit = async function(req,res){
 //@method(['get'])
 self.prototype.renderCollectionTag = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let data = await this.mongodb.find(db,"product",{tag: req.params.id},{limit: 10, sort: {title: 1}},true);
 		res.render("product/collection",{title: req.params.id.charAt(0).toUpperCase() + req.params.id.slice(1),rows: data});
 	}catch(e){
@@ -66,7 +66,7 @@ self.prototype.renderCollectionTag = async function(req,res){
 //@method(['get'])
 self.prototype.renderDocument = async function(req,res){
 	try{	
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let data = await this.mongodb.find(db,"product",{uri:req.params.id},{},true);
 		if(data.length!=1){
 			throw("No se encontró el documento solicitado");
@@ -85,7 +85,7 @@ self.prototype.renderDocument = async function(req,res){
 //@method(['get','post'])
 self.prototype.total = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let total = await this.mongodb.count(db,"product",query,{},true);
 		res.send({data: total});
@@ -100,7 +100,7 @@ self.prototype.total = async function(req,res){
 //@method(['get','post'])
 self.prototype.collection = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
 		let data = await this.mongodb.find(db,"product",query,options,true);
@@ -116,7 +116,7 @@ self.prototype.collection = async function(req,res){
 //@method(['get'])
 self.prototype.tag = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let data = await this.mongodb.distinct(db,"product","tag",true);
 		res.send({data: data});
 	}catch(e){
@@ -130,7 +130,7 @@ self.prototype.tag = async function(req,res){
 //@method(['get'])
 self.prototype.read = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let row = await this.mongodb.findOne(db,"product",req.params.id,true);
 		res.send({data: row});
 	}catch(e){
@@ -145,7 +145,7 @@ self.prototype.read = async function(req,res){
 //@roles(['admin','SELLER'])
 self.prototype.create = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		
 		req.body.user = req.user._id;
 		req.body.created = new Date();
@@ -173,7 +173,7 @@ self.prototype.create = async function(req,res){
 //@roles(['admin','SELLER'])
 self.prototype.update = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		
 		req.body.user = req.user._id;
 		req.body.updated = new Date();
@@ -201,7 +201,7 @@ self.prototype.update = async function(req,res){
 //@roles(['admin','SELLER'])
 self.prototype.delete = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database.url);
+		let db = await this.mongodb.connect(this.config.database);
 		let row = await this.mongodb.findOne(db,"product",req.params.id);
 		await this.mongodb.deleteOne(db,"product",req.params.id);
 		await this.mongodb.insertOne(db,"wall",{

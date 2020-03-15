@@ -48,7 +48,7 @@ app.controller("pollCtrl", function(trascender,$scope){
 			return new trascender({
 				baseurl: "api/poll",
 				start: function(){
-					this.options.fields = {"title":1,"status":1};
+					this.options.projection = {"title":1,"status":1};
 					this.getTotal();
 				},
 				beforeGetTotal: function(){

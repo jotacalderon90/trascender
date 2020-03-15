@@ -33,7 +33,7 @@ app.controller("blogCtrl", function(trascender,$scope){
 					this.getCollection();
 				},
 				beforeGetCollection: function(){
-					this.options = {skip: this.obtained, limit: this.rowsByPage, sort: {created: -1}, fields: {uri: 1, thumb: 1, resume: 1, title: 1, created: 1}};
+					this.options = {skip: this.obtained, limit: this.rowsByPage, sort: {created: -1}, projection: {uri: 1, thumb: 1, resume: 1, title: 1, created: 1}};
 					this.collectionLog = this.addLog(this.message.collection.on);
 					this.isLoading = true;
 					return true;
@@ -160,7 +160,7 @@ app.controller("blogCtrl", function(trascender,$scope){
 				},
 				beforeGetCollection: function(){
 					this.query = {tag: {$in: [_document.tag_main]}, title: {$ne: _document.title}};
-					this.options = {skip: this.obtained, limit: this.rowsByPage, sort: {created: -1}, fields: {uri: 1, thumb: 1, title: 1, created: 1}};
+					this.options = {skip: this.obtained, limit: this.rowsByPage, sort: {created: -1}, projection: {uri: 1, thumb: 1, title: 1, created: 1}};
 					this.collectionLog = this.addLog(this.message.collection.on);
 					return true;
 				},

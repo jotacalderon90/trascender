@@ -53,7 +53,7 @@ self.prototype.message = async function(req,res,next){
 			if(this.recaptcha!=undefined){
 				await this.helper.recaptcha(this.recaptcha,req);
 			}
-			let db = await this.mongodb.connect(this.config.database.url);
+			let db = await this.mongodb.connect(this.config.database);
 			
 			req.body.created = new Date();
 			req.body.to = req.body.email;

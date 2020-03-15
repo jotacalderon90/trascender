@@ -96,7 +96,7 @@ let trascender = function(){
 						}
 						
 						//FIND USER
-						let db = await this.mongodb.connect(this.config.database.url);
+						let db = await this.mongodb.connect(this.config.database);
 						if(token!=null && token!=undefined && !token.error){
 							req.user = await this.mongodb.findOne(db,"user",token.sub);
 						}
@@ -116,10 +116,13 @@ let trascender = function(){
 						
 						//VALIDATE USER
 						if(params.roles==undefined || params.roles.length==0){
+							db.c.close();
 							return next();
 						}else if(token==null || token==undefined){
+							db.c.close();
 							throw("Acción restringida"); 
 						}else if(token.error){
+							db.c.close();
 							throw(token.error); 
 						}else{
 							let a = await this.mongodb.find(db,"user_active",{user_id: token.sub},{}, true);

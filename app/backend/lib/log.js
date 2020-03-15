@@ -15,11 +15,11 @@ self.prototype.setBody = function(req){
 }
 
 self.prototype.saveBackup = async function(req){
-	let db = await this.mongodb.connect(this.config.database.url);
+	let db = await this.mongodb.connect(this.config.database);
 	for(ip in this.ips){
 		await this.mongodb.insertOne(db,"log",this.ips[ip]);
 	}
-	db.close();
+	db.c.close();
 }
 
 self.prototype.create = async function(req){
@@ -34,7 +34,7 @@ self.prototype.create = async function(req){
 				req.user.ip = (req.user.ip)?req.user.ip:[];
 				if(req.user.ip.indexOf(req.real_ip)==-1){
 					req.user.ip.push(req.real_ip);
-					let db = await this.mongodb.connect(this.config.database.url);
+					let db = await this.mongodb.connect(this.config.database);
 					await this.mongodb.updateOne(db,"user",req.user._id,{$set: {ip: req.user.ip}},true);
 				}
 			}
