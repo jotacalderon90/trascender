@@ -98,9 +98,8 @@ let trascender = async function(){
 						}
 						
 						//FIND USER
-						//let db = await this.mongodb.connect(this.config.database);
 						if(token!=null && token!=undefined && !token.error){
-							req.user = await this.mongodb.findOne(db,"user",token.sub);
+							req.user = await this.mongodb.findOne("user",token.sub);
 						}
 						
 						//LOG
