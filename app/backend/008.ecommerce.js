@@ -59,12 +59,8 @@ self.prototype.setMemoAdmin = function(doc){
 
 self.prototype.setWorkflow = async function(name){
 	try{
-		
-		//get document
-		let db = await this.mongodb.connect(this.config.database);
-		this.workflow = await this.mongodb.find(db,"workflow",{name: name},{},true);
+		this.workflow = await this.mongodb.find("workflow",{name: name});
 		this.workflow = this.workflow[0];
-		
 	}catch(e){
 		console.log(e);
 	}
@@ -107,8 +103,7 @@ self.prototype.ecommerce_create = async function(req,res){
 		doc.created = new Date();
 		
 		//insert document
-		let db = await this.mongodb.connect(this.config.database);
-		let row = await this.mongodb.insertOne(db,"ecommerce",doc,true);
+		let row = await this.mongodb.insertOne("ecommerce",doc);
 		
 		//config notification
 		doc.insertedId = row.insertedId.toString();
@@ -146,8 +141,7 @@ self.prototype.ecommerce_read = async function(req,res){
 		}
 		
 		//get document
-		let db = await this.mongodb.connect(this.config.database);
-		let row = await this.mongodb.findOne(db,"ecommerce",params[0],true);
+		let row = await this.mongodb.findOne("ecommerce",params[0]);
 		
 		//finish
 		res.render("ecommerce/transaction",{
@@ -194,8 +188,7 @@ self.prototype.ecommerce_update = async function(req,res){
 		}
 		
 		//get document
-		let db = await this.mongodb.connect(this.config.database);
-		let row = await this.mongodb.findOne(db,"ecommerce",params[0]);
+		let row = await this.mongodb.findOne("ecommerce",params[0]);
 		
 		//set document
 		row.message += "<br>" + ((isadmin)?"Administrador":"Cliente") + ": " + req.body.message + " <small>" + (new Date()).toISOString() + "</small>";
@@ -205,7 +198,7 @@ self.prototype.ecommerce_update = async function(req,res){
 		let insertedId = row._id;
 		
 		//update
-		await this.mongodb.updateOne(db,"ecommerce",params[0],row,true);
+		await this.mongodb.updateOne("ecommerce",params[0],row);
 		
 		//config notification
 		row.insertedId = params[0];

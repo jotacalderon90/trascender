@@ -17,15 +17,14 @@ let self = function(a){
 //@roles(['admin','ADM_Data'])
 self.prototype.export = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database);
-		let o = await this.mongodb.find(db,"object",{name: req.params.name},{});
+		let o = await this.mongodb.find("object",{name: req.params.name});
 		if(o.length!=1){
 			throw("Problemas con el objeto");
 		}
 		if(!o[0].public){
 			throw("Problemas con el objeto (2)");
 		}
-		let data = await this.mongodb.find(db,req.params.name,{},{},true);
+		let data = await this.mongodb.find(req.params.name);
 		res.send({data: data});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -44,10 +43,9 @@ self.prototype.import = async function(req,res){
 			throw(request.error);
 		}
 		
-		let db = await this.mongodb.connect(this.config.database);
 		for(let i=0;i<request.data.length;i++){
 			request.data[i]._id = this.mongodb.toId(request.data[i]._id);
-			await this.mongodb.insertOne(db,req.params.name,request.data[i]);
+			await this.mongodb.insertOne(req.params.name,request.data[i]);
 			console.log("INSERTADO " + (i+1) + "/" + request.data.length);
 		}
 		
@@ -68,9 +66,8 @@ self.prototype.import = async function(req,res){
 self.prototype.total = async function(req,res){
 	try{
 		let collection = req.params.name;
-		let db = await this.mongodb.connect(this.config.database);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
-		let total = await this.mongodb.count(db,collection,query,{},true);
+		let total = await this.mongodb.count(collection,query);
 		res.send({data: total});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -85,10 +82,9 @@ self.prototype.total = async function(req,res){
 self.prototype.collection = async function(req,res){
 	try{
 		let collection = req.params.name;
-		let db = await this.mongodb.connect(this.config.database);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
-		let data = await this.mongodb.find(db,collection,query,options,true);
+		let data = await this.mongodb.find(collection,query,options);
 		res.send({data: data});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -103,8 +99,7 @@ self.prototype.collection = async function(req,res){
 self.prototype.tags = async function(req,res){
 	try{
 		let collection = req.params.name;
-		let db = await this.mongodb.connect(this.config.database);
-		let data = await this.mongodb.distinct(db,collection,"tag",true);
+		let data = await this.mongodb.distinct(collection,"tag");
 		res.send({data: data});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -119,8 +114,7 @@ self.prototype.tags = async function(req,res){
 self.prototype.create = async function(req,res){
 	try{
 		let collection = req.params.name;
-		let db = await this.mongodb.connect(this.config.database);
-		await this.mongodb.insertOne(db,collection,req.body,true);
+		await this.mongodb.insertOne(collection,req.body);
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -135,8 +129,7 @@ self.prototype.create = async function(req,res){
 self.prototype.read = async function(req,res){
 	try{
 		let collection = req.params.name;
-		let db = await this.mongodb.connect(this.config.database);
-		let row = await this.mongodb.findOne(db,collection,req.params.id,true);
+		let row = await this.mongodb.findOne(collection,req.params.id);
 		res.send({data: row});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -151,8 +144,7 @@ self.prototype.read = async function(req,res){
 self.prototype.update = async function(req,res){
 	try{
 		let collection = req.params.name;
-		let db = await this.mongodb.connect(this.config.database);
-		await this.mongodb.updateOne(db,collection,req.params.id,req.body,true);
+		await this.mongodb.updateOne(collection,req.params.id,req.body);
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -167,8 +159,7 @@ self.prototype.update = async function(req,res){
 self.prototype.delete = async function(req,res){
 	try{
 		let collection = req.params.name;
-		let db = await this.mongodb.connect(this.config.database);
-		await this.mongodb.deleteOne(db,collection,req.params.id,true);
+		await this.mongodb.deleteOne(collection,req.params.id);
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null,error: e.toString()});

@@ -25,7 +25,7 @@ console.log(new Date() + " == importando trascender.render");
 const render 		= require("trascender.render");
 			
 //kernel/core/motor del sistema trascender
-let trascender = function(){
+let trascender = async function(){
 	try{
 		
 		//configurar estandar de aplicacion web/nodejs/express/trascender
@@ -63,6 +63,8 @@ let trascender = function(){
 				let cors = require("cors");
 				this.express.use(cors());
 			}
+			
+			await  this.mongodb.start();
 		}
 		
 		//definir funciones internas propias de trascender
@@ -96,7 +98,7 @@ let trascender = function(){
 						}
 						
 						//FIND USER
-						let db = await this.mongodb.connect(this.config.database);
+						//let db = await this.mongodb.connect(this.config.database);
 						if(token!=null && token!=undefined && !token.error){
 							req.user = await this.mongodb.findOne(db,"user",token.sub);
 						}
@@ -116,13 +118,10 @@ let trascender = function(){
 						
 						//VALIDATE USER
 						if(params.roles==undefined || params.roles.length==0){
-							db.c.close();
 							return next();
 						}else if(token==null || token==undefined){
-							db.c.close();
 							throw("Acción restringida"); 
 						}else if(token.error){
-							db.c.close();
 							throw(token.error); 
 						}else{
 							let a = await this.mongodb.find(db,"user_active",{user_id: token.sub},{}, true);
@@ -218,4 +217,5 @@ let trascender = function(){
 		console.log(e);
 		process.exit();
 	}
-}();
+};
+trascender();

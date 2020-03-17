@@ -6,8 +6,8 @@ const http 	 = require("http");
 const https  = require("https");
 
 var self = function(a){
-	this.dir = a.dir;
-	this.config = a.config;
+	this.dir = (a && a.dir)?a.dir:null;
+	this.config = (a && a.config)?a.config:null;
 }
 
 self.prototype.random = function(length){

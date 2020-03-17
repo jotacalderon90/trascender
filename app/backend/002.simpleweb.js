@@ -53,13 +53,11 @@ self.prototype.message = async function(req,res,next){
 			if(this.recaptcha!=undefined){
 				await this.helper.recaptcha(this.recaptcha,req);
 			}
-			let db = await this.mongodb.connect(this.config.database);
-			
 			req.body.created = new Date();
 			req.body.to = req.body.email;
 			req.body.html = this.render.processTemplateByPath(this.dir + this.config.properties.views + "mailing/template_message.html",req.body);
 			
-			await this.mongodb.insertOne(db,"message",req.body,true);
+			await this.mongodb.insertOne("message",req.body);
 			if(this.config.smtp.enabled){
 				await this.mailing.send(req.body);
 			}

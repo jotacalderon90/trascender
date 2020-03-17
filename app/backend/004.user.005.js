@@ -45,8 +45,7 @@ self.prototype.create = async function(req,res){
 					if(req.body.password==undefined || req.body.password==null || req.body.password.length < 5){ 
 						throw("La contraseña ingresada debe tener al menos 5 caracteres");
 					}else{
-						let db = await this.mongodb.connect(this.config.database);
-						let ce = await this.mongodb.count(db,"user",{email: req.body.email},{});
+						let ce = await this.mongodb.count("user",{email: req.body.email});
 						if(ce!=0){
 							throw("El email ingresado ya está registrado");
 						}else{
@@ -60,13 +59,13 @@ self.prototype.create = async function(req,res){
 							doc.roles = ["user"];
 							doc.created = new Date;
 							doc.activate = (this.config.smtp.enabled)?false:true;
-							await this.mongodb.insertOne(db,"user",doc,true);
+							await this.mongodb.insertOne("user",doc);
 							if(this.config.smtp.enabled===true){
 								let memo = {};
 								memo.to = doc.email;
 								memo.subject = "Activación de cuenta"
 								memo.nickname = doc.nickname;
-								memo.hash = this.config.properties.host + "/api/user/activate/" + new Buffer(doc.password).toString("base64");
+								memo.hash = this.config.properties.host + "/user/activate/" + new Buffer(doc.password).toString("base64");
 								memo.html = this.render.processTemplateByPath(this.dir + this.config.properties.views + "mailing/template_activate.html", memo);
 								await this.mailing.send(memo);
 								if(req.body.xhr){
@@ -104,8 +103,7 @@ self.prototype.login = async function(req,res){
 					}
 				}
 				req.body.email = req.body.email.toLowerCase();
-				let db = await this.mongodb.connect(this.config.database);
-				let rows = await this.mongodb.find(db,"user",{email: req.body.email, activate: true},{});
+				let rows = await this.mongodb.find("user",{email: req.body.email, activate: true});
 				if(rows.length!=1){
 					throw("Los datos ingresados no corresponden");
 				}else{
@@ -114,9 +112,9 @@ self.prototype.login = async function(req,res){
 					}else{
 						let cookie = this.auth.encode(rows[0]);
 						res.cookie("Authorization",cookie);
-						let active = await this.mongodb.find(db,"user_active",{user_id: rows[0]._id.toString()},{});
+						let active = await this.mongodb.find("user_active",{user_id: rows[0]._id.toString()});
 						if(active.length!=1){
-							await this.mongodb.insertOne(db,"user_active",{user_id: rows[0]._id.toString(), email: rows[0].email, date: new Date()},true);
+							await this.mongodb.insertOne("user_active",{user_id: rows[0]._id.toString(), email: rows[0].email, date: new Date()});
 						}
 						if(req.body.xhr){
 							res.send({data: true, ext: {cookie: cookie}});
@@ -176,8 +174,7 @@ self.prototype.update = async function(req,res){
 				redirect = "/user/logout";
 			}
 		}
-		let db = await this.mongodb.connect(this.config.database);
-		await this.mongodb.updateOne(db,"user",req.user._id,updated,true);
+		await this.mongodb.updateOne("user",req.user._id,updated);
 		if(req.body.xhr){
 			res.send({data: true, ext: {redirect: redirect}});
 		}else{
@@ -200,10 +197,9 @@ self.prototype.update = async function(req,res){
 //@roles(['user'])
 self.prototype.logout = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database);
-		let user = await this.mongodb.find(db,"user_active",{user_id: req.user._id.toString()});
+		let user = await this.mongodb.find("user_active",{user_id: req.user._id.toString()});
 		if(user.length==1){
-			await this.mongodb.deleteOne(db,"user_active",user[0]._id,true);
+			await this.mongodb.deleteOne("user_active",user[0]._id);
 		}
 		req.session.destroy();
 		if(req.query.xhr){
@@ -237,9 +233,8 @@ self.prototype.forget = async function(req,res){
 						await this.helper.recaptcha(this.recaptcha,req);
 					}
 				}
-				let db = await this.mongodb.connect(this.config.database);
 				req.body.email = req.body.email.toLowerCase();
-				let user = await this.mongodb.find(db,"user",{email: req.body.email},{});
+				let user = await this.mongodb.find("user",{email: req.body.email});
 				if(user.length!=1){
 					throw("Los datos ingresados no corresponden");
 				}else{
@@ -284,13 +279,12 @@ self.prototype.recovery = async function(req,res){
 						await this.helper.recaptcha(this.recaptcha,req);
 					}
 				}
-				let db = await this.mongodb.connect(this.config.database);
-				let user = await this.mongodb.find(db,"user",{password:  new Buffer(req.body.hash,"base64").toString("ascii")},{});
+				let user = await this.mongodb.find("user",{password:  new Buffer(req.body.hash,"base64").toString("ascii")});
 				if(user.length!=1){
 					throw("Los datos ingresados no corresponden");
 				}else{
 					let updated = {$set: {password: this.helper.toHash(req.body.password + user[0].email,user[0].hash)}};
-					await this.mongodb.updateOne(db,"user",user[0]._id,updated,true);
+					await this.mongodb.updateOne("user",user[0]._id,updated);
 					if(req.body.xhr){
 						res.send({data: true});
 					}else{
@@ -327,8 +321,7 @@ self.prototype.google_login = async function(req,res){
 		if(user==null){
 			throw(this.google.error);
 		}else{
-			let db = await this.mongodb.connect(this.config.database);
-			let row = await this.mongodb.find(db,"user",{email: user.emails[0].value},{});
+			let row = await this.mongodb.find("user",{email: user.emails[0].value});
 			if(row.length!=1){
 				row = {};
 				row.email = user.emails[0].value;
@@ -341,8 +334,8 @@ self.prototype.google_login = async function(req,res){
 				row.created = new Date;
 				row.activate = true
 				row.google = user;
-				await this.mongodb.insertOne(db,"user",row);
-				row = await this.mongodb.find(db,"user",{email: user.emails[0].value},{});
+				await this.mongodb.insertOne("user",row);
+				row = await this.mongodb.find("user",{email: user.emails[0].value});
 			}else{
 				let updated = {
 					$set: {
@@ -352,13 +345,13 @@ self.prototype.google_login = async function(req,res){
 					}
 				};
 				row = row[0];
-				await this.mongodb.updateOne(db,"user",row._id,updated);
+				await this.mongodb.updateOne("user",row._id,updated);
 			}
 			let cookie = this.auth.encode(row);
 			res.cookie("Authorization",cookie);
-			let active = await this.mongodb.find(db,"user_active",{user_id: row._id.toString()},{});
+			let active = await this.mongodb.find("user_active",{user_id: row._id.toString()});
 			if(active.length!=1){
-				await this.mongodb.insertOne(db,"user_active",{user_id: row._id.toString(), email: row.email, date: new Date()},true);
+				await this.mongodb.insertOne("user_active",{user_id: row._id.toString(), email: row.email, date: new Date()});
 			}
 			if(req.body.xhr){
 				res.send({data: true, ext: {cookie: cookie, redirect: ((req.session.redirectTo)?req.session.redirectTo:"/user/info")}});
@@ -402,8 +395,7 @@ self.prototype.read = async function(req,res){
 //@roles(['user'])
 self.prototype.public = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database);
-		let user = await this.mongodb.findOne(db,"user",req.params.id,true);
+		let user = await this.mongodb.findOne("user",req.params.id);
 		res.send({data: {
 			nickname: user.nickname,
 			thumb: user.thumb
@@ -421,7 +413,6 @@ self.prototype.public = async function(req,res){
 //@roles(['user'])
 self.prototype.update_ext = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database);
 		let enabled = ["lmap","public","jv","interest","location","twitter"];
 		let fields = {};
 		for(let attr in req.body){
@@ -430,7 +421,7 @@ self.prototype.update_ext = async function(req,res){
 			}
 		}
 		let updated = {$set: fields};
-		await this.mongodb.updateOne(db,"user",req.user._id,updated,true);
+		await this.mongodb.updateOne("user",req.user._id,updated);
 		res.send({data: true});
 	}catch(e){
 		console.log(e);

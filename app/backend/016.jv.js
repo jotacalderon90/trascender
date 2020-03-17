@@ -15,10 +15,9 @@ let self = function(a){
 //@method(['get'])
 self.prototype.user_total = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		query.roles = {$in: ["JV"]};
-		let total = await this.mongodb.count(db,"user",query,{},true);
+		let total = await this.mongodb.count("user",query);
 		res.send({data: total});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -31,12 +30,11 @@ self.prototype.user_total = async function(req,res){
 //@method(['get'])
 self.prototype.user_collection = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		query.roles = {$in: ["JV"]};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
 		options.projection = {public: 1};
-		let data = await this.mongodb.find(db,"user",query,options,true);
+		let data = await this.mongodb.find("user",query,options);
 		res.send({data: data});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -49,8 +47,7 @@ self.prototype.user_collection = async function(req,res){
 //@method(['get'])
 self.prototype.user_tags = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database);
-		let data = await this.mongodb.distinct(db,"user","public.tag",true);
+		let data = await this.mongodb.distinct("user","public.tag");
 		res.send({data: data});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -63,9 +60,8 @@ self.prototype.user_tags = async function(req,res){
 //@method(['get'])
 self.prototype.jv_total = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
-		let total = await this.mongodb.count(db,"jv",query,{},true);
+		let total = await this.mongodb.count("jv",query);
 		res.send({data: total});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -78,10 +74,9 @@ self.prototype.jv_total = async function(req,res){
 //@method(['get'])
 self.prototype.jv_collection = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
-		let data = await this.mongodb.find(db,"jv",query,options,true);
+		let data = await this.mongodb.find("jv",query,options);
 		res.send({data: data});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -93,8 +88,7 @@ self.prototype.jv_collection = async function(req,res){
 //@method(['get'])
 self.prototype.jv_read = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database);
-		let row = await this.mongodb.findOne(db,"jv",req.params.id,true);
+		let row = await this.mongodb.findOne("jv",req.params.id);
 		res.send({data: row});
 	}catch(e){
 		res.send({data: null,error: e.toString()});

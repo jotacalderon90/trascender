@@ -23,8 +23,7 @@ self.prototype.subscriber = async function(req,res){
 			case "post":
 				req.body.email = req.body.email.toLowerCase();
 				if(this.helper.isEmail(req.body.email)){
-					let db = await this.mongodb.connect(this.config.database);
-					let ce = await this.mongodb.count(db,"user",{email: req.body.email},{});
+					let ce = await this.mongodb.count("user",{email: req.body.email});
 					if(ce!=0){
 						throw("El email ingresado ya está registrado");
 					}else{
@@ -38,7 +37,7 @@ self.prototype.subscriber = async function(req,res){
 						doc.roles = ["user"];
 						doc.created = new Date;
 						doc.activate = (this.config.smtp.enabled)?false:true;
-						await this.mongodb.insertOne(db,"user",doc,true);
+						await this.mongodb.insertOne("user",doc);
 						if(this.config.smtp.enabled){
 							let memo = {};
 							memo.to = doc.email;
@@ -71,13 +70,12 @@ self.prototype.subscriber = async function(req,res){
 self.prototype.activate = async function(req,res){
 	try{
 		let hash = new Buffer(req.params.hash, "base64").toString("ascii");
-		let db = await this.mongodb.connect(this.config.database);
-		let row = await this.mongodb.find(db,"user",{password: hash},{});
+		let row = await this.mongodb.find("user",{password: hash});
 		if(row.length!=1){
 			throw("se ha encontrado más de un usuario asociado a este hash");
 		}else{
 			row[0].activate = true;
-			await this.mongodb.updateOne(db,"user",row[0]._id,row[0],true);
+			await this.mongodb.updateOne("user",row[0]._id,row[0]);
 			res.render("message",{title: "Usuario activado", message: "Se ha completado su registro correctamente", class: "success"});
 		}
 	}catch(e){
@@ -93,13 +91,12 @@ self.prototype.activate = async function(req,res){
 self.prototype.desactivate = async function(req,res){
 	try{
 		let hash = new Buffer(req.params.hash, "base64").toString("ascii");
-		let db = await this.mongodb.connect(this.config.database);
-		let row = await this.mongodb.find(db,"user",{password: hash},{});
+		let row = await this.mongodb.find("user",{password: hash});
 		if(row.length!=1){
 			throw("se ha encontrado más de un usuario asociado a este hash");
 		}else{
 			row[0].activate = null;
-			await this.mongodb.updateOne(db,"user",row[0]._id,row[0],true);
+			await this.mongodb.updateOne("user",row[0]._id,row[0]);
 			res.render("message",{title: "Usuario desactivado", message: "Se ha completado su desactivación correctamente", class: "success"});
 		}
 	}catch(e){

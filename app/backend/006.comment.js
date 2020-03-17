@@ -12,9 +12,8 @@ let self = function(a){
 //@method(['get'])
 self.prototype.total = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
-		let total = await this.mongodb.count(db,this.name,query,{},true);
+		let total = await this.mongodb.count(this.name,query);
 		res.send({data: total});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -27,10 +26,9 @@ self.prototype.total = async function(req,res){
 //@method(['get'])
 self.prototype.collection = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database);
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
-		let data = await this.mongodb.find(db,this.name,query,options,true);
+		let data = await this.mongodb.find(this.name,query,options);
 		res.send({data: data});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -44,8 +42,7 @@ self.prototype.collection = async function(req,res){
 //@roles(['user'])
 self.prototype.create = async function(req,res){
 	try{
-		let db = await this.mongodb.connect(this.config.database);
-		await this.mongodb.insertOne(db,this.name,req.body,true);
+		await this.mongodb.insertOne(this.name,req.body);
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null,error: e.toString()});

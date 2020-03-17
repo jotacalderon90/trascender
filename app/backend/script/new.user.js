@@ -22,7 +22,7 @@ rl.question('email: ', (email) => {
 				doc.roles = roles.split(",");
 				doc.created = new Date;
 				doc.activate = true;
-				let db = await mongodb.connect(config.database.url);
+				let db = await mongodb.connect(config.database);
 				await mongodb.insertOne(db,"user",doc,true);
 				console.log("usuario creado correctamente");
 			}
