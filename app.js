@@ -123,7 +123,7 @@ let trascender = async function(){
 						}else if(token.error){
 							throw(token.error); 
 						}else{
-							let a = await this.mongodb.find(db,"user_active",{user_id: token.sub},{}, true);
+							let a = await this.mongodb.find("user_active",{user_id: token.sub});
 							if(a.length==0){ throw("Acción restringida"); }
 							a = false;
 							for(let i=0;i<params.roles.length;i++){
