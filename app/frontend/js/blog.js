@@ -17,10 +17,10 @@ app.controller("blogCtrl", function(trascender,$scope){
 				increase: true,
 				baseurl: "api/blog",
 				start: function(){
-					window.title = document.getElementsByTagName("title")[0].innerHTML.trim().toLowerCase();
+					window.title = document.getElementsByTagName("title")[0].innerHTML.trim();//.toLowerCase();
 					this.coll = this.formatCollectionToClient(_collection);
 					this.obtained = _collection.length;
-					this.query = (window.title!="blog")?{tag: window.title}:{};
+					this.query = (window.title!="Blog")?{tag: window.title}:{};
 					this.getTag();
 					this.getTotal();
 					this.isLoading = false;
