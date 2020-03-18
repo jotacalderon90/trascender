@@ -150,6 +150,8 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 			dragTreedom.hoverNode = dragTreedom.ui;
 			dragTreedom.append(dragTreedom.process(docincontext.body));
 			dragTreedom.refresh(true);
+			
+			self.node.methods.save2();
 		},
 		cleanSelected: function(){
 			codemirror_body.getDoc().setValue(codemirror_body.getDoc().getValue().split("nodeSelected").join(""));
@@ -288,7 +290,9 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 				
 			alert("Actualización finalizada");
 			$("#abrir-cerrar").click();
-			$("#mdCONTENT").modal('hide')
+			$("#mdCONTENT").modal('hide');
+			
+			self.node.methods.save2();
 		}
 	});
 	
