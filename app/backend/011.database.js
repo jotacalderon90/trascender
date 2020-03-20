@@ -48,8 +48,6 @@ self.prototype.import = async function(req,res){
 			console.log("INSERTADO " + (i+1) + "/" + request.data.length);
 		}
 		
-		db.c.close();
-		
 		res.send({data: true});
 	}catch(e){
 		console.log(e);
