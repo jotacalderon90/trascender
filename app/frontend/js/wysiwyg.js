@@ -17,6 +17,7 @@ app.controller("wysiwygCtrl", function(trascender,$scope){
 			update: 	["PUT", "/api/file/public/:id"]
 		},
 		start: function(){
+			this.service_upload = this.serviceCreate("POST","/api/file/public/:id/uploader");
 			this.getCollection();
 		},
 		afterGetCollection: function(){
@@ -73,6 +74,38 @@ app.controller("wysiwygCtrl", function(trascender,$scope){
 				this.doc.content = this.doc.content.split(" onclick=").join(" onclick-backup=");
 			}else{
 				this.doc.content = this.doc.content.split(" onclick-backup=").join(" onclick=");
+			}
+		},
+		upload: function(type){
+			try{
+				let id="";
+				if(type=="elemento"){
+					id = self.node.data.doc.attributes[0].value;
+					id = encode(id);
+				}
+				
+				
+				var fd = new FormData();
+				var files = $('#file')[0].files[0];
+				fd.append('file',files);
+
+				$.ajax({
+					url: '/api/file/public/' + id + '/replace',
+					type: 'POST',
+					data: fd,
+					contentType: false,
+					processData: false,
+					success: function(response){
+						if(response && response.data){
+							alert("Imagen subida correctamente");
+						}else{
+							alert("Error al subir imagen: " + response.error);
+						}
+					},
+				});
+			}catch(e){
+				alert("error: " + e);
+				console.log(e);
 			}
 		}
 	});

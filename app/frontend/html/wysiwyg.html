@@ -129,9 +129,15 @@
 									</tr>
 								</tbody>
 							</table>
-							<div>
+							<div data-ng-show="main.node.data.doc.nodeName!='IMG'">
 								<p>TextNode</p>
 								<textarea class="form-control input-sm" rows="5" data-ng-model="main.node.data.doc.innerHTML"></textarea>
+							</div>
+							<div data-ng-show="main.node.data.doc.nodeName=='IMG'">
+								<p>Imagen</p>
+								<img data-ng-src="{{main.node.data.doc.attributes[0].value}}" width="300"/>
+								<input type="file" id="file" name="file"/>
+								<button type="button" data-ng-click="main.directory.upload('elemento')">Actualizar imagen</button>
 							</div>
 						</div>
 						<div class="modal-footer">

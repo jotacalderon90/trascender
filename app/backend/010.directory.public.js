@@ -274,8 +274,29 @@ self.prototype.upload = async function(req,res){
 			await this.upload_process(req.files.file, dir + req.files.file.name);
 		}
 		
-		//res.send({data: true});
-		res.redirect("/directory/public");
+		if(req.query.ajax){
+			res.send({data: true});
+		}else{
+			res.redirect("/directory/public");
+		}
+	}catch(e){
+		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger", config: this.config});
+	}
+}
+
+
+
+//@route('/api/file/public/:id/replace')
+//@method(['post'])
+//@roles(['admin','ADM_FileDirectory'])
+self.prototype.upload = async function(req,res){
+	try{
+		if (!req.files || Object.keys(req.files).length != 1) {
+			throw("no file");
+		}
+		let dir = this.dir + (this.decode(req.params.id)).substr(1);
+		await this.upload_process(req.files.file, dir);
+		res.send({data: true});
 	}catch(e){
 		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger", config: this.config});
 	}
