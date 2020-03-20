@@ -14,7 +14,6 @@ let self = function(a){
 
 //@route('/api/document/:name/export')
 //@method(['get'])
-//@roles(['admin','ADM_Data'])
 self.prototype.export = async function(req,res){
 	try{
 		let o = await this.mongodb.find("object",{name: req.params.name});
