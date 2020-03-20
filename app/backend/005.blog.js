@@ -1,6 +1,7 @@
 "use strict";
 
 let self = function(a){
+	this.dir = a.dir;
 	this.config = a.config;
 	this.mongodb = a.mongodb;
 }
@@ -139,6 +140,8 @@ self.prototype.create = async function(req,res){
 	try{
 		req.body.user = req.user._id;
 		req.body.created = new Date();
+		req.body.img = "/media/img/logo.png";
+		req.body.thumb = "/media/img/logo.png";
 		
 		await this.mongodb.insertOne("blog",req.body);
 		
@@ -201,6 +204,40 @@ self.prototype.delete = async function(req,res){
 	}catch(e){
 		res.send({data: null,error: e.toString()});
 	}
+}
+
+
+
+//@route('/api/blog/:id/image')
+//@method(['post'])
+//@roles(['admin','SELLER'])
+self.prototype.upload = async function(req,res){
+	try{
+		if (!req.files || Object.keys(req.files).length != 1) {
+			throw("no file");
+		}
+		let d = "/media/img/blog/" + req.params.id + ".jpg";
+		await this.upload_process(req.files.file, this.dir + "/app/frontend" + d);
+		await this.mongodb.updateOne("blog",req.params.id,{$set: {img: d, thumb: d}});
+		
+		res.redirect("/blog/edit/" + req.params.id);
+	}catch(e){
+		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger", config: this.config});
+	}
+}
+
+
+
+self.prototype.upload_process = function(file,path){
+	return new Promise(function(resolve,reject){
+		file.mv(path, function(error) {
+			if (error){
+				return reject(error);
+			}else{
+				resolve(true);
+			}
+		});
+	});
 }
 
 

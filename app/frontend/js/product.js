@@ -128,6 +128,9 @@ app.controller("productCtrl", function(trascender,$scope){
 					$(".input_tag").autocomplete({source: this.tag, select: ( event, ui )=>{
 						this.getDoc().tagbk = ui.item.value;
 					}});
+				},
+				getPostImage: function(){
+					return "/api/product/" + this.getDoc()._id + "/image";
 				}
 			});
 		},
