@@ -59,7 +59,7 @@ self.prototype.message = async function(req,res,next){
 			req.body.html = this.render.processTemplateByPath(this.dir + this.config.properties.views + "mailing/template_message.html",req.body);
 			
 			//insertar usuario si no existe
-			let e = this.mongodb.count("user",{email: req.body.email});
+			let e = await this.mongodb.count("user",{email: req.body.email});
 			if(e==0){
 				let u = {};
 				u.email = req.body.email;
