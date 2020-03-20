@@ -161,6 +161,17 @@ app.controller("productCtrl", function(trascender,$scope){
 					$scope.$digest(function(){});
 				}
 			});
+		},
+		tag: function(){
+			return new trascender({
+				baseurl: "api/product",
+				start: function(){
+					this.getTag();
+				},
+				afterGetTag: function(){
+					$scope.$digest(function(){});
+				}
+			}
 		}
 	}
 	

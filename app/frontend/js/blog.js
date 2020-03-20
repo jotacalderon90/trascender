@@ -169,6 +169,17 @@ app.controller("blogCtrl", function(trascender,$scope){
 					$scope.$digest(function(){});
 				}
 			});
+		},
+		tag: function(){
+			return new trascender({
+				baseurl: "api/blog",
+				start: function(){
+					this.getTag();
+				},
+				afterGetTag: function(){
+					$scope.$digest(function(){});
+				}
+			}
 		}
 	}
 	
