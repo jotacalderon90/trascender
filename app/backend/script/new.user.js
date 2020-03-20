@@ -8,9 +8,9 @@ rl.question('email: ', (email) => {
 	rl.question('password: ', (password) => {
 		rl.question('roles: ', (roles) => {
 			const fs = require("fs");
-			const helper = new (require("../lib/helper"))();
-			const mongodb = new (require("../lib/mongodb"))();
 			const config = JSON.parse(fs.readFileSync("../../../app.json","utf-8"));
+			const helper = new (require("../lib/helper"))();
+			const mongodb = new (require("../lib/mongodb"))({config: config});
 			let create = async function(email,password,roles){
 				let doc = {};
 				doc.email = email;
@@ -22,8 +22,8 @@ rl.question('email: ', (email) => {
 				doc.roles = roles.split(",");
 				doc.created = new Date;
 				doc.activate = true;
-				let db = await mongodb.connect(config.database);
-				await mongodb.insertOne(db,"user",doc,true);
+				await mongodb.start();
+				await mongodb.insertOne("user",doc);
 				console.log("usuario creado correctamente");
 			}
 			create(email,password,roles);

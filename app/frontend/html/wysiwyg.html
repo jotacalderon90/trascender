@@ -18,7 +18,6 @@
 		<link rel="stylesheet" href="bower_components/jquery-ui/themes/base/jquery-ui.min.css"/>
 		<link rel="stylesheet" href="css/wysiwyg.css" />
 		<link rel="stylesheet" href="css/www.css" />
-		<link href="https://fonts.googleapis.com/css?family=Abel" rel="stylesheet"> 
 	</head>
 	<body>
 		
@@ -28,18 +27,9 @@
 			<nav id="nav-main">
 				<ul>
 					<li data-ng-repeat="row in main.directory.coll">
-						<a data-ng-click="main.directory.changeMode('select',row)">{{row}}</a>
+						<a data-ng-click="main.directory.select(row)">{{row}}</a>
 					</li>
 				</ul>
-			
-				<div class="tree-classic" 
-					treecontrol 
-					tree-model="main.directory.coll" 
-					on-selection="main.directory.changeMode('select',node)" 
-					selected-node="main.directory.doc" 
-					expanded-nodes="main.directory.expanded"
-					options="main.directory.treeoptions">{{node.name}}
-				</div>
 				<br>
 				<div data-ng-show="main.directory.doc!=null">
 					<button class="btn btn-block btn-xs btn-primary btn-modal" data-toggle="modal" data-target="#mdCONTENT" data-ng-click="main.cargarContenido()">CONTENIDO</button>
@@ -215,10 +205,12 @@
 		<script type="text/javascript" src="bower_components/ckeditor/ckeditor.js"></script>
 		<script type="text/javascript" src="bower_components/jquery-ui/jquery-ui.min.js"></script>
 		<script type="text/javascript" src="js/lib/formatting.js"></script>
-		<script type="text/javascript" src="js/lib/trascender.bk.js"></script>
+		<script type="text/javascript" src="js/lib/trascender.js"></script>
 		<script type="text/javascript" >
 			var app = angular.module("myApp", [] );
-			app.factory("transcend", jotaTranscend);
+			app.factory("trascender", function(){
+				return trascender;
+			});
 		</script>
 		<script type="text/javascript" src="js/wysiwyg.js"></script>
 		<!--</js>-->

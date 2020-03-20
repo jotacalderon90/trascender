@@ -1,4 +1,4 @@
-app.controller("wysiwygCtrl", function(transcend,$scope){
+app.controller("wysiwygCtrl", function(trascender,$scope){
 	
 	var self = this;
 	
@@ -9,8 +9,7 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 	let path = "/html/";
 	
 	/*directorio de archivos*/
-	self.directory = new transcend({
-		scope: $scope,
+	self.directory = new trascender({
 		service: {
 			total: 		["GET", "/api/file/public/" + btoa(path) + "/total"],
 			collection: ["GET", "/api/file/public/" + btoa(path) + "/collection"],
@@ -19,6 +18,9 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 		},
 		start: function(){
 			this.getCollection();
+		},
+		afterGetCollection: function(){
+			$scope.$digest(function(){});
 		},
 		formatToServer: function(doc){
 			if(self.dom.isCompleteHTML){
@@ -41,10 +43,9 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 		},
 		afterChangeMode: function(action,doc){
 			switch(action){
-				case "select":
+				case "read":
 				this.doc_id = encode(path + doc);
-				this.read({id: this.doc_id});
-				//$("[for='abrir-cerrar']").click();//jc:20180328=nuevo editor
+				this.read(this.doc_id);
 				break;
 			}
 		},
@@ -58,37 +59,26 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 		},
 		beforeUpdate: function(){
 			this.process_onclick(false);
-			//if(confirm("confirme actualización")){
-				if(this.reloadDoc){
-					this.docToReload = angular.copy(this.doc);
-				}
-				return true;
-			/*}else{
-				this.reloadDoc = false;
-				this.docToReload = null;
-				return false;
-			}*/
+			this.idBK = this.doc.id;
+			return true;
 		},
 		paramsToUpdate: function(){
 			return {id: this.doc.id};
 		},
 		afterUpdate: function(){
-			if(self.directory.reloadDoc){
-				self.directory.select(self.directory.docToReload);
-			}
+			this.read(this.idBK);
 		},
 		process_onclick: function(remove){
 			if(remove){
-				self.directory.doc.content = self.directory.doc.content.split(" onclick=").join(" onclick-backup=");
+				this.doc.content = this.doc.content.split(" onclick=").join(" onclick-backup=");
 			}else{
-				self.directory.doc.content = self.directory.doc.content.split(" onclick-backup=").join(" onclick=");
+				this.doc.content = this.doc.content.split(" onclick-backup=").join(" onclick=");
 			}
 		}
 	});
 	
 	/*plantillas de html*/
-	self.html = new transcend({
-		scope: $scope, 
+	self.html = new trascender({
 		increase: true,
 		baseurl: "/api/document/html",
 		start: function(){
@@ -111,7 +101,7 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 		}
 	});
 	
-	self.dom = new transcend({
+	self.dom = new trascender({
 		taken: function(){
 			if(self.directory.doc.content.trim()==""){
 				self.directory.doc.content = this.default();
@@ -152,6 +142,8 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 			dragTreedom.refresh(true);
 			
 			self.node.methods.save2();
+			
+			$("#mdHTML").modal("hide");
 		},
 		cleanSelected: function(){
 			codemirror_body.getDoc().setValue(codemirror_body.getDoc().getValue().split("nodeSelected").join(""));
@@ -215,7 +207,6 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 				dragTreedom.append(dragTreedom.process($("#visualcontent").html()));
 				dragTreedom.refresh(true);
 				
-				self.directory.reloadDoc = true;
 				self.directory.update();
 				
 				$('#dvModal').modal('hide');
@@ -246,8 +237,7 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 	}
 	
 	/*Editor de contenido*/
-	self.contenteditor = new transcend({
-		scope: $scope, 
+	self.contenteditor = new trascender({
 		load: function(){
 			this.coll = [];
 			var inputs = $("#visualcontent").find("[data-tr]");
@@ -288,7 +278,6 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 			dragTreedom.append(dragTreedom.process(docincontext.body));
 			dragTreedom.refresh(true);
 				
-			alert("Actualización finalizada");
 			$("#abrir-cerrar").click();
 			$("#mdCONTENT").modal('hide');
 			
@@ -320,7 +309,6 @@ app.controller("wysiwygCtrl", function(transcend,$scope){
 			dragTreedom.append(dragTreedom.process($("#visualcontent").html()));
 			dragTreedom.refresh(true);
 			
-			self.directory.reloadDoc = true;
 			self.directory.update();
 		}
 		return false;
