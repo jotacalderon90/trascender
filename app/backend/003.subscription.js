@@ -35,7 +35,7 @@ self.prototype.subscriber = async function(req,res){
 						doc.notification = true;
 						doc.thumb = "/media/img/user.png";
 						doc.roles = ["user"];
-						doc.created = new Date;
+						doc.created = new Date();
 						doc.activate = (this.config.smtp.enabled)?false:true;
 						await this.mongodb.insertOne("user",doc);
 						if(this.config.smtp.enabled){

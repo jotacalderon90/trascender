@@ -57,6 +57,21 @@ self.prototype.message = async function(req,res,next){
 			req.body.to = req.body.email;
 			req.body.html = this.render.processTemplateByPath(this.dir + this.config.properties.views + "mailing/template_message.html",req.body);
 			
+			//insertar usuario si no existe
+			let e = this.mongodb.count("user",{email: req.body.email});
+			if(e==0){
+				let u = {};
+				u.hash = this.helper.random(10);
+				u.password = this.helper.toHash("123456" + req.body.email,u.hash);
+				u.nickname = req.body.email;
+				u.notification = true;
+				u.thumb = "/media/img/user.png";
+				u.roles = ["user","message"];
+				u.created = new Date();
+				u.activate = true;
+				await this.mongodb.insertOne("user",u);
+			}
+			
 			await this.mongodb.insertOne("message",req.body);
 			if(this.config.smtp.enabled){
 				await this.mailing.send(req.body);
