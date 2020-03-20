@@ -179,7 +179,7 @@ app.controller("blogCtrl", function(trascender,$scope){
 				afterGetTag: function(){
 					$scope.$digest(function(){});
 				}
-			}
+			});
 		}
 	}
 	
