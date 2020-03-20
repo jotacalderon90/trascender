@@ -49,6 +49,7 @@ self.prototype.render_other = function(req,res,next){
 //@description('primera accion en que usuario/cliente envia informacion al servidor')
 self.prototype.message = async function(req,res,next){
 	try{
+		req.body.email = req.body.email.toLowerCase();
 		if(this.helper.isEmail(req.body.email)){
 			if(this.recaptcha!=undefined){
 				await this.helper.recaptcha(this.recaptcha,req);
@@ -61,7 +62,7 @@ self.prototype.message = async function(req,res,next){
 			let e = this.mongodb.count("user",{email: req.body.email});
 			if(e==0){
 				let u = {};
-				u.email = req.body.email.toLowerCase();
+				u.email = req.body.email;
 				u.hash = this.helper.random(10);
 				u.password = this.helper.toHash("123456" + u.email,u.hash);
 				u.nickname = u.email;
@@ -73,7 +74,7 @@ self.prototype.message = async function(req,res,next){
 				await this.mongodb.insertOne("user",u);
 				console.log("nuevo usuario insertado");
 			}else{
-				console.log("usuario ya insertado");
+				console.log("usuario ya insertado: " + e);
 			}
 			
 			await this.mongodb.insertOne("message",req.body);
