@@ -48,10 +48,26 @@
 				<div class="modal-dialog modal-lg">
 					<div class="modal-content">
 						<div class="modal-body">
+							<div data-ng-repeat="row in main.contenteditor.coll">
+								<div class="input-group" >
+									<span class="input-group-addon">{{row.label}}</span>
+									<input type="text" class="form-control"  data-ng-model="row.value"/>
+									<span class="input-group-addon" data-ng-show="row.img!=null" data-toggle="collapse" href="#collapse{{$index}}" aria-expanded="false" aria-controls="collapse{{$index}}">
+										<i class="fa fa-plus"></i>
+									</span>
+								</div>
+								<div class="collapse" id="collapse{{$index}}">
+									<div class="well">
+										<img data-ng-src="{{row.img}}" height="100"/>
+										<input type="file" id="file{{$index}}" name="file{{$index}}"/>
+										<button type="button" data-ng-click="main.directory.upload(null,row.img,$index)">Actualizar imagen</button>
+									</div>
+								</div>
+							</div>
 							<div id="form-dinamyc"></div>
 						</div>
 						<div class="modal-footer">
-							<button class="btn btn-xs btn-success" data-ng-click="main.contenteditor.process()">Guardar</button>
+							<button class="btn btn-xs btn-success" data-ng-click="main.contenteditor.process2()">Guardar</button>
 						</div>
 					</div>
 				</div>

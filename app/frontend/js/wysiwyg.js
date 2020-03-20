@@ -76,17 +76,24 @@ app.controller("wysiwygCtrl", function(trascender,$scope){
 				this.doc.content = this.doc.content.split(" onclick-backup=").join(" onclick=");
 			}
 		},
-		upload: function(type){
+		upload: function(type,src,index){
 			try{
+				var fd = new FormData();
+				var files;
+				
 				let id="";
+				let srcbk="";
 				if(type=="elemento"){
+					srcbk = self.node.data.doc.attributes[0].value;
 					id = self.node.data.doc.attributes[0].value;
 					id = encode(id);
+					files = $('#file')[0].files[0];
+				}else{
+					srcbk = src;
+					id = encode(src);
+					files = $('#file' + index)[0].files[0];
 				}
 				
-				
-				var fd = new FormData();
-				var files = $('#file')[0].files[0];
 				fd.append('file',files);
 
 				$.ajax({
@@ -98,6 +105,15 @@ app.controller("wysiwygCtrl", function(trascender,$scope){
 					success: function(response){
 						if(response && response.data){
 							alert("Imagen subida correctamente");
+							location.reload();
+							/*if(type=="elemento"){
+								self.node.data.doc.attributes[0].value = "";
+								self.node.data.doc.attributes[0].value = srcbk + "?" + new Date().getTime();
+							}else{
+								self.contenteditor.coll[index].src = "";
+								self.contenteditor.coll[index].src = srcbk + "?" + new Date().getTime();
+							}
+							$scope.$digest(function(){});*/
 						}else{
 							alert("Error al subir imagen: " + response.error);
 						}
@@ -275,6 +291,22 @@ app.controller("wysiwygCtrl", function(trascender,$scope){
 			this.coll = [];
 			var inputs = $("#visualcontent").find("[data-tr]");
 			for(var i=0;i<inputs.length;i++){
+				let v = (inputs[i].getAttribute("data-dinamyc")=="textnode")?inputs[i].innerHTML:inputs[i].getAttribute(inputs[i].getAttribute("data-dinamyc"));
+				let img = null;
+				if(v.indexOf("media/img/simpleweb")>-1){
+					img = extractIn(v,"background-image:url(",")");
+				}
+				
+				this.coll.push({
+					label: inputs[i].getAttribute("data-label"),
+					dinamyc: inputs[i].getAttribute("data-dinamyc"),
+					value: v,
+					img: img
+				})
+			}
+			//$scope.$digest(function(){});
+			
+			/*for(var i=0;i<inputs.length;i++){
 				this.coll.push({
 					input: (inputs[i].getAttribute("data-input"))?inputs[i].getAttribute("data-input"):"text",
 					label: inputs[i].getAttribute("data-label"),
@@ -284,7 +316,7 @@ app.controller("wysiwygCtrl", function(trascender,$scope){
 					default: (inputs[i].getAttribute("data-dinamyc")=="textnode")?inputs[i].innerHTML:inputs[i].getAttribute(inputs[i].getAttribute("data-dinamyc"))
 				});
 			}
-			createFORM(this.coll);
+			createFORM(this.coll);*/
 		},
 		process: function(){
 			for(var i=0;i<this.coll.length;i++){
@@ -302,6 +334,32 @@ app.controller("wysiwygCtrl", function(trascender,$scope){
 					}else{
 						input[0].setAttribute(dinamyc,$("[name='" + this.coll[i].name + "']").val());
 					}
+				}
+			}
+			
+			docincontext.body = $("#visualcontent").html()
+			dragTreedom.ui.innerHTML = "";
+			dragTreedom.hoverNode = dragTreedom.ui;
+			dragTreedom.append(dragTreedom.process(docincontext.body));
+			dragTreedom.refresh(true);
+				
+			$("#abrir-cerrar").click();
+			$("#mdCONTENT").modal('hide');
+			
+			self.node.methods.save2();
+		},
+		process2: function(){
+			for(var i=0;i<this.coll.length;i++){
+				var label = this.coll[i].label;
+				var dinamyc = this.coll[i].dinamyc;
+				var value = this.coll[i].value;
+				
+				var input = $("#visualcontent").find("[data-label='" + label + "']");
+				
+				if(dinamyc=="textnode"){
+					input[0].innerHTML = value;
+				}else{
+					input[0].setAttribute(dinamyc,value);
 				}
 			}
 			
