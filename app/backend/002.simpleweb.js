@@ -61,15 +61,19 @@ self.prototype.message = async function(req,res,next){
 			let e = this.mongodb.count("user",{email: req.body.email});
 			if(e==0){
 				let u = {};
+				u.email = req.body.email.toLowerCase();
 				u.hash = this.helper.random(10);
-				u.password = this.helper.toHash("123456" + req.body.email,u.hash);
-				u.nickname = req.body.email;
+				u.password = this.helper.toHash("123456" + u.email,u.hash);
+				u.nickname = u.email;
 				u.notification = true;
 				u.thumb = "/media/img/user.png";
 				u.roles = ["user","message"];
 				u.created = new Date();
 				u.activate = true;
 				await this.mongodb.insertOne("user",u);
+				console.log("nuevo usuario insertado");
+			}else{
+				console.log("usuario ya insertado");
 			}
 			
 			await this.mongodb.insertOne("message",req.body);
