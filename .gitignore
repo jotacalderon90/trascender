@@ -10,10 +10,8 @@ node_modules/*
 #dependencias de lado cliente
 #################
 app/frontend/bower_components/*
-
-#logs
-#################
-app/media/doc/log/*
+app/frontend/media/img/blog/*
+app/frontend/media/img/product/*
 
 #package-lock
 #################
