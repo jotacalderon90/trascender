@@ -42,7 +42,7 @@ app.controller("storyCtrl", function(trascender,$scope){
 					this.fulltext = "";
 					this.getTotal();
 					this.getTag();
-					$(window).scroll(()=>{this.scrolling()});	
+					//$(window).scroll(()=>{this.scrolling()});	
 				},
 				beforeGetTotal: function(){
 					this.getAll = false;
@@ -59,6 +59,7 @@ app.controller("storyCtrl", function(trascender,$scope){
 					this.getCollection();
 				},
 				beforeGetCollection: function(){
+					this.options.skip = this.obtained;
 					this.options.sort = {year: this.sorted, month: this.sorted, day: this.sorted, title: this.sorted};
 					return true;
 				},
