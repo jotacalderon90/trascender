@@ -2,20 +2,36 @@ app.controller("storyCtrl", function(trascender,$scope){
 	
 	if(typeof user!="undefined"){
 		this.user = user;
-		this.user.isAdmin = function(){
-			if(this.doc && this.doc.roles && (this.doc.roles.indexOf("admin")>-1)){
-				return true;
-			}else{
-				return false;
-			}
-		}
+		this.user.setAdmin(["admin"]);
 	}
 	
-	var instances = {
+	trascender.prototype.formatToClient = function(row){
+		if(row.year<0){
+			row.fecha = row.year.toString().replace("-","") + " (ac)";
+			row.fechat = row.fecha;
+		}else{
+			if(isNaN(row.month) || row.month==0){
+				row.fecha = moment([row.year,1,1], "YYYYMMDD").fromNow();
+				row.fechat = "Alrededor del año " + row.year;
+			}else{
+				row.mes = row.month;
+				if(isNaN(row.day) || row.day==0){
+					row.fecha = moment([row.year,row.mes,1], "YYYYMMDD").fromNow();
+					row.fechat = this.months[row.month-1] + " del año " + row.year;
+				}else{
+					row.dia = row.day;
+					row.fecha = moment([row.year,row.mes,row.dia], "YYYYMMDD").fromNow();
+					row.fechat = moment([row.year,row.mes-1,row.dia]).format("dddd, DD MMMM YYYY");
+				}
+			}
+		}
+		return row;
+	}
+	
+	let i = {
 		collection: function(){
 			return new trascender({
 				increase: true,
-				scrolling: true,
 				baseurl: "/api/story",
 				start: function(){
 					window.title = document.getElementsByTagName("title")[0].innerHTML.trim();
@@ -26,6 +42,7 @@ app.controller("storyCtrl", function(trascender,$scope){
 					this.fulltext = "";
 					this.getTotal();
 					this.getTag();
+					$(window).scroll(()=>{this.scrolling()});	
 				},
 				beforeGetTotal: function(){
 					this.getAll = false;
@@ -56,34 +73,6 @@ app.controller("storyCtrl", function(trascender,$scope){
 						$scope.$digest(function(){});
 					}
 				},
-				formatToClient: function(doc){
-					if(doc.year<0){
-						doc.fecha = doc.year.toString().replace("-","") + " (ac)";
-						doc.fechat = doc.fecha;
-					}else{
-						if(isNaN(doc.month) || doc.month==0){
-							doc.fecha = moment([doc.year,1,1], "YYYYMMDD").fromNow();
-							doc.fechat = "Alrededor del año " + doc.year;
-						}else{
-							doc.mes = doc.month;
-							if(isNaN(doc.day) || doc.day==0){
-								doc.fecha = moment([doc.year,doc.mes,1], "YYYYMMDD").fromNow();
-								doc.fechat = this.months[doc.month-1] + " del año " + doc.year;
-							}else{
-								doc.dia = doc.day;
-								doc.fecha = moment([doc.year,doc.mes,doc.dia], "YYYYMMDD").fromNow();
-								doc.fechat = moment([doc.year,doc.mes-1,doc.dia]).format("dddd, DD MMMM YYYY");
-							}
-						}
-					}
-					if(doc.tag){
-						doc.tag_inline = doc.tag.join(",");
-					}
-					if(doc.font){
-						doc.font_inline = doc.font.join(",");
-					}
-					return doc;
-				},
 				getSortInfo: function(type){
 					switch(type){
 						case "label":
@@ -93,41 +82,95 @@ app.controller("storyCtrl", function(trascender,$scope){
 							return (this.sorted==-1)?"desc":"asc";
 						break;
 					}
+				},
+				scrolling: function(){
+					if(Math.round($(window).scrollTop() + $(window).height()) == Math.round($(document).height())) {
+						if(!this.isLoading && this.obtained < this.cant){
+							this.getCollection();
+						}
+					}
 				}
 			});
 		},
 		document: function(){
 			return new trascender({
-				baseurl: "/api/story",
-				paramsToUpdate: function(){
-					return {id: this.doc._id};
+				baseurl: "api/story",
+				default: function(){
+					return {tag: [],font:[]};
 				},
-				paramsToDelete: function(){
-					return {id: this.doc._id};
+				start: function(){
+					if(typeof _document != "undefined"){
+						this.select(_document);
+					}else{
+						this.new();
+					}
+					this.getTag();
 				},
-				beforeCreate: function(){
-					return confirm("Confirme");
+				beforeCreate: function(doc){
+					return confirm("Confirme creación del documento");
 				},
-				beforeUpdate: function(){
-					return confirm("Confirme");
+				afterCreate: function(s){
+					if(s){
+						location.href = "/story";
+					}else{
+						$scope.$digest(function(){});
+					}
+				},
+				beforeUpdate: function(doc){
+					return confirm("Confirme actualización del documento");
+				},
+				afterUpdate: function(s){
+					if(s){
+						location.reload();
+					}else{
+						$scope.$digest(function(){});
+					}
 				},
 				beforeDelete: function(){
-					return confirm("Confirme");
+					return confirm("Confirme eliminación del documento");
 				},
-				afterCreate: function(){location.reload();},
-				afterUpdate: function(){location.reload();},
-				afterDelete: function(){location.reload();},
+				afterDelete: function(s){
+					if(s){
+						location.href = "/story";
+					}else{
+						$scope.$digest(function(){});
+					}
+				},
 				formatToServer: function(doc){
-					doc.font = doc.font_inline.split(",");
-					doc.tag = doc.tag_inline.split(",");
-					delete doc.font_inline;
-					delete doc.tag_inline;
-					delete doc["$$hashKey"];
+					delete doc.tagbk;
+					delete doc.fontgbk;
 					return doc;
+				},
+				addTag: function(event){
+					if(event.which === 13) {
+						if(this.getDoc().tag.indexOf(this.getDoc().tagbk)==-1){
+							this.getDoc().tag.push(this.getDoc().tagbk);
+							this.getDoc().tagbk = "";
+						}
+					}
+				},
+				removeTag: function(i){
+					this.getDoc().tag.splice(i,1);
+				},
+				addFont: function(event){
+					if(event.which === 13) {
+						if(this.getDoc().font.indexOf(this.getDoc().fontbk)==-1){
+							this.getDoc().font.push(this.getDoc().fontbk);
+							this.getDoc().fontbk = "";
+						}
+					}
+				},
+				removeFont: function(i){
+					this.getDoc().font.splice(i,1);
+				},
+				afterGetTag: function(){
+					$(".input_tag").autocomplete({source: this.tag, select: ( event, ui )=>{
+						this.getDoc().tagbk = ui.item.value;
+					}});
 				}
 			});
 		},
-		dayastoday: function(){
+		resume: function(){
 			return new trascender({
 				increase: true,
 				scrolling: true,
@@ -153,46 +196,15 @@ app.controller("storyCtrl", function(trascender,$scope){
 					}else{
 						$scope.$digest(function(){});
 					}
-				},
-				formatToClient: function(doc){
-					if(doc.year<0){
-						doc.fecha = doc.year.toString().replace("-","") + " (ac)";
-						doc.fechat = doc.fecha;
-					}else{
-						if(isNaN(doc.month) || doc.month==0){
-							doc.fecha = moment([doc.year,1,1], "YYYYMMDD").fromNow();
-							doc.fechat = "Alrededor del año " + doc.year;
-						}else{
-							doc.mes = doc.month;
-							if(isNaN(doc.day) || doc.day==0){
-								doc.fecha = moment([doc.year,doc.mes,1], "YYYYMMDD").fromNow();
-								doc.fechat = this.months[doc.month-1] + " del año " + doc.year;
-							}else{
-								doc.dia = doc.day;
-								doc.fecha = moment([doc.year,doc.mes,doc.dia], "YYYYMMDD").fromNow();
-								doc.fechat = moment([doc.year,doc.mes-1,doc.dia]).format("dddd, DD MMMM YYYY");
-							}
-						}
-					}
-					if(doc.tag){
-						doc.tag_inline = doc.tag.join(",");
-					}
-					if(doc.font){
-						doc.font_inline = doc.font.join(",");
-					}
-					return doc;
 				}
 			});
 		}
 	}
 	
-	for(instance in story_instances){
-		this[story_instances[instance]] = new instances[story_instances[instance]]();
+	for(instance in instances.story){
+		this[instances.story[instance]] = new i[instances.story[instance]]();
 	}
 	
-	var self = this;
-	
-	setTimeout(function(){$scope.$digest(function(){});}, 500);
 });
 			
 //reemplazar elemento de array

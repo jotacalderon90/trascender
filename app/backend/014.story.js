@@ -67,6 +67,30 @@ self.prototype.renderCollectionTag = async function(req,res){
 
 
 
+//@route('/story/new')
+//@method(['get'])
+self.prototype.new = async function(req,res){
+	res.render("story/form");
+}
+
+
+
+//@route('/story/edit/:id')
+//@method(['get'])
+//@roles(['admin'])
+self.prototype.edit = async function(req,res){
+	try{	
+		let row = await this.mongodb.findOne("story",req.params.id);
+		res.render("story/form",{row: row});
+	}catch(e){
+		console.log(e);
+		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger", config: this.config});
+	}
+	
+}
+
+
+
 //@route('/api/story/total')
 //@method(['get'])
 self.prototype.total = async function(req,res){
@@ -112,20 +136,6 @@ self.prototype.tags = async function(req,res){
 
 
 
-//@route('/api/story/:id')
-//@method(['get'])
-self.prototype.read = async function(req,res){
-	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		let row = await this.mongodb.findOne(collection,req.params.id);
-		res.send({data: row});
-	}catch(e){
-		res.send({data: null,error: e.toString()});
-	}
-}
-
-
-
 //@route('/api/story')
 //@method(['post'])
 //@roles(['admin'])
@@ -134,6 +144,20 @@ self.prototype.create = async function(req,res){
 		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
 		await this.mongodb.insertOne(collection,req.body);
 		res.send({data: true});
+	}catch(e){
+		res.send({data: null,error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/story/:id')
+//@method(['get'])
+self.prototype.read = async function(req,res){
+	try{
+		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
+		let row = await this.mongodb.findOne(collection,req.params.id);
+		res.send({data: row});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
 	}
