@@ -48,8 +48,11 @@ app.controller("storyCtrl", function(trascender,$scope){
 					
 					this.options = {sort: {year: 1, month: 1, day: 1, title: 1}, limit: 10, skip: this.obtained};
 					
-					this.getTotal();
+					this.getTag();
 					
+				},
+				afterGetTag: function(){
+					this.getTotal();
 				},
 				loadMap: function(){
 					let lat = -33.59875863395195;

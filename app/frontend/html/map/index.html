@@ -68,6 +68,22 @@
 	<div data-ng-controller="storyCtrl as ctrl">
 		
 		<div class="page-header">
+			<div class="pull-right">
+				<div class="btn-group btn-group-xs" role="group" >
+					<div class="btn-group">
+						<button type="button" class="btn btn-default btn-xs">Tags</button>
+						<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<span class="caret"></span>
+							<span class="sr-only">Toggle Dropdown</span>
+						</button>
+						<ul class="dropdown-menu">
+							<li data-ng-repeat="row in ctrl.collection.tag">
+								<a data-ng-href="/map?tag={{row}}">{{row}}</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
 			<h1>
 				<a href="/map">Mapas</a>
 			</h1>
