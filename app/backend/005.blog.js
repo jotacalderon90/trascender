@@ -4,6 +4,7 @@ let self = function(a){
 	this.dir = a.dir;
 	this.config = a.config;
 	this.mongodb = a.mongodb;
+	this.helper = a.helper;
 }
 
 
@@ -62,6 +63,19 @@ self.prototype.renderCollectionTag = async function(req,res){
 
 //@route('/blog/:id')
 //@method(['get'])
+self.prototype.render_id = async function(req,res,next){
+	let view = "blog/" + req.params.id;
+	if(this.helper.exist(view)){
+		res.render(view);
+	}else{
+		return next();
+	}
+}
+
+
+
+//@route('/blog/:id')
+//@method(['get'])
 self.prototype.renderDocument = async function(req,res){
 	try{	
 		let data = await this.mongodb.find("blog",{uri:req.params.id});
@@ -107,32 +121,6 @@ self.prototype.collection = async function(req,res){
 
 
 
-//@route('/api/blog/tag/collection')
-//@method(['get'])
-self.prototype.tag = async function(req,res){
-	try{
-		let data = await this.mongodb.distinct("blog","tag");
-		res.send({data: data});
-	}catch(e){
-		res.send({data: null,error: e.toString()});
-	}
-}
-
-
-
-//@route('/api/blog/:id')
-//@method(['get'])
-self.prototype.read = async function(req,res){
-	try{
-		let row = await this.mongodb.findOne("blog",req.params.id);
-		res.send({data: row});
-	}catch(e){
-		res.send({data: null,error: e.toString()});
-	}
-}
-
-
-
 //@route('/api/blog')
 //@method(['post'])
 //@roles(['admin','BLOGUER'])
@@ -154,6 +142,19 @@ self.prototype.create = async function(req,res){
 		});
 		
 		res.send({data: true});
+	}catch(e){
+		res.send({data: null,error: e.toString()});
+	}
+}
+
+
+
+//@route('/api/blog/:id')
+//@method(['get'])
+self.prototype.read = async function(req,res){
+	try{
+		let row = await this.mongodb.findOne("blog",req.params.id);
+		res.send({data: row});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
 	}
@@ -208,6 +209,19 @@ self.prototype.delete = async function(req,res){
 
 
 
+//@route('/api/blog/tag/collection')
+//@method(['get'])
+self.prototype.tag = async function(req,res){
+	try{
+		let data = await this.mongodb.distinct("blog","tag");
+		res.send({data: data});
+	}catch(e){
+		res.send({data: null,error: e.toString()});
+	}
+}
+
+
+
 //@route('/api/blog/:id/image')
 //@method(['post'])
 //@roles(['admin','SELLER'])
@@ -217,27 +231,13 @@ self.prototype.upload = async function(req,res){
 			throw("no file");
 		}
 		let d = "/media/img/blog/" + req.params.id + ".jpg";
-		await this.upload_process(req.files.file, this.dir + "/app/frontend" + d);
+		await this.helper.upload_process(req.files.file, this.dir + "/app/frontend" + d);
 		await this.mongodb.updateOne("blog",req.params.id,{$set: {img: d, thumb: d}});
 		
 		res.redirect("/blog/edit/" + req.params.id);
 	}catch(e){
 		res.status(500).render("message",{title: "Error en el Servidor", message: e.toString(), error: 500, class: "danger", config: this.config});
 	}
-}
-
-
-
-self.prototype.upload_process = function(file,path){
-	return new Promise(function(resolve,reject){
-		file.mv(path, function(error) {
-			if (error){
-				return reject(error);
-			}else{
-				resolve(true);
-			}
-		});
-	});
 }
 
 

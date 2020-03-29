@@ -85,5 +85,16 @@ self.prototype.request = function(url){
 	});
 }
 
+self.prototype.upload_process = function(file,path){
+	return new Promise(function(resolve,reject){
+		file.mv(path, function(error) {
+			if (error){
+				return reject(error);
+			}else{
+				resolve(true);
+			}
+		});
+	});
+}
 
 module.exports = self;
