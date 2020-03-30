@@ -134,6 +134,22 @@ app.controller("databaseCtrl", function(trascender,$scope){
 	this.document = new trascender({
 		baseurl: "api/document/:name",
 		load: function(){
+			
+			//parche mas adelante mejorar
+			if(self.object.doc.service){
+				for(s in self.object.doc.service){
+					console.log(s);
+					console.log(self.object.doc.service[s].method);
+					console.log(self.object.doc.service[s].uri);
+					console.log(this["service_" + s]);
+					console.log(this.serviceCreate);
+					this["service_" + s] = this.serviceCreate(self.object.doc.service[s].method.toUpperCase(),self.object.doc.service[s].uri);
+					console.log(this["service_" + s]);
+				}
+			}else{
+				this.createServices();
+			}
+			
 			this.wantFilter = false; 
 			this.filter = {};
 			for(attr in self.object.getOutput()){

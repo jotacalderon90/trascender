@@ -431,6 +431,43 @@ self.prototype.update_ext = async function(req,res){
 
 
 
+//@route('/api/user')
+//@method(['post'])
+//@roles(['admin'])
+self.prototype.createByAdmin = async function(req,res){
+	try{
+		req.body.email = req.body.email.toLowerCase();
+		if(!this.helper.isEmail(req.body.email)){
+			throw("El email ingresado no es válido");
+		}else{
+			if(req.body.password==undefined || req.body.password==null || req.body.password.length < 5){ 
+				throw("La contraseña ingresada debe tener al menos 5 caracteres");
+			}else{
+				let ce = await this.mongodb.count("user",{email: req.body.email});
+				if(ce!=0){
+					throw("El email ingresado ya está registrado");
+				}else{
+					let doc = {};
+					doc.email = req.body.email;
+					doc.hash = this.helper.random(10);
+					doc.password = this.helper.toHash(req.body.password + req.body.email,doc.hash);
+					doc.nickname = req.body.email;
+					doc.notification = true;
+					doc.thumb = "/media/img/user.png";
+					doc.roles = ["user"];
+					doc.created = new Date();
+					doc.activate = true;
+					await this.mongodb.insertOne("user",doc);
+					res.send({data: true});
+				}
+			}
+		}
+	}catch(e){
+		res.send({data: null, error: e});
+	}
+}
+
+
 module.exports = self;
 
 
