@@ -1,0 +1,20 @@
+<!--use:_views/m.main-->
+
+<!--define:title-->
+Log
+<!--/define:title-->
+
+<!--define:main-->
+	<div class="table-responsive" data-ng-controller="logCtrl as ctrl">
+		<div class="page-header">
+			<h1><a href="/log">Log</a> por día</h1>
+		</div>
+	</div>
+<!--/define:main-->
+
+<!--define:script-->
+	<script>
+		var instances = {log: ["days"]};
+	</script>
+	<script type="text/javascript" src="js/log.js"></script>
+<!--/define:script-->

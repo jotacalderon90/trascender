@@ -113,7 +113,6 @@ let trascender = async function(){
 						content += JSON.stringify(req.body);
 						console.log(content);
 						fs.appendFile("./log.csv", content, function (err) {});
-						this.log.create(req);
 						
 						//VALIDATE USER
 						if(params.roles==undefined || params.roles.length==0){
@@ -199,8 +198,6 @@ let trascender = async function(){
 				console.log(new Date() + " == publicando error 404");
 				res.status(404).render("message",{title: "Error 404", message: "URL no encontrada", error: 404, class: "danger"});
 			});
-			
-			this.log.mongodb = this.mongodb;
 			
 			//iniciar aplicacion
 			let port = this.config.properties.port;
