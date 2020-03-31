@@ -607,6 +607,16 @@ trascender.prototype.randomArray = function(array){
 	return new_array;
 }
 
+trascender.prototype.distinct = function(array){
+	let a = [];
+	for(let i=0;i<array.length;i++){
+		if(a.indexOf(array[i])==-1){
+			a.push(array[i]);
+		}
+	}
+	return a;
+}
+
 trascender.prototype.updateCart = function(row){
 	if(row==undefined){
 		row = _document;

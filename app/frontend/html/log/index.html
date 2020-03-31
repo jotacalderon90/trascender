@@ -7,41 +7,16 @@ Log
 <!--define:main-->
 	<div data-ng-controller="logCtrl as ctrl">
 		<div class="page-header">
-			<div class="pull-right">
-				<div class="btn-group btn-group-xs" role="group" >
-					<button type="button" class="btn btn-info" data-ng-click="ctrl.start.getDays()">
-						desglosar días
-					</button>
-				</div>
-			</div>
 			<h1>Log</h1>
 		</div>
-		<div id="chartContainer" style="height: 400px; width: 100%;"></div>
-		<!--<table class="table">
-			<tr>
-				<th>Created</th>
-				<th>IP</th>
-				<th>Author</th>
-				<th>URL</th>
-				<th>Method</th>
-				<th>Data</th>
-			</tr>
-			<tr data-ng-repeat="row in ctrl.start.coll">
-				<th>{{row.created}}</th>
-				<th>{{row.ip}}</th>
-				<th>{{row.author}}</th>
-				<th>{{row.method}}</th>
-				<th>{{row.data}}</th>
-				<th><a data-ng-href="{{row.url}}" title="{{row.url}}">{{row.url}}</a></th>
-			</tr>
-		</table>-->
+		<div id="chart1" style="height: 400px; width: 100%;"></div>
+		<div id="chart2" style="height: 400px; width: 100%;"></div>
 	</div>
 <!--/define:main-->
 
 <!--define:script-->
 	<script>
 		var _document = {{data: JSON.stringify(doc.data)}};
-		var instances = {log: ["start"]};
 	</script>
 	<script type="text/javascript" src="js/lib/canvasjs-2.3.2/canvasjs.min.js"></script>
 	<script type="text/javascript" src="js/log.js"></script>

@@ -34,10 +34,13 @@ app.controller("storyCtrl", function(trascender,$scope){
 				increase: true,
 				baseurl: "/api/story",
 				start: function(){
+					var url = new URL(location.href);
+					var s = url.searchParams.get("s");
+					
 					window.title = document.getElementsByTagName("title")[0].innerHTML.trim();
 					this.query = (window.title!="Story")?{tag: window.title}:{};
 					this.months =["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-					this.sorted = -1;
+					this.sorted = (s)?parseInt(s):-1;
 					this.getAll = false;
 					this.fulltext = "";
 					this.getTotal();
