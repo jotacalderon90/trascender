@@ -1,0 +1,53 @@
+body{
+	margin:0px;
+}
+canvas {
+	background-color: #f1f1f1;
+	float: left;
+}
+
+#bf {  position: relative;  top:50px; left: 550px;  height: 0px;  width:100px;  margin:0 auto; cursor: pointer;}
+#bf img {  position:absolute;  left:0;  transition: opacity 0.1s ease-in-out;}
+#bf img.top:hover {opacity:0;}
+
+#bb {  position: relative;  top:50px; left: 500px;  height:0px;  width:340px;  margin:0 auto; cursor: pointer;}
+#bb img {  position:absolute;  left:0;  transition: opacity 0.1s ease-in-out;}
+#bb img.top:hover {opacity:0;}
+
+#ba {  position: relative;  top:50px; left: 300px;  height:0px;  width:195px;  margin:0 auto; cursor: pointer;}
+#ba img {  position:absolute;  left:0;  transition: opacity 0.1s ease-in-out;}
+#ba img.top:hover {opacity:0;}
+
+#bw {  position: relative;  top:50px; left: 100px;  height:0px;  width:50px;  margin:0 auto; cursor: pointer;}
+#bw img {  position:absolute;  left:0;  transition: opacity 0.1s ease-in-out;}
+#bw img.top:hover {opacity:0;}
+
+
+.container {
+	 /*display: block;*/
+	 position: relative;
+	 padding-left: 35px;
+	 margin-bottom: 12px;
+	 cursor: pointer;
+	 font-size: 22px;
+	 /*-webkit-user-select: none;
+	 -moz-user-select: none;
+	 -ms-user-select: none;
+	 user-select: none;*/
+	}
+/*	
+.container input { position: absolute; opacity: 0; cursor: pointer;}
+
+.checkmark { position: absolute; top: 0; left: 1; height: 25px; width: 25px; background-color: #eee; border-radius: 50%;}
+
+.container:hover input ~ .checkmark { background-color: #ccc;}
+
+.container input:checked ~ .checkmark {	background-color: #2196F3;}
+
+.checkmark:after {content: ""; position: absolute;	display: none;}
+
+.container input:checked ~ .checkmark:after {display: block;}
+
+.container .checkmark:after { top: 9px; left: 9px;	width: 8px;	height: 8px; border-radius: 50%; background: white;}
+*/
+
