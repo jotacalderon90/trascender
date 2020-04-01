@@ -82,56 +82,108 @@ app.controller("logCtrl", function(trascender,$scope){
 		},
 		chart1OnClick: function(e){
 			
-			//obtener mayores urls
-			let c = self.log.coll.filter((r)=>{
-				return r.create_date == e.dataPoint.x.toDateString();
-			});
-			c = c.map((r)=>{return r.url});
-			c = self.log.distinct(c);
-			
-			let r2 = [];
-			for(let i=0;i<c.length;i++){
-				r2.push({
-					x: c[i],
-					y: self.log.coll.filter((r)=>{
-							return r.url == c[i]
-						}).length
-				});
-			}
-			
-			
+			/*
 			//individualizar ips
-			/*let c = self.log.coll.filter((r)=>{
+			let c = self.log.coll.filter((r)=>{
 				return r.create_date == e.dataPoint.x.toDateString();
 			});
 			c = c.map((r)=>{return r.ip});
 			c = self.log.distinct(c);
-			console.log(c);*/
+			console.log(c);
+			*/
 			
+			//obtener mayores urls
+			let c = self.log.coll.filter((r)=>{
+				return r.create_date == e.dataPoint.x.toDateString();
+			});
 			
+			let url = c.map((r)=>{return r.url});
+			url = self.log.distinct(url);
+			
+			let r2 = [];
+			for(let i=0;i<url.length;i++){
+				let data = c.filter((r)=>{return r.url == url[i]});
+				r2.push({
+					label: url[i],
+					y: data.length,
+					datax: data
+				});
+			}
+			
+			r2 = self.log.SOABF(r2,"y");
+			r2 = r2.reverse();
+			r2 = r2.slice(0,10);
 			
 			new CanvasJS.Chart("chart2", {
 				animationEnabled: true,
 				exportEnabled: true,
-				theme: "light1", // "light1", "light2", "dark1", "dark2"
+				theme: "light1",
+				axisX:{
+					interval: 1
+				},
+				axisY2:{
+					interlacedColor: "rgba(1,77,101,.2)",
+					gridColor: "rgba(1,77,101,.1)",
+					title: "URLS"
+				},
 				title:{
 					text: "Trafico del día " + e.dataPoint.x.toDateString()
 				},
-				axisY: {
-					title: "Número de llamadas",
-					includeZero: false,
-					scaleBreaks: {
-						autoCalculate: true
-					}
-				},
 				data: [{
-					type: "column", 
-					indexLabelFontColor: "#5A5757",
-					indexLabelFontSize: 16,
-					indexLabelPlacement: "outside",
-					dataPoints: r2
+					type: "bar", 
+					name: "companies",
+					axisYType: "secondary",
+					color: "#014D65",
+					dataPoints: r2,
+					click: function(e){
+						self.map.getInfoIPS(self.log.distinct(e.dataPoint.datax.map((r)=>{return r.ip})));
+					}
 				}]
 			}).render();
+		},
+	});
+	
+	self.map = new trascender({
+		start: function(){
+			this.serviceip = this.serviceCreate("GET","/api/client/geoip/:ip");
+			this.marker = [];
+		},
+		getInfoIPS: async function(ips){
+			let data = [];
+			for(let i=0;i<ips.length;i++){
+				let info = await this.getInfoIP(ips[i]);
+				data.push(info);
+			}
+			this.loadMap(data);
+		},
+		getInfoIP: async function(ip){
+			try{
+				let info = await this.serviceip({ip: ip});
+				return info;
+			}catch(e){
+				return null;
+			}
+		},
+		loadMap: function(data){
+			try{
+				let lat = -33.59875863395195;
+				let lng = -70.7080078125;
+				this.map = L.map("map").setView([lat, lng],3);
+						
+				let mapLink = '<a href="http://www.esri.com/">Esri</a>';
+				let wholink = 'i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';	
+				L.tileLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}g").addTo(this.map);
+			}catch(e){
+				console.log(e);
+			}
+			
+			for(let i=0;i<this.marker.length;i++){
+				this.map.removeLayer(this.marker[i]);
+			}
+			
+			for(let i=0;i<data.length;i++){
+				this.marker.push(L.marker(data[i].ll).addTo(this.map));
+			}
 		}
 	});
 });
