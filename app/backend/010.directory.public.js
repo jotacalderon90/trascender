@@ -289,7 +289,7 @@ self.prototype.upload = async function(req,res){
 //@route('/api/file/public/:id/replace')
 //@method(['post'])
 //@roles(['admin','ADM_FileDirectory'])
-self.prototype.upload = async function(req,res){
+self.prototype.replace = async function(req,res){
 	try{
 		if (!req.files || Object.keys(req.files).length != 1) {
 			throw("no file");
