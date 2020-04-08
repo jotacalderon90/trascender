@@ -4,6 +4,33 @@ app.controller("storyCtrl", function(trascender,$scope){
 		this.user = user;
 		this.user.setAdmin(["admin"]);
 	}
+	trascender.prototype.romanize = function(num) {
+		if (!+num)
+			return false;
+		var digits = String(+num).split(""),
+			key = ["","C","CC","CCC","CD","D","DC","DCC","DCCC","CM",
+				   "","X","XX","XXX","XL","L","LX","LXX","LXXX","XC",
+				   "","I","II","III","IV","V","VI","VII","VIII","IX"],
+			roman = "",
+			i = 3;
+		while (i--)
+			roman = (key[+digits.pop() + (i * 10)] || "") + roman;
+		return Array(+digits.join("") + 1).join("M") + roman;
+	}
+	trascender.prototype.centuryFromYear = function(year){
+		let r = null;
+		if( isNaN(Number(year)) ){
+			r = undefined;
+		}else{
+			r = Math.floor((year-1)/100) + 1;
+			if(r<0){
+				r = "Siglo " + this.romanize((r*-1)) + " (AC)";
+			}else{
+				r = "Siglo" + this.romanize(r);
+			}
+		}
+		return r;
+	}
 	trascender.prototype.months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 	trascender.prototype.formatToClient = function(row){
 		if(row.year<0){
@@ -25,6 +52,22 @@ app.controller("storyCtrl", function(trascender,$scope){
 				}
 			}
 		}
+		if(row.year>=1940 && row.year<1950){
+			row.epoch = "década del 40'";
+		}else if(row.year>=1950 && row.year<1960){
+			row.epoch = "década del 50'";
+		}else if(row.year>=1960 && row.year<1970){
+			row.epoch = "década del 60'";
+		}else if(row.year>=1970 && row.year<1980){
+			row.epoch = "década del 70'";
+		}else if(row.year>=1980 && row.year<1990){
+			row.epoch = "década del 80'";
+		}else if(row.year>=1990 && row.year<=2000){
+			row.epoch = "década del 90'";
+		}else{
+			row.epoch = this.centuryFromYear(row.year);
+		}
+		
 		return row;
 	}
 	
@@ -201,18 +244,25 @@ app.controller("storyCtrl", function(trascender,$scope){
 				}
 			});
 		},
-		explain: function(){
+		timeline: function(){
 			return new trascender({
 				increase: true,
 				scrolling: true,
 				baseurl: "/api/story",
 				start: function(){
+					var url = new URL(location.href);
+					this.urlTAG = url.searchParams.get("tag");
 					$("#background,#loading").fadeIn();
 					this.getTag();
 				},
 				afterGetTag: function(){
 					$( "#input_tag" ).autocomplete({source: this.tag});
-					$("#background,#loading").fadeOut();
+					if(this.urlTAG){
+						this.query.tag = this.urlTAG;
+						this.getTotal();
+					}else{
+						$("#background,#loading").fadeOut();
+					}
 				},
 				beforeGetTotal: function(){
 					$("#background,#loading").fadeIn();
