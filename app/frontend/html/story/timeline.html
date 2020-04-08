@@ -27,7 +27,7 @@ Timeline
 			<div class="timeline-wrapper" data-ng-repeat="row in ctrl.timeline.coll">
 				<h2 class="timeline-time" data-ng-show="row.epoch!=ctrl.timeline.coll[$index-1].epoch"><span>{{row.epoch}}</span></h2>
 				<dl class="timeline-series">
-					<dt id="{{$index}}" class="timeline-event "><a>{{row.title}}</a></dt>
+					<dt id="{{$index}}" class="timeline-event start-open"><a>{{row.title}}</a></dt>
 					<dd class="timeline-event-content" id="{{$index}}EX">
 						<h3>{{row.fechat}}</h3>
 						<div class="media">
