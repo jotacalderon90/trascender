@@ -258,6 +258,9 @@ app.controller("storyCtrl", function(trascender,$scope){
 				afterGetTag: function(){
 					$( "#input_tag" ).autocomplete({source: this.tag});
 					if(this.urlTAG){
+						$(".search").css("display","none");
+						$(".page-header h1").html("línea de tiempo: " + this.urlTAG);
+						
 						this.query.tag = this.urlTAG;
 						this.getTotal();
 					}else{
