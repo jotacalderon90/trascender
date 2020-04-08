@@ -4,7 +4,7 @@ app.controller("storyCtrl", function(trascender,$scope){
 		this.user = user;
 		this.user.setAdmin(["admin"]);
 	}
-	
+	trascender.prototype.months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 	trascender.prototype.formatToClient = function(row){
 		if(row.year<0){
 			row.fecha = row.year.toString().replace("-","") + " (ac)";
@@ -39,7 +39,6 @@ app.controller("storyCtrl", function(trascender,$scope){
 					
 					window.title = document.getElementsByTagName("title")[0].innerHTML.trim();
 					this.query = (window.title!="Story")?{tag: window.title}:{};
-					this.months =["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 					this.sorted = (s)?parseInt(s):-1;
 					this.getAll = false;
 					this.fulltext = "";
@@ -182,7 +181,6 @@ app.controller("storyCtrl", function(trascender,$scope){
 				start: function(){
 					let d = new Date();
 					this.query = {day: d.getDate(),month: d.getMonth() + 1};
-					this.months =["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 					this.options.sort = {year: -1, month: -1, day: -1, title: -1};
 					this.getTotal();
 				},
@@ -200,6 +198,50 @@ app.controller("storyCtrl", function(trascender,$scope){
 					}else{
 						$scope.$digest(function(){});
 					}
+				}
+			});
+		},
+		explain: function(){
+			return new trascender({
+				increase: true,
+				scrolling: true,
+				baseurl: "/api/story",
+				start: function(){
+					$("#background,#loading").fadeIn();
+					this.getTag();
+				},
+				afterGetTag: function(){
+					$( "#input_tag" ).autocomplete({source: this.tag});
+					$("#background,#loading").fadeOut();
+				},
+				beforeGetTotal: function(){
+					$("#background,#loading").fadeIn();
+					this.obtained = 0;
+					this.coll = [];
+					return true;
+				},
+				afterGetTotal: function(){
+					this.getCollection();
+				},
+				beforeGetCollection: function(){
+					$("#background,#loading").fadeIn();
+					this.options.skip = this.obtained;
+					this.options.sort = {year: 1, month: 1, day: 1, title: 1};
+					return true;
+				},
+				afterGetCollection: function(){
+					console.log(this.coll);
+					$.timeliner({});
+					$("#background,#loading").fadeOut();
+					$scope.$digest(function(){});
+				},
+				getRandomColor: function() {
+					var letters = '0123456789ABCDEF';
+					var color = '#';
+					for (var i = 0; i < 6; i++) {
+						color += letters[Math.floor(Math.random() * 16)];
+					}
+					return color;
 				}
 			});
 		}
