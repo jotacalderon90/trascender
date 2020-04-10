@@ -89,7 +89,12 @@ app.controller("mapCtrl", function(trascender,$scope){
 								break;
 						}
 					});
-					
+					let u = new URL(location.href);
+					let t = u.searchParams.get("tag");
+					if(t){
+						this.query.tag = t;
+						this.getTotal();
+					}
 				},
 				afterGetTag: function(){
 					$( "#input_tag" ).autocomplete({source: this.tag, select: ( event, ui )=>{

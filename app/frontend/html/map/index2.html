@@ -137,9 +137,20 @@
 						<dd class="timeline-event-content" id="{{data._id}}EX">
 							<h3>{{data.fechat}}</h3>
 							<img data-ng-src="{{data.img}}" alt="{{data.resume}}. {{data.fecha}}" title="{{data.resume}}. {{data.fecha}}" data-ng-click="ctrl.collection.setDOC(data)"/>
-							<button class="btn btn-xs btn-warning pull-right" data-toggle="modal" data-target="#mdForm" data-ng-show="ctrl.user.isAdmin()">
-								<i class="fa fa-pencil"></i>
-							</button>
+							<small>{{data.resume}}.</small>
+							<ul class="list-unstyled">
+								<li data-ng-repeat="tag in data.tag">
+									<a class="label label-success" href="/map/index2?tag={{tag}}" >{{tag}}</a>
+								</li>
+								<li data-ng-repeat="font in data.font">
+									<a class="label label-primary" href="{{font}}" target="_blank">ver {{$index+1}}° referencia</a>
+								</li>
+								<li data-ng-show="ctrl.user.isAdmin()">
+									<a class="label label-warning" data-toggle="modal" data-target="#mdForm">
+										<i class="fa fa-pencil"></i>
+									</a>
+								</li>
+							</ul>
 						</dd>
 					</dl>
 				</div>
