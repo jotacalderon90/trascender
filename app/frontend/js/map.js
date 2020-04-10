@@ -208,22 +208,7 @@ app.controller("mapCtrl", function(trascender,$scope){
 							}
 						}
 					}
-					if(row.year>=1940 && row.year<1950){
-						row.epoch = "década del 40'";
-					}else if(row.year>=1950 && row.year<1960){
-						row.epoch = "década del 50'";
-					}else if(row.year>=1960 && row.year<1970){
-						row.epoch = "década del 60'";
-					}else if(row.year>=1970 && row.year<1980){
-						row.epoch = "década del 70'";
-					}else if(row.year>=1980 && row.year<1990){
-						row.epoch = "década del 80'";
-					}else if(row.year>=1990 && row.year<=2000){
-						row.epoch = "década del 90'";
-					}else{
-						row.epoch = this.centuryFromYear(row.year);
-					}
-					
+					row.epoch = this.centuryFromYear(row.year);
 					return row;
 				},
 				next: function(){
