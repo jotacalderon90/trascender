@@ -8,7 +8,33 @@ let self = function(a){
 	this.config = a.config;
 	this.helper = a.helper;
 	this.mongodb = a.mongodb;
-	this.collection_name = "map";
+}
+
+
+
+self.prototype.render_view = function(req,res,next){
+	let view = "map/" + ((req.params.id)?req.params.id:"index");
+	if(this.helper.exist(view)){
+		res.render(view);
+	}else{
+		return next();
+	}
+}
+
+
+
+//@route('/map')
+//@method(['get'])
+self.prototype.render_index = function(req,res,next){
+	this.render_view(req,res,next);
+}
+
+
+
+//@route('/map/:id')
+//@method(['get'])
+self.prototype.render_other = function(req,res,next){
+	this.render_view(req,res,next);
 }
 
 
@@ -17,10 +43,9 @@ let self = function(a){
 //@method(['get'])
 self.prototype.collection = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
 		let query = (req.method=="GET")?JSON.parse(req.query.query):(req.method=="POST")?req.body.query:{};
 		let options = (req.method=="GET")?JSON.parse(req.query.options):(req.method=="POST")?req.body.options:{};
-		let data = await this.mongodb.find(collection,query,options);
+		let data = await this.mongodb.find("map",query,options);
 		res.send({data: data});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -34,8 +59,7 @@ self.prototype.collection = async function(req,res){
 //@roles(['admin'])
 self.prototype.create = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		await this.mongodb.insertOne(collection,req.body);
+		await this.mongodb.insertOne("map",req.body);
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -49,8 +73,7 @@ self.prototype.create = async function(req,res){
 //@roles(['admin'])
 self.prototype.update = async function(req,res){
 	try{
-		let collection = (this.collection_name!=undefined)?this.collection_name:req.params.name;
-		await this.mongodb.updateOne(collection,req.params.id,req.body);
+		await this.mongodb.updateOne("map",req.params.id,req.body);
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
@@ -59,23 +82,7 @@ self.prototype.update = async function(req,res){
 
 
 
-//@route('/map')
-//@method(['get'])
-self.prototype.render_index = async function(req,res){
-	try{
-		var v = "map/index";
-		if(!fs.existsSync(this.dir + this.config.properties.views + "/" + v + ".html")){
-			throw("URL no encontrada");
-		}
-		res.render(v,{config: this.config});
-	}catch(e){
-		res.status(404).render("message",{title: "Error 404", message: e.toString(), error: 404, class: "danger"});
-	}
-}
-
-
-
-//@route('/map/audio/:text')
+//@route('/api/map/audio/:text')
 //@method(['get'])
 self.prototype.texttomp3 = function(req,res){
 	txtomp3.attributes.tl = "es";

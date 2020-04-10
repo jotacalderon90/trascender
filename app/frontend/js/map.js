@@ -1,72 +1,26 @@
-app.controller("storyCtrl", function(trascender,$scope){
+app.controller("mapCtrl", function(trascender,$scope){
 	
 	var self = this;
 	
 	if(typeof user!="undefined"){
 		this.user = user;
-		this.user.isAdmin = function(){
-			if(this.doc && this.doc.roles && (this.doc.roles.indexOf("admin")>-1)){
-				return true;
-			}else{
-				return false;
-			}
-		}
+		this.user.setAdmin(["admin"]);
 	}
 	
-	
-	var instances = {
-		collection: function(){
+	let i = {
+		map: function(){
 			return new trascender({
-				increase: true,
-				baseurl: "/api/story",
-				months:  ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
-				index: 0,
 				start: async function(){
 					
 					await self.user.checkUser();
 					
-					this.audio = document.getElementById("audio");
-					this.speech = document.getElementById("speech");
-					this.audio.volume = 0.4;
-					this.speech.onended = this.speechEnd(this);
-
-					this.loadMap();
-					
-					//{latitud: {$nin: [null,""]},longitud :{$nin: [null,""]}};
-					this.query = {};
-
-					let url = new URL(location.href);
-					let c = url.searchParams.get("tag");
-					if(c!=null){
-						this.query.tag = c;
-					}
-					c = url.searchParams.get("nospeech");
-					if(c!=null){
-						this.speech = null;
-						$(".to-speech").fadeOut();
-					}
-					
-					this.options = {sort: {year: 1, month: 1, day: 1, title: 1}, limit: 10, skip: this.obtained};
-					
-					this.getTag();
-					
-				},
-				afterGetTag: function(){
-					this.getTotal();
-				},
-				loadMap: function(){
 					let lat = -33.59875863395195;
 					let lng = -70.7080078125;
 					this.map = L.map("map").setView([lat, lng],3);
-					
 					let mapLink = '<a href="http://www.esri.com/">Esri</a>';
 					let wholink = 'i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';	
-					L.tileLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}g").addTo(this.map);
+					L.tileLayer("http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}g").addTo(this.map);	
 					
-					this.marker = L.marker([lat, lng]).addTo(this.map);
-					this.refresh();
-				},
-				refresh: async function(){
 					if(self.user.isAdmin()){
 						let drawnItems = L.featureGroup().addTo(this.map);
 						L.control.layers({}, { 'drawlayer': drawnItems }, { position: 'topleft', collapsed: false }).addTo(this.map);
@@ -97,6 +51,9 @@ app.controller("storyCtrl", function(trascender,$scope){
 						".leaflet-draw-edit-remove").css("display","none");
 						
 					}
+					$(".leaflet-control-zoom").css("display","none");
+					$(".leaflet-control-layers").css("display","none");
+					
 				},
 				onDragMarker: function(event){
 					let layer = event.layer;
@@ -104,143 +61,214 @@ app.controller("storyCtrl", function(trascender,$scope){
 					self.document.getDoc().ZOOM = this.map.getZoom();
 					self.document.getDoc().LNG = layer.toGeoJSON().geometry.coordinates[0];
 					self.document.getDoc().LAT = layer.toGeoJSON().geometry.coordinates[1];
-					$('#mdDoc').modal('show');
+					$('#mdForm').modal('show');
 					$scope.$digest(function(){});
 				},
-				speechEnd: function(me){
-					return function(){
-						if(me.inprocess){
-							$("article").fadeOut();
-							setTimeout(function(){
-								me.next();
-								$scope.$digest(function(){});
-							}, 2000);
+				setMarker: function(doc){
+					if(this.marker){
+						this.map.removeLayer(this.marker);
+					}
+					this.marker = L.marker([doc.LAT, doc.LNG]).addTo(this.map);
+					this.map.setView([doc.LAT, doc.LNG],3, {animate: true, pan: {duration: 2 }});
+				}					
+			});
+		},
+		collection: function(){
+			return new trascender({
+				increase: true,
+				baseurl: "/api/story",
+				months:  ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
+				start: function(){
+					this.query.tag = "";
+					this.getTag();
+					
+					$(document).keydown((e)=>{
+						switch(e.keyCode){
+							case 67:
+								$("#mdCog").modal("show");
+								break;
 						}
-					}					
+					});
+					
 				},
-				afterGetTotal: function(){
-					this.getCollection();
+				afterGetTag: function(){
+					$( "#input_tag" ).autocomplete({source: this.tag, select: ( event, ui )=>{
+						this.query.tag = ui.item.value;
+					}});
 				},
-				formatToClient: function(doc){
-					//date format
-					if(doc.year<0){
-						doc.fecha = doc.year.toString().replace("-","") + " (ac)";
-						doc.fechat = doc.fecha;
+				beforeGetTotal: function(){
+					this.index = -1;
+					$("#dvTimeline").animate({scrollTop: 0});
+					return true;
+				},
+				afterGetTotal: async function(){
+					let d = await this.getRESUME();
+					this.coll = await this.service_collection({query:JSON.stringify({tag: this.query.tag}),options:JSON.stringify({sort: {year: 1, month: 1, day: 1, title: 1}})});
+					this.coll = this.formatCollectionToClient(this.coll);
+					
+					let years = [];
+					for(let i=d[0].year;i<d[1].year+100;i=i+100){
+						let d = {};
+						d.label = this.centuryFromYear(i);
+						d.data = this.coll.filter((r)=>{return r.epoch == d.label});
+						years.push(d);
+					}
+					this.years = years;
+					$.timeliner({});
+					
+					$("#mdCog").modal("hide");
+					$("#dvTimeline").fadeIn();
+					
+					$scope.$digest(function(){});
+					
+					$(document).removeAttr("keydown");
+					$(document).keydown((e)=>{
+						switch(e.keyCode){
+							case 37://left
+								this.back();
+								break;
+							case 38://up
+								this.back();
+								break;
+							case 39://right
+								this.next();
+								break;
+							case 40://down
+								this.next();
+								break;
+							case 67:
+								$("#mdCog").modal("show");
+								break;
+							default:
+								console.log(e.keyCode);
+								break;
+						}
+					});
+					
+					this.next();
+					
+				},
+				getRESUME: async function(){
+					try{
+						let f = await this.service_collection({query:JSON.stringify({tag: this.query.tag}),options:JSON.stringify({sort: {year: 1, month: 1, day: 1, title: 1}, limit: 1, skip: 0})});
+						s=-1;
+						let l = await this.service_collection({query:JSON.stringify({tag: this.query.tag}),options:JSON.stringify({sort: {year:-1, month:-1, day:-1, title:-1}, limit: 1, skip: 0})});
+						return [f[0],l[0]]
+					}catch(e){
+						alert(e);
+						console.log(e);
+						return null;
+					}
+				},
+				centuryFromYear: function(year){
+					if(year==0){
+						return "Año 0";
+					}
+					let r = null;
+					if( isNaN(Number(year)) ){
+						r = undefined;
 					}else{
-						if(isNaN(doc.month) || doc.month==0){
-							doc.fecha = moment([doc.year,1,1], "YYYYMMDD").fromNow();
-							doc.fechat = "Alrededor del año " + doc.year;
-							doc.date = new Date(doc.year,0,1);
+						r = Math.floor((year-1)/100) + 1;
+						if(r<0){
+							r = "Siglo " + this.romanize((r*-1)) + " (ac)";
 						}else{
-							doc.mes = doc.month;
-							if(isNaN(doc.day) || doc.day==0){
-								doc.fecha = moment([doc.year,doc.mes,1], "YYYYMMDD").fromNow();
-								doc.fechat = this.months[doc.month-1] + " del año " + doc.year;
-								doc.date = new Date(doc.year,doc.month-1,1);
+							r = "Siglo" + this.romanize(r);
+						}
+					}
+					return r;
+				},
+				romanize: function(num) {
+					if (!+num)
+						return false;
+					let digits = String(+num).split(""),
+					key = ["","C","CC","CCC","CD","D","DC","DCC","DCCC","CM", "","X","XX","XXX","XL","L","LX","LXX","LXXX","XC","","I","II","III","IV","V","VI","VII","VIII","IX"],
+					roman = "",
+					i = 3;
+					while (i--)
+						roman = (key[+digits.pop() + (i * 10)] || "") + roman;
+					return Array(+digits.join("") + 1).join("M") + roman;
+				},
+				formatToClient: function(row){
+					if(row.year<0){
+						row.fecha = row.year.toString().replace("-","") + " (ac)";
+						row.fechat = row.fecha;
+					}else{
+						if(isNaN(row.month) || row.month==0){
+							row.fecha = moment([row.year,1,1], "YYYYMMDD").fromNow();
+							row.fechat = "Alrededor del año " + row.year;
+						}else{
+							row.mes = row.month;
+							if(isNaN(row.day) || row.day==0){
+								row.fecha = moment([row.year,row.mes,1], "YYYYMMDD").fromNow();
+								row.fechat = this.months[row.month-1] + " del año " + row.year;
 							}else{
-								doc.dia = doc.day;
-								doc.fecha = moment([doc.year,doc.mes,doc.dia], "YYYYMMDD").fromNow();
-								doc.fechat = moment([doc.year,doc.mes-1,doc.dia]).format("dddd, DD MMMM YYYY");
-								doc.date = new Date(doc.year,doc.month-1,doc.day);
+								row.dia = row.day;
+								row.fecha = moment([row.year,row.mes,row.dia], "YYYYMMDD").fromNow();
+								row.fechat = moment([row.year,row.mes-1,row.dia]).format("dddd, DD MMMM YYYY");
 							}
 						}
 					}
-					
-					/*mejora fechat
-					if(doc.fechat.indexOf(",")>-1){
-						let a = doc.fechat.split(",");
-						a[1] = a[1].trim().split(" ");
-						a[1][0] = (a[1][0].indexOf("0")==0)?a[1][0].replace("0",""):a[1][0];
-						doc.fechat = a[0] + ", " + a[1][0] + " de " + a[1][1] + " del año " + a[1][2];
-					}*/
-					
-					return doc;
-				},
-				afterGetCollection: function(){
-					this.load();
-				},
-				load: function(){
-					if(this.coll[this.index]){
-						this.select(this.coll[this.index]);
+					if(row.year>=1940 && row.year<1950){
+						row.epoch = "década del 40'";
+					}else if(row.year>=1950 && row.year<1960){
+						row.epoch = "década del 50'";
+					}else if(row.year>=1960 && row.year<1970){
+						row.epoch = "década del 60'";
+					}else if(row.year>=1970 && row.year<1980){
+						row.epoch = "década del 70'";
+					}else if(row.year>=1980 && row.year<1990){
+						row.epoch = "década del 80'";
+					}else if(row.year>=1990 && row.year<=2000){
+						row.epoch = "década del 90'";
 					}else{
-						this.getCollection();
-					}
-				},
-				afterChangeMode: async function(action,doc){
-					self.document.getCollection();
-				},
-				afterGetMapInfo: function(doc){
-					
-					if(doc==null){
-						this.map.removeLayer(this.marker);
-						return;
-					}
-					this.marker.addTo(this.map);
-					this.marker.setLatLng([doc.LAT, doc.LNG]);
-					this.map.setView([doc.LAT, doc.LNG],((doc.ZOOM)?doc.ZOOM:3));
-					
-					this.audio.src = doc.AUDIO;
-					this.audio.currentTime = 0;
-					this.audio.play();
-					
-					if(this.speech!=null){
-						let speech = (this.doc.title + " " + this.doc.resume).toLowerCase();
-						speech = speech.split("ñ").join("ni");
-						speech = speech.split("á").join("a");
-						speech = speech.split("é").join("e");
-						speech = speech.split("í").join("i");
-						speech = speech.split("ó").join("o");
-						speech = speech.split("ú").join("u");
-						speech = speech.split("ll").join("y");
-						speech = speech.split(" ").join("");
-						speech = speech.split(".").join("");
-						speech = "/map/audio/" + speech;
-						
-						this.speech.src = speech;
-						this.speech.currentTime = 0;
-						this.speech.play();
+						row.epoch = this.centuryFromYear(row.year);
 					}
 					
-					$("article").fadeIn();
-				},
-				prev: function(){
-					this.index--;
-					if(this.index==-1){
-						this.index=0;
-					}
-					this.load();
+					return row;
 				},
 				next: function(){
 					this.index++;
-					if(this.index==this.total){
-						this.index=0;
+					if(this.index - 1 > this.coll.length){
+						this.index--;
 					}
-					this.load();
+					this.moveTimeline(this.coll[this.index]);
+					self.document.get(this.coll[this.index]._id);
 				},
-				play: function(){
-					this.inprocess = true;
-					this.next();
+				back: function(){
+					this.index--;
+					if(this.index < 0){
+						this.index = 0;
+					}
+					this.moveTimeline(this.coll[this.index]);
+					self.document.get(this.coll[this.index]._id);
 				},
-				stop: function(){
-					this.inprocess = false;
+				moveTimeline: function(d){
+					console.log(d);
+					let o = $($("#" + d._id)[0]);
+					let s = o.offset().top;
+					
+					$("#dvTimeline").animate({scrollTop: s + $("#dvTimeline").scrollTop()}, 1500);
 				}
 			});
 		},
 		document: function(){
 			return new trascender({
 				baseurl: "/api/map",
-				paramsToGetCollection: function(){
-					return {query: JSON.stringify({STORY: self.collection.doc._id}), options: "{}"};
-				},
-				afterGetCollection: function(){
-					if(this.coll.length==0){
-						this.new();
-						this.newdoc.STORY = self.collection.doc._id;
-						self.collection.afterGetMapInfo(null);
-					}else if(this.coll.length==1){
-						this.edit(this.coll[0]);
-						self.collection.afterGetMapInfo(this.doc);
-						$scope.$digest(function(){});
+				get: async function(id){
+					try{
+						let d = await this.service_collection({query: JSON.stringify({STORY: id}), options: "{}"});
+						if(d.length==0){
+							this.new();
+							this.newdoc.STORY = id;
+						}else if(d.length==1){
+							this.edit(d[0]);
+							$scope.$digest(function(){});
+					
+							self.map.setMarker(d[0]);
+						}
+					}catch(e){
+						alert(e);
+						console.log(e);
 					}
 				},
 				beforeCreate: function(){
@@ -250,24 +278,22 @@ app.controller("storyCtrl", function(trascender,$scope){
 					return confirm("Confirme edición");
 				},
 				afterCreate: function(){
-					$('#mdDoc').modal('hide');
+					$('#mdForm').modal('hide');
 				},
 				afterUpdate: function(){
-					$('#mdDoc').modal('hide');
+					$('#mdForm').modal('hide');
 				},
 				setLoc: function(){
-					$('#mdDoc').modal('hide');
+					$('#mdForm').modal('hide');
 					$('.leaflet-draw-draw-marker').fadeIn();
 				}
 			});
 		}
 	}
 	
-	for(instance in map_instances){
-		this[map_instances[instance]] = new instances[map_instances[instance]]();
+	for(instance in instances.map){
+		this[instances.map[instance]] = new i[instances.map[instance]]();
 	}
-	
-	var self = this;
 	
 	setTimeout(function(){$scope.$digest(function(){});}, 500);
 });
