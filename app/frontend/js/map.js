@@ -81,7 +81,7 @@ app.controller("mapCtrl", function(trascender,$scope){
 				start: function(){
 					this.query.tag = "";
 					this.getTag();
-					
+					this.INDEXTODOC = 0;
 					$(document).keydown((e)=>{
 						switch(e.keyCode){
 							case 67:
@@ -209,6 +209,8 @@ app.controller("mapCtrl", function(trascender,$scope){
 						}
 					}
 					row.epoch = this.centuryFromYear(row.year);
+					row.INDEX = this.INDEXTODOC;
+					this.INDEXTODOC++;
 					return row;
 				},
 				next: function(){
@@ -216,14 +218,20 @@ app.controller("mapCtrl", function(trascender,$scope){
 					if(this.index - 1 > this.coll.length){
 						this.index--;
 					}
-					this.moveTimeline(this.coll[this.index]);
-					self.document.get(this.coll[this.index]._id);
+					this.refresh();
 				},
 				back: function(){
 					this.index--;
 					if(this.index < 0){
 						this.index = 0;
 					}
+					this.refresh();
+				},
+				setDOC: function(r){
+					this.index = r.INDEX;
+					this.refresh();
+				},
+				refresh: function(){
 					this.moveTimeline(this.coll[this.index]);
 					self.document.get(this.coll[this.index]._id);
 				},
