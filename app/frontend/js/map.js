@@ -69,7 +69,7 @@ app.controller("mapCtrl", function(trascender,$scope){
 						this.map.removeLayer(this.marker);
 					}
 					this.marker = L.marker([doc.LAT, doc.LNG]).addTo(this.map);
-					this.map.setView([doc.LAT, doc.LNG],3, {animate: true, pan: {duration: 2 }});
+					this.map.setView([doc.LAT, doc.LNG],2, {animate: true, pan: {duration: 2 }});
 				}					
 			});
 		},
