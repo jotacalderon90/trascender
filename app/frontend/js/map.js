@@ -71,7 +71,7 @@ app.controller("mapCtrl", function(trascender,$scope){
 						this.map.removeLayer(this.marker);
 					}
 					this.marker = L.marker([doc.LAT, doc.LNG]).addTo(this.map);
-					this.map.setView([doc.LAT, doc.LNG],2, {animate: true, pan: {duration: 2 }});
+					this.map.setView([doc.LAT, doc.LNG],((doc.zoom)?doc.zoom:2), {animate: true, pan: {duration: 1 }});
 				}					
 			});
 		},
@@ -295,7 +295,7 @@ app.controller("mapCtrl", function(trascender,$scope){
 					let o = $($("#" + d._id)[0]);
 					let s = o.offset().top;
 					
-					$("#dvTimeline").animate({scrollTop: s + $("#dvTimeline").scrollTop()}, 1500);
+					$("#dvTimeline").animate({scrollTop: s + $("#dvTimeline").scrollTop()}, 1000);
 				}
 			});
 		},
