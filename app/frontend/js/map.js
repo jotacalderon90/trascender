@@ -343,29 +343,36 @@ app.controller("mapCtrl", function(trascender,$scope){
 					this.init(this.getDATA());
 				},
 				getDATA: function(){
-					return [
-					{key: 1000,name: "Informática"},
-						{key: 1100,name: "Hardware",parent: 1000},
-							{key: 1101,name: "Tubos de vacío",parent: 1100},
-							{key: 1102,name: "Máquinas",parent: 1100},
-							{key: 1103,name: "Computadoras",parent: 1100},
-							{key: 1104,name: "Lector",parent: 1100},
-							{key: 1105,name: "Grabador",parent: 1100},
-							{key: 1106,name: "Unidad de control",parent: 1100},
-							{key: 1107,name: "Memoria",parent: 1100},
-							{key: 1108,name: "Disco duro",parent: 1100},
-							{key: 1109,name: "Circuito integrado",parent: 1100},
-							{key: 1110,name: "Transistores",parent: 1100},
-							{key: 1111,name: "Mouse",parent: 1100},
-							{key: 1112,name: "Microprocesador",parent: 1100},
-							{key: 1114,name: "Tarjeta madre",parent: 1100},
-							{key: 1115,name: "RAM",parent: 1100},
-							{key: 1116,name: "PC",parent: 1100},
-						{key: 1200,name: "Software",parent: 1000},
-							{key: 1201,name: "Programación",parent: 1200},
-							{key: 1202,name: "Sistema",parent: 1200},
-							{key: 1203,name: "Aplicación",parent: 1200},
-					];
+					let r = [];
+					let c = $("#txt_data").html();
+					c = c.split("\n");
+					let parent;
+					
+					for(let i=0;i<c.length;i++){
+						let d = {};
+						d.key = i;
+						d.name = c[i].trim();
+						d.name = (d.name.indexOf(",")==-1)?d.name:d.name.split(",").join("\n");
+						
+						if(i==0){
+							parent = 0;
+						}else{
+							d.parent = null;
+							let p = 1;
+							while(d.parent==null){
+								let ct = c[i].split("\t").length-1;
+								let ct2 = c[i-p].split("\t").length-1;
+								let anterior = r[r.length-p];
+								if(ct>ct2){
+									d.parent = anterior.key;
+								}else{
+									p++;
+								}
+							}
+						}
+						r.push(d);
+					}
+					return r;
 				},
 				init: function(DATA) {
 					var $ = go.GraphObject.make; // for conciseness in defining templates
