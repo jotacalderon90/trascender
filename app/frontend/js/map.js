@@ -7,6 +7,8 @@ app.controller("mapCtrl", function(trascender,$scope){
 		this.user.setAdmin(["admin"]);
 	}
 	
+	$("#background,#loading").fadeIn();
+	
 	let i = {
 		map: function(){
 			return new trascender({
@@ -82,11 +84,24 @@ app.controller("mapCtrl", function(trascender,$scope){
 					this.query.tag = "";
 					this.getTag();
 					this.INDEXTODOC = 0;
+					this.listTAG = [];
+					this.started = false;
 					$(document).keydown((e)=>{
 						switch(e.keyCode){
 							case 67:
-								$("#mdCog").modal("show");
+								$("#mdCog").modal("toggle");
 								break;
+							case 71:
+								$("#mdGo").modal("toggle");
+								break;
+							case 77:
+								$("#mdMap").modal("toggle");
+								break;
+							/*case 123:
+								alert("nos vemos de otra forma ;)");
+								break;*/
+							default:
+								console.log(e.keyCode);
 						}
 					});
 					let u = new URL(location.href);
@@ -94,7 +109,33 @@ app.controller("mapCtrl", function(trascender,$scope){
 					if(t){
 						this.query.tag = t;
 						this.getTotal();
+					}else{
+						$("#background,#loading").fadeOut();
 					}
+					
+					$('#mdCog').on('show.bs.modal', (e)=>{$('#dvTimeline').fadeOut();});
+					$('#mdCog').on('hide.bs.modal', (e)=>{if(this.started){$('#dvTimeline').fadeIn();}});
+					
+					$('#mdMap').on('show.bs.modal', (e)=>{$('#dvTimeline').fadeOut();});
+					$('#mdMap').on('hide.bs.modal', (e)=>{if(this.started){$('#dvTimeline').fadeIn();}});
+					
+					$('#mdGo').on('show.bs.modal', (e)=>{$('#dvTimeline').fadeOut();});
+					$('#mdGo').on('hide.bs.modal', (e)=>{if(this.started){$('#dvTimeline').fadeIn();}});
+					
+					$('#mdMap').delegate('textarea', 'keydown', function(e) {
+						var keyCode = e.keyCode || e.which;
+						if (keyCode == 9) {
+							e.preventDefault();
+							var start = this.selectionStart;
+							var end = this.selectionEnd;
+							// set textarea value to: text before caret + tab + text after caret
+							$(this).val($(this).val().substring(0, start) + "\t" + $(this).val().substring(end));
+							// put caret at right position again
+							this.selectionStart =
+							this.selectionEnd = start + 1;
+						}
+					});
+					
 				},
 				afterGetTag: function(){
 					$( "#input_tag" ).autocomplete({source: this.tag, select: ( event, ui )=>{
@@ -103,7 +144,9 @@ app.controller("mapCtrl", function(trascender,$scope){
 				},
 				beforeGetTotal: function(){
 					this.index = -1;
-					$("#dvTimeline").animate({scrollTop: 0});
+					$("#mdCog").modal("hide");
+					$("#background,#loading").fadeIn();
+					this.started = true;
 					return true;
 				},
 				afterGetTotal: async function(){
@@ -118,10 +161,11 @@ app.controller("mapCtrl", function(trascender,$scope){
 						d.data = this.coll.filter((r)=>{return r.epoch == d.label});
 						years.push(d);
 					}
+					$("#dvTimeline").animate({scrollTop: 0});
+					$("#background,#loading").fadeOut();
 					this.years = years;
 					$.timeliner({});
 					
-					$("#mdCog").modal("hide");
 					$("#dvTimeline").fadeIn();
 					
 					$scope.$digest(function(){});
@@ -141,9 +185,6 @@ app.controller("mapCtrl", function(trascender,$scope){
 							case 40://down
 								this.next();
 								break;
-							case 67:
-								$("#mdCog").modal("show");
-								break;
 							default:
 								console.log(e.keyCode);
 								break;
@@ -152,6 +193,7 @@ app.controller("mapCtrl", function(trascender,$scope){
 					
 					this.next();
 					
+					console.log(this.listTAG);
 				},
 				getRESUME: async function(){
 					try{
@@ -194,6 +236,13 @@ app.controller("mapCtrl", function(trascender,$scope){
 					return Array(+digits.join("") + 1).join("M") + roman;
 				},
 				formatToClient: function(row){
+					
+					for(let i=0;i<row.tag.length;i++){
+						if(this.listTAG.indexOf(row.tag[i])==-1){
+							this.listTAG.push(row.tag[i]);
+						}
+					}
+					
 					if(row.year<0){
 						row.fecha = row.year.toString().replace("-","") + " (ac)";
 						row.fechat = row.fecha;
@@ -284,6 +333,94 @@ app.controller("mapCtrl", function(trascender,$scope){
 				setLoc: function(){
 					$('#mdForm').modal('hide');
 					$('.leaflet-draw-draw-marker').fadeIn();
+				}
+			});
+		},
+		go: function(){
+			return new trascender({
+				start: function(){
+					$('#mdGo').on('shown.bs.modal', (e)=>{this.myDiagram.commandHandler.zoomToFit();});
+					this.init(this.getDATA());
+				},
+				getDATA: function(){
+					return [
+					{key: 1000,name: "Informática"},
+						{key: 1100,name: "Hardware",parent: 1000},
+							{key: 1101,name: "Tubos de vacío",parent: 1100},
+							{key: 1102,name: "Máquinas",parent: 1100},
+							{key: 1103,name: "Computadoras",parent: 1100},
+							{key: 1104,name: "Lector",parent: 1100},
+							{key: 1105,name: "Grabador",parent: 1100},
+							{key: 1106,name: "Unidad de control",parent: 1100},
+							{key: 1107,name: "Memoria",parent: 1100},
+							{key: 1108,name: "Disco duro",parent: 1100},
+							{key: 1109,name: "Circuito integrado",parent: 1100},
+							{key: 1110,name: "Transistores",parent: 1100},
+							{key: 1111,name: "Mouse",parent: 1100},
+							{key: 1112,name: "Microprocesador",parent: 1100},
+							{key: 1114,name: "Tarjeta madre",parent: 1100},
+							{key: 1115,name: "RAM",parent: 1100},
+							{key: 1116,name: "PC",parent: 1100},
+						{key: 1200,name: "Software",parent: 1000},
+							{key: 1201,name: "Programación",parent: 1200},
+							{key: 1202,name: "Sistema",parent: 1200},
+							{key: 1203,name: "Aplicación",parent: 1200},
+					];
+				},
+				init: function(DATA) {
+					var $ = go.GraphObject.make; // for conciseness in defining templates
+					this.myDiagram =
+					$(go.Diagram, "myDiagramDiv", // must be the ID or reference to div
+							{
+								"toolManager.hoverDelay": 100, // 100 milliseconds instead of the default 850
+								allowCopy: false,
+								layout: // create a TreeLayout for the family tree
+									$(go.TreeLayout, {
+										angle: 90,
+										nodeSpacing: 10,
+										layerSpacing: 40,
+										layerStyle: go.TreeLayout.LayerUniform
+									})
+							});
+							
+					// replace the default Node template in the nodeTemplateMap
+					this.myDiagram.nodeTemplate =
+						$(go.Node, "Auto", {
+								deletable: false
+							},
+							new go.Binding("text", "name"),
+							$(go.Shape, "Rectangle", {
+									fill: "lightgray",
+									stroke: null,
+									strokeWidth: 0,
+									stretch: go.GraphObject.Fill,
+									alignment: go.Spot.Center
+								},
+								new go.Binding("fill", "gender", '#90CAF9')),
+							$(go.TextBlock, {
+									font: "700 12px Droid Serif, sans-serif",
+									textAlign: "center",
+									margin: 10,
+									maxSize: new go.Size(80, NaN)
+								},
+								new go.Binding("text", "name"))
+						);
+					// define the Link template
+					this.myDiagram.linkTemplate =
+						$(go.Link, // the whole link panel
+							{
+								routing: go.Link.Orthogonal,
+								corner: 5,
+								selectable: false
+							},
+							$(go.Shape, {
+								strokeWidth: 3,
+								stroke: '#424242'
+							})); // the gray link shape
+					// here's the family data
+					var nodeDataArray = DATA;
+					// create the model for the family tree
+					this.myDiagram.model = new go.TreeModel(nodeDataArray);
 				}
 			});
 		}

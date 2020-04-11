@@ -31,6 +31,46 @@
 			bottom: 0;
 			z-index: 2;
 		}
+		#btnGo{
+			position: fixed;
+			top: 0;
+			left: 0;
+		}
+		#mdGo .modal-dialog{
+			margin: 0;
+			padding: 0;
+			height: 100%;
+		}
+		#mdGo .modal-lg{
+			width: 100%;
+		}
+		#mdGo .modal-content{
+			background: inherit;
+			height: 100%;
+		}
+		#mdGo button{
+			z-index: 999;
+		}
+		#myDiagramDiv{
+			width: 100%;
+			margin-top: 1%;
+			height: 98%;
+		}
+		
+		
+		#mdMap .modal-content{
+			background: black;
+			opacity: 0.5;
+		}
+		#mdMap .modal-body{
+			padding: 0px;
+		}
+		#mdMap .modal-content textarea{
+			background: inherit;
+			height: 400px;
+			color: white;
+		}
+		
 		.ui-autocomplete{
 			z-index: 9999;
 		}
@@ -77,6 +117,32 @@
 			from { opacity: 0;}
 			to   { opacity: 1;}
 		}
+		
+		
+		
+		/*LOADER*/
+		#background{
+			position: fixed;
+			width: 100%;
+			height: 100%;
+			background: black;
+			z-index: 3;
+			opacity: 0.5;
+			display: none;
+		}
+		#loading{
+			position: fixed;
+			z-index: 4;
+			top: 50%;
+			width: 100%;
+			text-align: center;
+			display: none;
+		}
+		#loading i{
+			font-size: 100px;
+		}
+		
+		
 	</style>
 	
 <!--/define:css-->
@@ -117,16 +183,23 @@
 <!--/define:head-->
 
 <!--define:main-->
+	<div id="background"></div>
+	<div id="loading">
+		<i class="fa fa-spin fa-spinner"></i>
+	</div>
 	<div id="full" data-ng-app="myApp" data-ng-controller="mapCtrl as ctrl">
 		
 		<div id="map"></div>
 		
-		<button id="btnCOG" class="btn btn-xs" data-toggle="modal" data-target="#mdCog">
+		<!--<button id="btnCOG" class="btn btn-xs" data-toggle="modal" data-target="#mdCog">
 			<i class="fa fa-cog"></i>
-		</button>
+		</button>-->
 		
 		<div id="dvTimeline">
 			<div class="bk"></div>
+			<!--<button id="btnGo" class="btn btn-xs" data-toggle="modal" data-target="#mdGo">
+				<i class="fa fa-cog"></i>
+			</button>-->
 			<div id="timeline" class="timeline-container">
 				<div class="timeline-wrapper" data-ng-repeat="year in ctrl.collection.years">
 					<h2 class="timeline-time"><span>{{year.label}}</span></h2>
@@ -160,14 +233,17 @@
 		
 		<!--include:map/mdCog-->
 		<!--include:map/mdForm-->
+		<!--include:map/mdGo-->
+		<!--include:map/mdMap-->
 		
 	</div>
 <!--/define:main-->
 
 <!--define:script-->
 	<script type="text/javascript" src="js/lib/timeliner-2.31/js/timeliner.js"></script>
+	<script type="text/javascript" src="js/lib/go-2.1/release/go.js"></script>
 	<script type="text/javascript">
-		var instances = {map: ["map","collection","document"]};
+		var instances = {map: ["map","collection","document","go"]};
 	</script>
 	<script type="text/javascript" src="js/map.js"></script>
 <!--/define:script-->
