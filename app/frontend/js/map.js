@@ -162,11 +162,12 @@ app.controller("mapCtrl", function(trascender,$scope){
 						years.push(d);
 					}
 					$("#dvTimeline").animate({scrollTop: 0});
-					$("#background,#loading").fadeOut();
 					this.years = years;
 					$.timeliner({});
 					
-					$("#dvTimeline").fadeIn();
+					$("#dvTimeline").fadeIn(()=>{
+						$("#background,#loading").fadeOut();
+					});
 					
 					$scope.$digest(function(){});
 					
