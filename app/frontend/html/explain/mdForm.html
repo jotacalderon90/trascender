@@ -21,6 +21,9 @@
 				<input type="text" class="form-control" data-ng-model="ctrl.document.getDoc().AUDIO">
 			</div>
 			<div class="modal-footer">
+				<a class="btn btn-info" href="/story/edit/{{ctrl.document.getDoc().STORY}}" target="_blank">
+					Modificar documento histórico
+				</a>
 				<button type="button" class="btn btn-primary" title="Crear" data-ng-show="ctrl.document.isCreateMode()" data-ng-click="ctrl.document.create()">
 					<i class="fa fa-check" data-ng-show="!ctrl.document.createLog.spinner"></i>
 					<i class="fa fa-spinner fa-spin" data-ng-show="ctrl.document.createLog.spinner"></i>
