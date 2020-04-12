@@ -9,6 +9,31 @@ app.controller("explainCtrl", function(trascender,$scope){
 	
 	$("#background,#loading").fadeIn();
 	
+	$(document).keydown((e)=>{
+		switch(e.keyCode){
+			case 66:
+				$("#map").fadeToggle();//b
+				break;
+			case 67:
+				$("#mdCog").modal("toggle");//C
+				break;
+			case 71:
+				$("#mdGo").modal("toggle");//G
+				break;
+			case 77:
+				$("#mdMap").modal("toggle");//M
+				break;
+			/*case 84:
+				$("#dvTimeline").fadeToggle();
+				break;
+			case 123:
+				alert("nos vemos de otra forma ;)");
+				break;*/
+			default:
+				console.log(e.keyCode);
+		}
+	});
+	
 	let i = {
 		map: function(){
 			return new trascender({
@@ -86,24 +111,6 @@ app.controller("explainCtrl", function(trascender,$scope){
 					this.INDEXTODOC = 0;
 					this.listTAG = [];
 					this.started = false;
-					$(document).keydown((e)=>{
-						switch(e.keyCode){
-							case 67:
-								$("#mdCog").modal("toggle");
-								break;
-							case 71:
-								$("#mdGo").modal("toggle");
-								break;
-							case 77:
-								$("#mdMap").modal("toggle");
-								break;
-							/*case 123:
-								alert("nos vemos de otra forma ;)");
-								break;*/
-							default:
-								console.log(e.keyCode);
-						}
-					});
 					let u = new URL(location.href);
 					let t = u.searchParams.get("tag");
 					if(t){
@@ -357,13 +364,14 @@ app.controller("explainCtrl", function(trascender,$scope){
 						d.name = c[i].trim();
 						d.name = (d.name.indexOf(",")==-1)?d.name:d.name.split(",").join("\n");
 						
-						if(i==0){
-							parent = 0;
+						let ct = c[i].split("\t").length-1;
+						
+						if(ct==0){
+							parent = i;
 						}else{
 							d.parent = null;
 							let p = 1;
 							while(d.parent==null){
-								let ct = c[i].split("\t").length-1;
 								let ct2 = c[i-p].split("\t").length-1;
 								let anterior = r[r.length-p];
 								if(ct>ct2){

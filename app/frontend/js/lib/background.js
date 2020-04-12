@@ -3,10 +3,11 @@
 /*Código MATRIX: reference http://thecodeplayer.com/walkthrough/matrix-rain-animation-html5-canvas-javascript*/
 /*************************************************************************************************************/
 
-var c = document.getElementById("background");
+var c = document.getElementById("matrix");
 var ctx = c.getContext("2d");
 
 //making the canvas full screen
+$(c).css("position","absolute");
 c.height = $(document).height();
 c.width = window.innerWidth;
 
