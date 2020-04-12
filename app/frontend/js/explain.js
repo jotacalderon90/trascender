@@ -92,12 +92,20 @@ app.controller("explainCtrl", function(trascender,$scope){
 					$scope.$digest(function(){});
 				},
 				setMarker: function(doc){
-					if(this.marker){
-						this.map.removeLayer(this.marker);
+					this.removeMarker();
+					if(doc && doc.LAT && doc.LNG){
+						this.marker = L.marker([doc.LAT, doc.LNG]).addTo(this.map);
+						this.map.setView([doc.LAT, doc.LNG],((doc.zoom)?doc.zoom:2), {animate: true, pan: {duration: 1 }});
 					}
-					this.marker = L.marker([doc.LAT, doc.LNG]).addTo(this.map);
-					this.map.setView([doc.LAT, doc.LNG],((doc.zoom)?doc.zoom:2), {animate: true, pan: {duration: 1 }});
-				}					
+				},
+				removeMarker: function(){
+					try{
+						console.log(this.marker);
+						this.map.removeLayer(this.marker);
+					}catch(e){
+						console.log(e);
+					}
+				}
 			});
 		},
 		collection: function(){
@@ -315,6 +323,7 @@ app.controller("explainCtrl", function(trascender,$scope){
 						if(d.length==0){
 							this.new();
 							this.newdoc.STORY = id;
+							self.map.removeMarker();
 						}else if(d.length==1){
 							this.edit(d[0]);
 							$scope.$digest(function(){});
