@@ -13,7 +13,7 @@ let self = function(a){
 
 
 self.prototype.render_view = function(req,res,next){
-	let view = "map/" + ((req.params.id)?req.params.id:"index");
+	let view = "explain/" + ((req.params.id)?req.params.id:"index");
 	if(this.helper.exist(view)){
 		res.render(view);
 	}else{
@@ -23,7 +23,7 @@ self.prototype.render_view = function(req,res,next){
 
 
 
-//@route('/map')
+//@route('/explain')
 //@method(['get'])
 self.prototype.render_index = function(req,res,next){
 	this.render_view(req,res,next);
@@ -31,7 +31,7 @@ self.prototype.render_index = function(req,res,next){
 
 
 
-//@route('/map/:id')
+//@route('/explain/:id')
 //@method(['get'])
 self.prototype.render_other = function(req,res,next){
 	this.render_view(req,res,next);

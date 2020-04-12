@@ -1,4 +1,4 @@
-app.controller("mapCtrl", function(trascender,$scope){
+app.controller("explainCtrl", function(trascender,$scope){
 	
 	var self = this;
 	
@@ -340,7 +340,9 @@ app.controller("mapCtrl", function(trascender,$scope){
 		go: function(){
 			return new trascender({
 				start: function(){
-					$('#mdGo').on('shown.bs.modal', (e)=>{this.myDiagram.commandHandler.zoomToFit();});
+					$('#mdGo').on('shown.bs.modal', (e)=>{
+						this.myDiagram.commandHandler.zoomToFit();
+					});
 					this.init(this.getDATA());
 				},
 				getDATA: function(){
@@ -434,8 +436,8 @@ app.controller("mapCtrl", function(trascender,$scope){
 		}
 	}
 	
-	for(instance in instances.map){
-		this[instances.map[instance]] = new i[instances.map[instance]]();
+	for(instance in instances.explain){
+		this[instances.explain[instance]] = new i[instances.explain[instance]]();
 	}
 	
 	setTimeout(function(){$scope.$digest(function(){});}, 500);
