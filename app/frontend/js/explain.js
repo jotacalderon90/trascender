@@ -95,12 +95,14 @@ app.controller("explainCtrl", function(trascender,$scope){
 					this.removeMarker();
 					if(doc && doc.LAT && doc.LNG){
 						this.marker = L.marker([doc.LAT, doc.LNG]).addTo(this.map);
-						this.map.setView([doc.LAT, doc.LNG],((doc.zoom)?doc.zoom:2), {animate: true, pan: {duration: 1 }});
+						this.map.setView([doc.LAT, doc.LNG],3/*((doc.zoom)?doc.zoom:2)*/, {animate: true, pan: {duration: 1 }});
 					}
 				},
 				removeMarker: function(){
 					try{
-						this.map.removeLayer(this.marker);
+						if(this.marker!=undefined){
+							this.map.removeLayer(this.marker);
+						}
 					}catch(e){
 						
 					}
@@ -314,44 +316,55 @@ app.controller("explainCtrl", function(trascender,$scope){
 					$("#dvTimeline").animate({scrollTop: s + $("#dvTimeline").scrollTop()}, 1000);
 				},
 				setConceptualMap: function(coll){
-					let cm = "";
-					for(let i=0;i<coll.length;i++){
-						let tags = coll[i].tag;
-						let tabs;
-						let some = false;
-						for(let x=0;x<tags.length;x++){
-							if(cm.indexOf(tags[x])==-1){
-								some = true;
-								tabs = this.setConceptualMapTAB(x);
-								cm += tabs + tags[x]+"\n";
-							}else{
-								
+					let tags = [];
+					let key = 0;
+					
+					let inserted = function(tag){
+						let i = tags.filter((r)=>{return r.name==tag}).length;
+						if(i==0){
+							return false;
+						}else{
+							return true;
+						}
+					}
+					
+					let getParentId = function(tag){
+						for(let i=0;i<tags.length;i++){
+							if(tags[i].name == tag){
+								return i;
 							}
 						}
-						if(some){
-							cm += tabs + "\t" + coll[i].title + "\n";
-						}else{
-							cm = this.insertConcept(cm,coll[i].title,coll[i].tag[coll[i].tag.length-1]);
+					}
+					
+					for(let i=0;i<coll.length;i++){
+						for(let x=0;x<coll[i].tag.length;x++){
+							if(!inserted(coll[i].tag[x])){
+								let tag = {};
+								tag.key = key;
+								tag.name = coll[i].tag[x];
+								if(x>0){
+									tag.parent = getParentId(coll[i].tag[x-1]);
+								}
+								
+								tags.push(tag);
+								
+								key++;
+							}
 						}
 					}
-					//console.log(cm);
-					self.go.init(self.go.getDATA(cm));
-				},
-				setConceptualMapTAB: function(cant){
-					let tab = "";
-					for(let i=0;i<cant;i++){
-						tab+="\t";
-					}
-					return tab;
-				},
-				insertConcept: function(cm,child,parent){
-					cm = cm.split("\n");
-					for(let i=0;i<cm.length;i++){
-						if(cm[i].indexOf(parent)>-1){
-							cm[i+1] = cm[i+1] + "," + child;
+					
+					for(let i=0;i<tags.length;i++){
+						let CHILD = coll.filter((r)=>{return r.tag_main == tags[i].name;});
+						if(CHILD.length>0){
+							CHILD = CHILD.map((r)=>{return r.title;}).join("\n");
+							tags.push({key: key, name: CHILD, parent: i});
+							key++;
 						}
+						
 					}
-					return cm.join("\n");
+					
+					console.log(tags);
+					self.go.init(tags);
 				}
 			});
 		},
