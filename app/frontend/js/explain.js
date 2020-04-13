@@ -211,6 +211,7 @@ app.controller("explainCtrl", function(trascender,$scope){
 					
 					this.next();
 					
+					this.setConceptualMap(this.coll);
 				},
 				getRESUME: async function(){
 					try{
@@ -311,6 +312,46 @@ app.controller("explainCtrl", function(trascender,$scope){
 					let s = o.offset().top;
 					
 					$("#dvTimeline").animate({scrollTop: s + $("#dvTimeline").scrollTop()}, 1000);
+				},
+				setConceptualMap: function(coll){
+					let cm = "";
+					for(let i=0;i<coll.length;i++){
+						let tags = coll[i].tag;
+						let tabs;
+						let some = false;
+						for(let x=0;x<tags.length;x++){
+							if(cm.indexOf(tags[x])==-1){
+								some = true;
+								tabs = this.setConceptualMapTAB(x);
+								cm += tabs + tags[x]+"\n";
+							}else{
+								
+							}
+						}
+						if(some){
+							cm += tabs + "\t" + coll[i].concept + "\n";
+						}else{
+							cm = this.insertConcept(cm,coll[i].concept,coll[i].tag[coll[i].tag.length-1]);
+						}
+					}
+					//console.log(cm);
+					self.go.init(self.go.getDATA(cm));
+				},
+				setConceptualMapTAB: function(cant){
+					let tab = "";
+					for(let i=0;i<cant;i++){
+						tab+="\t";
+					}
+					return tab;
+				},
+				insertConcept: function(cm,child,parent){
+					cm = cm.split("\n");
+					for(let i=0;i<cm.length;i++){
+						if(cm[i].indexOf(parent)>-1){
+							cm[i+1] = cm[i+1] + "," + child;
+						}
+					}
+					return cm.join("\n");
 				}
 			});
 		},
@@ -359,38 +400,39 @@ app.controller("explainCtrl", function(trascender,$scope){
 					$('#mdGo').on('shown.bs.modal', (e)=>{
 						this.myDiagram.commandHandler.zoomToFit();
 					});
-					this.init(this.getDATA());
+					//this.init(this.getDATA($("#txt_data").html()));
 				},
-				getDATA: function(){
+				getDATA: function(STRING){
 					let r = [];
-					let c = $("#txt_data").html();
+					let c = STRING;
 					c = c.split("\n");
 					let parent;
-					
 					for(let i=0;i<c.length;i++){
-						let d = {};
-						d.key = i;
-						d.name = c[i].trim();
-						d.name = (d.name.indexOf(",")==-1)?d.name:d.name.split(",").join("\n");
-						
-						let ct = c[i].split("\t").length-1;
-						
-						if(ct==0){
-							parent = i;
-						}else{
-							d.parent = null;
-							let p = 1;
-							while(d.parent==null){
-								let ct2 = c[i-p].split("\t").length-1;
-								let anterior = r[r.length-p];
-								if(ct>ct2){
-									d.parent = anterior.key;
-								}else{
-									p++;
+						if(c[i].trim()!=""){
+							let d = {};
+							d.key = i;
+							d.name = c[i].trim();
+							d.name = (d.name.indexOf(",")==-1)?d.name:d.name.split(",").join("\n");
+							
+							let ct = c[i].split("\t").length-1;
+							
+							if(ct==0){
+								parent = i;
+							}else{
+								d.parent = null;
+								let p = 1;
+								while(d.parent==null){
+									let ct2 = c[i-p].split("\t").length-1;
+									let anterior = r[r.length-p];
+									if(ct>ct2){
+										d.parent = anterior.key;
+									}else{
+										p++;
+									}
 								}
 							}
+							r.push(d);
 						}
-						r.push(d);
 					}
 					return r;
 				},
