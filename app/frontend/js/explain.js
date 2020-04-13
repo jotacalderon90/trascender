@@ -329,9 +329,9 @@ app.controller("explainCtrl", function(trascender,$scope){
 							}
 						}
 						if(some){
-							cm += tabs + "\t" + coll[i].concept + "\n";
+							cm += tabs + "\t" + coll[i].title + "\n";
 						}else{
-							cm = this.insertConcept(cm,coll[i].concept,coll[i].tag[coll[i].tag.length-1]);
+							cm = this.insertConcept(cm,coll[i].title,coll[i].tag[coll[i].tag.length-1]);
 						}
 					}
 					//console.log(cm);
