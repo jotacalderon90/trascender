@@ -28,9 +28,9 @@ app.controller("explainCtrl", function(trascender,$scope){
 				break;
 			case 123:
 				alert("nos vemos de otra forma ;)");
-				break;*/
+				break;
 			default:
-				console.log(e.keyCode);
+				console.log(e.keyCode);*/
 		}
 	});
 	
@@ -100,10 +100,9 @@ app.controller("explainCtrl", function(trascender,$scope){
 				},
 				removeMarker: function(){
 					try{
-						console.log(this.marker);
 						this.map.removeLayer(this.marker);
 					}catch(e){
-						console.log(e);
+						
 					}
 				}
 			});
@@ -116,7 +115,6 @@ app.controller("explainCtrl", function(trascender,$scope){
 				start: function(){
 					this.query.tag = "";
 					this.getTag();
-					this.INDEXTODOC = 0;
 					this.listTAG = [];
 					this.started = false;
 					let u = new URL(location.href);
@@ -159,6 +157,7 @@ app.controller("explainCtrl", function(trascender,$scope){
 				},
 				beforeGetTotal: function(){
 					this.index = -1;
+					this.INDEXTODOC = 0;
 					$("#mdCog").modal("hide");
 					$("#background,#loading").fadeIn();
 					this.started = true;
@@ -169,6 +168,10 @@ app.controller("explainCtrl", function(trascender,$scope){
 					this.coll = await this.service_collection({query:JSON.stringify({tag: this.query.tag}),options:JSON.stringify({sort: {year: 1, month: 1, day: 1, title: 1}})});
 					this.coll = this.formatCollectionToClient(this.coll);
 					
+					if(d[0] == undefined && d[1] == undefined){
+						$("#background,#loading").fadeOut();
+						return;
+					}
 					let years = [];
 					for(let i=d[0].year;i<d[1].year+100;i=i+100){
 						let d = {};
@@ -178,7 +181,27 @@ app.controller("explainCtrl", function(trascender,$scope){
 					}
 					$("#dvTimeline").animate({scrollTop: 0});
 					this.years = years;
-					$.timeliner({});
+					
+					if(!this.timeliner_started){
+						$.timeliner({});
+						this.timeliner_started = true;
+						$(document).keydown((e)=>{
+							switch(e.keyCode){
+								case 37://left
+									this.back();
+									break;
+								case 38://up
+									this.back();
+									break;
+								case 39://right
+									this.next();
+									break;
+								case 40://down
+									this.next();
+									break;
+							}
+						});
+					}
 					
 					$("#dvTimeline").fadeIn(()=>{
 						$("#background,#loading").fadeOut();
@@ -186,30 +209,8 @@ app.controller("explainCtrl", function(trascender,$scope){
 					
 					$scope.$digest(function(){});
 					
-					$(document).removeAttr("keydown");
-					$(document).keydown((e)=>{
-						switch(e.keyCode){
-							case 37://left
-								this.back();
-								break;
-							case 38://up
-								this.back();
-								break;
-							case 39://right
-								this.next();
-								break;
-							case 40://down
-								this.next();
-								break;
-							default:
-								console.log(e.keyCode);
-								break;
-						}
-					});
-					
 					this.next();
 					
-					console.log(this.listTAG);
 				},
 				getRESUME: async function(){
 					try{
@@ -283,16 +284,16 @@ app.controller("explainCtrl", function(trascender,$scope){
 					this.INDEXTODOC++;
 					return row;
 				},
-				next: function(){
-					this.index++;
-					if(this.index - 1 > this.coll.length){
-						this.index--;
+				back: function(){
+					this.index--;
+					if(!this.coll[this.index]){
+						this.index = this.coll.length-1;
 					}
 					this.refresh();
 				},
-				back: function(){
-					this.index--;
-					if(this.index < 0){
+				next: function(){
+					this.index++;
+					if(!this.coll[this.index]){
 						this.index = 0;
 					}
 					this.refresh();
@@ -306,7 +307,6 @@ app.controller("explainCtrl", function(trascender,$scope){
 					self.document.get(this.coll[this.index]._id);
 				},
 				moveTimeline: function(d){
-					console.log(d);
 					let o = $($("#" + d._id)[0]);
 					let s = o.offset().top;
 					
