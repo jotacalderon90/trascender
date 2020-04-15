@@ -8,6 +8,7 @@ var ctx = c.getContext("2d");
 
 //making the canvas full screen
 $(c).css("position","absolute");
+$(c).css("z-index","1");
 c.height = $(document).height();
 c.width = window.innerWidth;
 
