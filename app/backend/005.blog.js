@@ -5,6 +5,7 @@ let self = function(a){
 	this.config = a.config;
 	this.mongodb = a.mongodb;
 	this.helper = a.helper;
+	this.microservice = a.microservice;
 }
 
 
@@ -132,14 +133,7 @@ self.prototype.create = async function(req,res){
 		req.body.thumb = "/media/img/logo.png";
 		
 		await this.mongodb.insertOne("blog",req.body);
-		
-		await this.mongodb.insertOne("wall",{
-			content: "<p>Creó una nueva publicación en el Blog: <small>" + req.body.title + "</small></p>",
-			url: "/blog/" + req.body.uri,
-			tag: (typeof req.body.tag=="string")?req.body.tag.split(","):req.body.tag,
-			author: req.body.user,
-			created: new Date()
-		});
+		this.microservice.noWait("post","/api/wall/blog",{title: req.body.title});
 		
 		res.send({data: true});
 	}catch(e){
@@ -171,14 +165,7 @@ self.prototype.update = async function(req,res){
 		req.body.updated = new Date();
 		
 		await this.mongodb.updateOne("blog",req.params.id,req.body);
-		
-		await this.mongodb.insertOne("wall",{
-			content: "<p>Actualizó una publicación del Blog: <small>" + req.body.title + "</small></p>",
-			url: "/blog/" + req.body.uri,
-			tag: (typeof req.body.tag=="string")?req.body.tag.split(","):req.body.tag,
-			author: req.body.user,
-			created: new Date()
-		});
+		this.microservice.noWait("put","/api/wall/blog",{id: req.params.id});
 		
 		res.send({data: true});
 	}catch(e){
@@ -195,12 +182,7 @@ self.prototype.delete = async function(req,res){
 	try{
 		let row = await this.mongodb.findOne("blog",req.params.id);
 		await this.mongodb.deleteOne("blog",req.params.id);
-		await this.mongodb.insertOne("wall",{
-			content: "<p>Eliminó una publicación del Blog: <small>" + row.title + "</small></p>",
-			tag: ["Blog"],
-			author: req.user._id,
-			created: new Date()
-		});
+		this.microservice.noWait("delete","/api/wall/blog",{title: row.title, author: req.user._id});
 		res.send({data: true});
 	}catch(e){
 		res.send({data: null,error: e.toString()});
