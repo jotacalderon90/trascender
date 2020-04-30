@@ -1,6 +1,8 @@
 console.log(new Date() + " == iniciando aplicacion");
 
 //importar librerias externas
+console.log(new Date() + " == importando readline");
+const readline 		= require('readline');
 console.log(new Date() + " == importando fs");
 const fs			= require("fs");
 console.log(new Date() + " == importando path");
@@ -30,6 +32,7 @@ let trascender = async function(){
 		
 		//configurar estandar de aplicacion web/nodejs/express/trascender
 		if(true){
+			
 			console.log(new Date() + " == configurando aplicacion");
 			this.express = express();
 			this.express.use(bodyParser.json({limit: "50mb"})); 
@@ -40,6 +43,7 @@ let trascender = async function(){
 			this.express.use(helmet());
 			
 			process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+			this.process = process;
 			
 			this.dir		= __dirname;
 			this.config		= JSON.parse(fs.readFileSync("./app.json","utf8"));
@@ -65,6 +69,35 @@ let trascender = async function(){
 			}
 			
 			await  this.mongodb.start();
+			
+			if (!fs.existsSync("./log.csv")) {
+				try{
+					let r = await this.readline.ask("Se ha detectado que es la primera vez que ejecuta el sistema trascender\nDebe tener al menos un usuario administrador, ¿desea crearlo? [S/N]?: ");
+					if(r.toUpperCase()=="S"){
+						let user = await this.readline.ask("Ingrese un nombre de usuario: ");
+						let pass = await this.readline.ask("Ingrese una contraseña: ");
+						let doc = {};
+						doc.email = user;
+						doc.hash = this.helper.random(10);
+						doc.password = this.helper.toHash(pass + user,doc.hash);
+						doc.nickname = user;
+						doc.notification = true;
+						doc.thumb = "/media/img/user.png";
+						doc.roles = ["admin","user"];
+						doc.created = new Date();
+						doc.activate = true;
+						r = await this.mongodb.count("user",{email: user});
+						if(r==0){
+							r = await mongodb.insertOne("user",doc);
+							console.log("usuario administrador creado correctamente");
+						}else{
+							throw("El usuario " + user + " ya existe");
+						}
+					}
+				}catch(e){
+					console.error("No se pudo crear el usuario administrador: " + e);
+				}
+			}
 		}
 		
 		//definir funciones internas propias de trascender
@@ -73,6 +106,9 @@ let trascender = async function(){
 			this.beforeExecute = function(params){
 				return async (req,res,next) => {
 					try{
+						//SI NO EXISTE ARCHIVO LOG ES PRIMERA VEZ QUE EJECUTA POR ENDE DEBERIA CARGAR OBJETOS BASICOS Y CREAR USUARIO ADMIN
+						
+						
 						//SET TYPE:FILE-FOLDER-REDIRECT-API
 						req.type = params.type;
 						
