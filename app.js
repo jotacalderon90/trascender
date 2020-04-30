@@ -70,9 +70,29 @@ let trascender = async function(){
 			
 			await  this.mongodb.start();
 			
+			//PRIMERA EJECUCION DE SISTEMA TRASCENDER
 			if (!fs.existsSync("./log.csv")) {
 				try{
-					let r = await this.readline.ask("Se ha detectado que es la primera vez que ejecuta el sistema trascender\nDebe tener al menos un usuario administrador, ¿desea crearlo? [S/N]?: ");
+					let r;
+					
+					let objects = JSON.parse(fs.readFileSync("./app/backend/script/objects.json","utf8"));
+					for(let i=0;i<objects.length;i++){
+						r = await this.mongodb.count("object",{name: objects[i].name});
+						if(r==0){
+							r = await this.mongodb.insertOne("object",objects[i]);
+							console.log(new Date() + " == inserted " + r.insertedCount + " object " + objects[i].name);
+							if(r.insertedCount==1){
+								if(objects[i].doc){
+									for(let x=0;x<objects[i].doc.length;x++){
+										r = await this.mongodb.insertOne(objects[i].name,objects[i].doc[x]);
+										console.log(new Date() + " == inserted " + r.insertedCount + " document in " + objects[i].name);
+									}
+								}
+							}
+						}
+					}
+					
+					r = await this.readline.ask("Debe tener al menos un usuario administrador, ¿desea crearlo? [S/N]?: ");
 					if(r.toUpperCase()=="S"){
 						let user = await this.readline.ask("Ingrese un nombre de usuario: ");
 						let pass = await this.readline.ask("Ingrese una contraseña: ");
