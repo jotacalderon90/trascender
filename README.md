@@ -4,6 +4,13 @@
 
 Framework para crear aplicaciones nodejs
 
+### Requisitos
+
+```sh
+NodeJS
+MongoDB
+```
+
 ### DESCARGAR
 
 ```sh
