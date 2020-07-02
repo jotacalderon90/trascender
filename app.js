@@ -48,7 +48,6 @@ let trascender = async function(){
 			}
 			this.express.use(upload());
 			this.express.use(helmet());
-			this.express.disable('server');
 			
 			process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 			this.process = process;
